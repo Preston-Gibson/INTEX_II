@@ -198,7 +198,7 @@ export default function App() {
                 />
                 <img
                   className="howwework-img img-square"
-                  src="https://lh3.googleusercontent.com/aida-public/AB6AXuC1q-u2Mc2oyrCMEjBOVkG3KGUwFcLeizR7Wh3FmsWxbiXHaVj6y9lxLV2YThZsifR-Gc0Sl47Fj3yanHlY_N3GdWCBrry9bmYZE2bML9kbsaqHLS5PTwWx-8zJgbhL9yOEqf0mZHb_lIP89ee2_Z3LR66_fYjtzMxHxCXyG6HU9KFOt7NSczq8LoD841BlovzwXe37o1h9DjCgMMa_mFteWnW8XXVLXiXWfEWIxDzWrUbdg9DXzM0silvbTyvWgcXDoxsrrpUVIHw"
+                  src="https://lh3.googleusercontent.com/aida-public/AB6AXuC1q-u2Mc2oyrCMEjBOVkG3KGUwFcLeizR7Wh3FmsWxbiXHaVj6y9lxLV2YThZsifR-Gc0Sl47Fj3yanHlY_N3GdWCBrry9bmYZE2bML9kbsaqHLS5PTwWx-8zJgbhL9yOEqf0mZHb_lIP89ee2_Z3LR66_fYjtzMxHxCXyG6HU9KFOt7NSczq8LoD841BlovzwXe37o1h9DjCgMMa_mFteWnW8XXVLXiXWfWIxDzWrUbdg9DXzM0silvbTyvWgcXDoxsrrpUVIHw"
                   alt="Hands joined in support"
                 />
               </div>
@@ -210,7 +210,7 @@ export default function App() {
                 />
                 <img
                   className="howwework-img img-tall"
-                  src="https://lh3.googleusercontent.com/aida-public/AB6AXuDyS8-zhBehfSldtHFWdfUTMRkPhR0mJDqvom_LNVrTx5wtCXBWxWQ4JclaWhumyGTQZZCmfp93PZWY9FWdoFqD4oqXTVkTnyz8V5_VsOIGsypoVRn3Qb2jLiZfv4L_Jb20HqXKpmus_mFqWPjQkHBd1P-6HbgpNHtEmnDdSfFFHO5RVQZhO6dz7CdQS_f_anwJipnjYsyiVlB-gKraBYY2mBxutv_McRRns3yddrtgAv7fYXPbmZIPBIk6rUyRmQcEMnxFAnSj5VQ"
+                  src="https://lh3.googleusercontent.com/aida-public/AB6AXuDyS8-zhBehfSldtHFWdfUTMRkPhR0mJDqvom_LNVrTx5wtCXBWxWQ4JclaWhumyGTQZZCfp93PZWY9FWdoFqD4oqXTVkTnyz8V5_VsOIGsypoVRn3Qb2jLiZfv4L_Jb20HqXKpmus_mFqWPjQkHBd1P-6HbgpNHtEmnDdSfFFHO5RVQZhO6dz7CdQS_f_anwJipnjYsyiVlB-gKraBYY2mBxutv_McRRns3yddrtgAv7fYXPbmZIPBIk6rUyRmQcEMnxFAnSj5VQ"
                   alt="Bright classroom scene"
                 />
               </div>

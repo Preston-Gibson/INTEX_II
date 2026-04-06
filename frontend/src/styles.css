@@ -130,6 +130,11 @@ button { cursor: pointer; font-family: var(--font-body); border: none; outline: 
 .nav-logo img {
   height: 2.75rem;
   width: auto;
+  mix-blend-mode: multiply;
+}
+
+.footer-logo img {
+  mix-blend-mode: multiply;
 }
 
 .nav-links {
@@ -424,16 +429,15 @@ button { cursor: pointer; font-family: var(--font-body); border: none; outline: 
 /* Card 2: Legal Advocacy — primary fill */
 .bento-legal {
   background: var(--primary);
+  color: #ffffff;
   align-items: center;
   text-align: center;
   justify-content: center;
   gap: 0.75rem;
 }
 
-.bento-legal h3,
-.bento-legal p { color: var(--on-primary-container); }
-
-.bento-legal h3 { color: var(--on-primary); font-size: 1.1rem; }
+.bento-legal h3 { color: #ffffff; font-size: 1.1rem; }
+.bento-legal p  { color: var(--primary-fixed-dim); }
 
 /* Card 3: Education — amber fill */
 .bento-education {
