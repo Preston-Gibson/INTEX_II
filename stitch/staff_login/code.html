@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Staff Portal Login | Lucero</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&amp;family=Inter:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "on-error-container": "#93000a",
+                    "on-secondary-fixed-variant": "#004f4f",
+                    "surface-container-highest": "#e1e3e4",
+                    "on-tertiary-fixed-variant": "#604100",
+                    "secondary": "#006a6a",
+                    "on-secondary": "#ffffff",
+                    "secondary-container": "#90efef",
+                    "on-tertiary-fixed": "#281900",
+                    "tertiary-fixed-dim": "#ffba38",
+                    "surface-container-low": "#f3f4f5",
+                    "inverse-surface": "#2e3132",
+                    "surface": "#f8f9fa",
+                    "primary-fixed": "#d7e2ff",
+                    "surface-dim": "#d9dadb",
+                    "outline-variant": "#c2c6d4",
+                    "on-secondary-container": "#006e6e",
+                    "surface-variant": "#e1e3e4",
+                    "on-secondary-fixed": "#002020",
+                    "background": "#f8f9fa",
+                    "tertiary-fixed": "#ffdeac",
+                    "on-primary-fixed": "#001a40",
+                    "surface-bright": "#f8f9fa",
+                    "surface-container": "#edeeef",
+                    "on-surface": "#191c1d",
+                    "tertiary-container": "#775200",
+                    "outline": "#727784",
+                    "surface-container-high": "#e7e8e9",
+                    "inverse-on-surface": "#f0f1f2",
+                    "primary-fixed-dim": "#acc7ff",
+                    "on-primary-fixed-variant": "#004491",
+                    "primary-container": "#0056b3",
+                    "primary": "#003f87",
+                    "surface-tint": "#115cb9",
+                    "on-background": "#191c1d",
+                    "secondary-fixed": "#93f2f2",
+                    "secondary-fixed-dim": "#76d6d5",
+                    "on-primary": "#ffffff",
+                    "error": "#ba1a1a",
+                    "error-container": "#ffdad6",
+                    "tertiary": "#593c00",
+                    "on-primary-container": "#bbd0ff",
+                    "on-tertiary": "#ffffff",
+                    "surface-container-lowest": "#ffffff",
+                    "inverse-primary": "#acc7ff",
+                    "on-tertiary-container": "#ffc769",
+                    "on-error": "#ffffff",
+                    "on-surface-variant": "#424752"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.125rem",
+                    "lg": "0.25rem",
+                    "xl": "0.5rem",
+                    "full": "0.75rem"
+            },
+            "fontFamily": {
+                    "headline": ["Manrope"],
+                    "body": ["Inter"],
+                    "label": ["Inter"]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+      .material-symbols-outlined {
+        font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+      }
+      body {
+        font-family: 'Inter', sans-serif;
+      }
+      h1, h2, h3 {
+        font-family: 'Manrope', sans-serif;
+      }
+      .aurora-gradient {
+        background: linear-gradient(135deg, #003f87 0%, #0056b3 100%);
+      }
+    </style>
+</head>
+<body class="bg-surface text-on-surface min-h-screen flex flex-col">
+<!-- TopNavBar (Simplified for Login) -->
+<nav class="fixed top-0 w-full z-50 bg-surface/80 backdrop-blur-xl shadow-sm h-20">
+<div class="flex justify-between items-center max-w-7xl mx-auto px-6 h-full">
+<div class="flex items-center gap-2">
+<span class="text-2xl font-bold text-blue-900">Lucero</span>
+</div>
+<div class="flex items-center gap-6">
+<a class="font-manrope text-sm font-semibold tracking-tight text-slate-600 hover:text-blue-800 transition-colors" href="#">Our Mission</a>
+<a class="font-manrope text-sm font-semibold tracking-tight text-slate-600 hover:text-blue-800 transition-colors" href="#">Impact</a>
+</div>
+</div>
+</nav>
+<!-- Main Content Canvas -->
+<main class="flex-grow flex items-center justify-center pt-24 pb-12 px-6">
+<div class="w-full max-w-6xl grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
+<!-- Branding & Narrative Section -->
+<div class="hidden md:block">
+<div class="space-y-6">
+<span class="inline-flex items-center px-4 py-1.5 rounded-full bg-tertiary-fixed text-on-tertiary-fixed text-xs font-bold tracking-wider uppercase">
+                        Staff Portal
+                    </span>
+<h1 class="text-5xl font-extrabold text-blue-900 leading-tight">
+                        Empowering Advocates, <br/> Protecting Futures.
+                    </h1>
+<p class="text-lg text-on-surface-variant leading-relaxed max-w-md">
+                        Securely manage cases, donor impact, and visits to the children of Santa Rosa de Copán. Your dedication is their dawn.
+                    </p>
+<div class="relative h-64 w-full rounded-xl overflow-hidden shadow-sm">
+<img class="absolute inset-0 w-full h-full object-cover" data-alt="warm golden sunlight filtering through architectural details in a peaceful courtyard with soft shadows" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAQesxqr0Y5XcYX7UrcceBblo_lgBghRFHNqsZ1pZeMOzL9kajTEHgR8iS4IlrmOVhRW1Pv5dZK69HYxk_hAvuticBdPo6seWokugQ4ZyI8R2s6dRJANR1ewdDJuQQO2ngjRtCyl3-8zTsDFovu8NUub-hvdiBG0sK6FRBGI2L7jxqo2MMx6MCHq-NqRDZf4ZLkqBOL1WnRAOZWyjomQ8J7CFK-mNj1uUEZl-3ctlyRB_5rP5Smy_HKLTCF0Uya4kwGtSzTsGO-SQ"/>
+<div class="absolute inset-0 bg-blue-900/10 mix-blend-multiply"></div>
+</div>
+</div>
+</div>
+<!-- Login Form Section -->
+<div class="flex flex-col items-center">
+<div class="w-full max-w-md bg-surface-container-lowest p-8 md:p-10 rounded-xl shadow-sm border border-outline-variant/10">
+<div class="mb-8">
+<h2 class="text-2xl font-bold text-on-surface mb-2">Welcome Back</h2>
+<p class="text-sm text-on-surface-variant">Sign in to access your administrative dashboard.</p>
+</div>
+<form class="space-y-5">
+<div class="space-y-2">
+<label class="block text-sm font-medium text-on-surface-variant" for="username">Username</label>
+<div class="relative">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline text-lg">person</span>
+<input class="w-full pl-10 pr-4 py-3 bg-surface-container-low border-0 rounded-xl text-on-surface placeholder:text-outline focus:ring-1 focus:ring-primary focus:bg-surface-container-lowest transition-all" id="username" name="username" placeholder="e.g. j.doe@lucero.org" type="text"/>
+</div>
+</div>
+<div class="space-y-2">
+<div class="flex justify-between items-center">
+<label class="block text-sm font-medium text-on-surface-variant" for="password">Password</label>
+<a class="text-xs font-semibold text-primary hover:text-primary-container" href="#">Forgot Password?</a>
+</div>
+<div class="relative">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline text-lg">lock</span>
+<input class="w-full pl-10 pr-4 py-3 bg-surface-container-low border-0 rounded-xl text-on-surface placeholder:text-outline focus:ring-1 focus:ring-primary focus:bg-surface-container-lowest transition-all" id="password" name="password" placeholder="••••••••" type="password"/>
+</div>
+</div>
+<div class="flex items-center gap-2 pt-2">
+<input class="rounded text-primary focus:ring-primary h-4 w-4 border-outline-variant" id="remember" type="checkbox"/>
+<label class="text-xs text-on-surface-variant font-medium" for="remember">Remember this device for 30 days</label>
+</div>
+<button class="w-full aurora-gradient text-white font-bold py-3.5 rounded-xl shadow-lg hover:shadow-xl transition-all transform active:scale-[0.98]" type="submit">
+                            Secure Login
+                        </button>
+</form>
+<!-- Security Banner -->
+<div class="mt-8 pt-6 border-t border-outline-variant/10">
+<div class="flex gap-3 items-start bg-blue-50/50 p-4 rounded-lg">
+<span class="material-symbols-outlined text-blue-700 mt-0.5">shield_lock</span>
+<div class="text-[11px] leading-relaxed text-blue-900/70 font-medium">
+<span class="font-bold text-blue-900 block mb-0.5">Authorized Access Only</span>
+                                This system is for the exclusive use of Lucero staff. All activity is logged and monitored for the safety of our children and data integrity. Unauthorized attempts to access this portal are strictly prohibited.
+                            </div>
+</div>
+</div>
+</div>
+<p class="mt-8 text-xs text-on-surface-variant/60 flex items-center gap-2">
+<span class="material-symbols-outlined text-sm">verified_user</span>
+                    Enterprise-Grade Encryption Active
+                </p>
+</div>
+</div>
+</main>
+<!-- Footer -->
+<footer class="w-full py-12 mt-20 border-t border-slate-200/20 bg-slate-50">
+<div class="max-w-7xl mx-auto px-6 flex flex-col md:flex-row justify-between items-center md:items-start gap-8">
+<div class="flex flex-col gap-2">
+<span class="text-lg font-bold text-blue-900">Lucero</span>
+<p class="text-slate-500 text-sm max-w-xs font-inter leading-relaxed">
+                    © 2024 Lucero. Dedicated to the children of Central America.
+                </p>
+</div>
+<div class="flex flex-wrap justify-center gap-6 md:gap-10">
+<a class="text-slate-500 hover:text-blue-600 transition-colors text-sm font-inter" href="#">Transparency Report</a>
+<a class="text-slate-500 hover:text-blue-600 transition-colors text-sm font-inter" href="#">Contact Us</a>
+<a class="text-slate-500 hover:text-blue-600 transition-colors text-sm font-inter" href="#">Privacy Policy</a>
+<a class="text-slate-500 hover:text-blue-600 transition-colors text-sm font-inter" href="#">Careers</a>
+</div>
+</div>
+</footer>
+</body></html>

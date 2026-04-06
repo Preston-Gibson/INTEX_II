@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Lucero Caseload Inventory</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&amp;family=Inter:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "on-error-container": "#93000a",
+                    "on-secondary-fixed-variant": "#004f4f",
+                    "surface-container-highest": "#e1e3e4",
+                    "on-tertiary-fixed-variant": "#604100",
+                    "secondary": "#006a6a",
+                    "on-secondary": "#ffffff",
+                    "secondary-container": "#90efef",
+                    "on-tertiary-fixed": "#281900",
+                    "tertiary-fixed-dim": "#ffba38",
+                    "surface-container-low": "#f3f4f5",
+                    "inverse-surface": "#2e3132",
+                    "surface": "#f8f9fa",
+                    "primary-fixed": "#d7e2ff",
+                    "surface-dim": "#d9dadb",
+                    "outline-variant": "#c2c6d4",
+                    "on-secondary-container": "#006e6e",
+                    "surface-variant": "#e1e3e4",
+                    "on-secondary-fixed": "#002020",
+                    "background": "#f8f9fa",
+                    "tertiary-fixed": "#ffdeac",
+                    "on-primary-fixed": "#001a40",
+                    "surface-bright": "#f8f9fa",
+                    "surface-container": "#edeeef",
+                    "on-surface": "#191c1d",
+                    "tertiary-container": "#775200",
+                    "outline": "#727784",
+                    "surface-container-high": "#e7e8e9",
+                    "inverse-on-surface": "#f0f1f2",
+                    "primary-fixed-dim": "#acc7ff",
+                    "on-primary-fixed-variant": "#004491",
+                    "primary-container": "#0056b3",
+                    "primary": "#003f87",
+                    "surface-tint": "#115cb9",
+                    "on-background": "#191c1d",
+                    "secondary-fixed": "#93f2f2",
+                    "secondary-fixed-dim": "#76d6d5",
+                    "on-primary": "#ffffff",
+                    "error": "#ba1a1a",
+                    "error-container": "#ffdad6",
+                    "tertiary": "#593c00",
+                    "on-primary-container": "#bbd0ff",
+                    "on-tertiary": "#ffffff",
+                    "surface-container-lowest": "#ffffff",
+                    "inverse-primary": "#acc7ff",
+                    "on-tertiary-container": "#ffc769",
+                    "on-error": "#ffffff",
+                    "on-surface-variant": "#424752"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.125rem",
+                    "lg": "0.25rem",
+                    "xl": "0.5rem",
+                    "full": "0.75rem"
+            },
+            "fontFamily": {
+                    "headline": ["Manrope"],
+                    "body": ["Inter"],
+                    "label": ["Inter"]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .tonal-carving {
+            background: linear-gradient(135deg, #f8f9fa 0%, #f3f4f5 100%);
+        }
+        .aurora-gradient {
+            background: linear-gradient(135deg, #003f87 0%, #0056b3 100%);
+        }
+    </style>
+</head>
+<body class="bg-surface font-body text-on-surface">
+<!-- TopNavBar (Hidden on desktop as SideNavBar is primary admin shell) -->
+<nav class="md:hidden fixed top-0 w-full z-50 bg-surface/80 backdrop-blur-xl shadow-sm h-20 px-6 flex justify-between items-center">
+<div class="text-2xl font-bold text-blue-900">Lucero</div>
+<button class="p-2">
+<span class="material-symbols-outlined">menu</span>
+</button>
+</nav>
+<!-- SideNavBar (Authority: JSON) -->
+<aside class="hidden md:flex h-screen w-64 fixed left-0 top-0 bg-slate-50 border-r-0 flex-col py-6 font-manrope font-medium text-sm">
+<div class="px-6 mb-8">
+<h1 class="text-xl font-extrabold text-blue-900">Lucero Admin</h1>
+<p class="text-[10px] text-slate-500 tracking-widest uppercase mt-1">Santa Rosa de Copán</p>
+</div>
+<div class="flex-1 space-y-1">
+<div class="bg-blue-100/50 text-blue-900 rounded-xl mx-2 px-4 py-3 font-bold flex items-center gap-3 transition-all translate-x-1 duration-200">
+<span class="material-symbols-outlined" data-icon="folder_shared">folder_shared</span>
+<span>Caseload</span>
+</div>
+<div class="text-slate-500 mx-2 px-4 py-3 hover:bg-slate-200/50 rounded-xl transition-all flex items-center gap-3">
+<span class="material-symbols-outlined" data-icon="volunteer_activism">volunteer_activism</span>
+<span>Donors</span>
+</div>
+<div class="text-slate-500 mx-2 px-4 py-3 hover:bg-slate-200/50 rounded-xl transition-all flex items-center gap-3">
+<span class="material-symbols-outlined" data-icon="history_edu">history_edu</span>
+<span>Recordings</span>
+</div>
+<div class="text-slate-500 mx-2 px-4 py-3 hover:bg-slate-200/50 rounded-xl transition-all flex items-center gap-3">
+<span class="material-symbols-outlined" data-icon="home_pin">home_pin</span>
+<span>Visits</span>
+</div>
+<div class="text-slate-500 mx-2 px-4 py-3 hover:bg-slate-200/50 rounded-xl transition-all flex items-center gap-3">
+<span class="material-symbols-outlined" data-icon="analytics">analytics</span>
+<span>Analytics</span>
+</div>
+</div>
+<div class="px-4 mb-6">
+<button class="w-full aurora-gradient text-white py-3 rounded-xl font-bold flex items-center justify-center gap-2 shadow-lg shadow-primary/20 hover:scale-105 duration-150 ease-in-out">
+<span class="material-symbols-outlined text-sm">add</span>
+<span>New Case</span>
+</button>
+</div>
+<div class="border-t border-slate-200/50 pt-4 space-y-1">
+<div class="text-slate-500 mx-2 px-4 py-2 hover:bg-slate-200/50 rounded-xl transition-all flex items-center gap-3 text-xs">
+<span class="material-symbols-outlined text-lg" data-icon="settings">settings</span>
+<span>Settings</span>
+</div>
+<div class="text-slate-500 mx-2 px-4 py-2 hover:bg-slate-200/50 rounded-xl transition-all flex items-center gap-3 text-xs">
+<span class="material-symbols-outlined text-lg" data-icon="help_outline">help_outline</span>
+<span>Support</span>
+</div>
+</div>
+</aside>
+<!-- Main Content Canvas -->
+<main class="md:ml-64 min-h-screen pt-24 md:pt-0 pb-12">
+<header class="max-w-7xl mx-auto px-6 md:px-10 py-10">
+<div class="flex flex-col md:flex-row md:items-end justify-between gap-6">
+<div class="space-y-2">
+<h2 class="text-4xl font-headline font-extrabold tracking-tight text-on-surface">Caseload Inventory</h2>
+<p class="text-on-surface-variant font-body text-lg max-w-xl">Monitor the healing journey of the children under our care with radiant compassion and professional precision.</p>
+</div>
+<div class="flex items-center gap-3">
+<div class="relative">
+<input class="bg-surface-container-low border-none focus:ring-1 focus:ring-primary rounded-full px-5 py-3 pl-12 w-64 md:w-80 font-body text-sm text-on-surface" placeholder="Search residents..." type="text"/>
+<span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-on-surface-variant text-xl">search</span>
+</div>
+<button class="bg-surface-container-high p-3 rounded-full hover:bg-surface-container-highest transition-colors">
+<span class="material-symbols-outlined text-on-surface-variant">filter_list</span>
+</button>
+</div>
+</div>
+<!-- Stats Overview - Subtle Tonal Carving -->
+<div class="grid grid-cols-1 md:grid-cols-4 gap-4 mt-12">
+<div class="bg-surface-container-low p-6 rounded-xl border-l-4 border-primary">
+<p class="text-on-surface-variant text-xs font-bold uppercase tracking-wider">Total Active</p>
+<p class="text-3xl font-headline font-bold mt-1">42</p>
+</div>
+<div class="bg-surface-container-low p-6 rounded-xl border-l-4 border-tertiary-fixed-dim">
+<p class="text-on-surface-variant text-xs font-bold uppercase tracking-wider">Assessing</p>
+<p class="text-3xl font-headline font-bold mt-1">8</p>
+</div>
+<div class="bg-surface-container-low p-6 rounded-xl border-l-4 border-secondary">
+<p class="text-on-surface-variant text-xs font-bold uppercase tracking-wider">Counseling</p>
+<p class="text-3xl font-headline font-bold mt-1">24</p>
+</div>
+<div class="bg-surface-container-low p-6 rounded-xl border-l-4 border-primary-container">
+<p class="text-on-surface-variant text-xs font-bold uppercase tracking-wider">Reintegrating</p>
+<p class="text-3xl font-headline font-bold mt-1">10</p>
+</div>
+</div>
+</header>
+<!-- Bento Grid Caseload -->
+<section class="max-w-7xl mx-auto px-6 md:px-10">
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+<!-- Resident Card 1 -->
+<div class="bg-surface-container-lowest rounded-xl shadow-sm hover:shadow-md transition-shadow group overflow-hidden">
+<div class="h-24 aurora-gradient relative">
+<div class="absolute -bottom-6 left-6 ring-4 ring-surface-container-lowest rounded-full overflow-hidden w-16 h-16 bg-surface-container-high">
+<img alt="Profile" class="w-full h-full object-cover" data-alt="Close-up portrait of a young Central American girl with a hopeful expression and soft natural lighting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuC5tQCZ5H70l2GxpbmNJKk9QyXM5xnmk96Eb6sZ2xiLFlZx7y25f6dAH0ESkibJ3Zarqj0xnf-aL-iqxYaswsv_Yp5jhUzGtYeFh8nh04J_mQ7uN2FfhVfLo0f1KX1M3EM476FRAiul5RnNu6DJG2-qRlGTtUJvLSLoBC4TQw7qgxuBAgUo26MBl6toQEpeKneQHT-LKOvy2a5koMZCSbqkruPTocnDJ4fHtbx24JuJDL9VkBByounuUro0YaA5gchDYUGtORVZdg"/>
+</div>
+</div>
+<div class="pt-10 px-6 pb-6 space-y-4">
+<div>
+<div class="flex justify-between items-start">
+<h3 class="text-xl font-bold font-headline">Elena M.</h3>
+<span class="bg-secondary/10 text-secondary px-3 py-1 rounded-full text-[10px] font-bold uppercase">Counseling</span>
+</div>
+<p class="text-on-surface-variant text-sm">Case #2024-081 • Age: 11</p>
+</div>
+<div class="space-y-1">
+<div class="flex justify-between text-xs text-on-surface-variant mb-1">
+<span>Healing Progress</span>
+<span class="font-bold">65%</span>
+</div>
+<div class="h-2 w-full bg-surface-container-highest rounded-full overflow-hidden">
+<div class="h-full bg-secondary w-[65%] rounded-full"></div>
+</div>
+</div>
+<div class="pt-4 border-t border-surface-container-low flex justify-between items-center text-xs text-on-surface-variant">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-sm">calendar_today</span>
+<span>Intake: Jan 12, 2024</span>
+</div>
+<button class="text-primary font-bold hover:underline">View File</button>
+</div>
+</div>
+</div>
+<!-- Resident Card 2 -->
+<div class="bg-surface-container-lowest rounded-xl shadow-sm hover:shadow-md transition-shadow group overflow-hidden">
+<div class="h-24 bg-tertiary-container relative">
+<div class="absolute -bottom-6 left-6 ring-4 ring-surface-container-lowest rounded-full overflow-hidden w-16 h-16 bg-surface-container-high">
+<img alt="Profile" class="w-full h-full object-cover" data-alt="Portrait of a young boy smiling warmly, wearing a clean collared shirt against a blurred garden background" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCeTZB2524_ZqUEYfUsvqDdoC0AdkuFW1odKfGLMPFKHJ3V61L9Jgv83YYtAF1K4wO0CUvjWyIn4D5VIXnYQwNgJD-ei23VhAkr1lIUkA3yEYDYWCZYtMMFEbRU2GnlvgvrqYzXZZulTHG1M1MuhWUtttqdh5wMaFZiBMjuENbd20osLnffgbA_KyXhC9nL6XqOe3Ao02RaItMsVCwpv-Nu-V5hS0snFX-9IDfLWH8ieagFeX3AFD8nZ1_9vWCi74Uu7X1QAT0BbQ"/>
+</div>
+</div>
+<div class="pt-10 px-6 pb-6 space-y-4">
+<div>
+<div class="flex justify-between items-start">
+<h3 class="text-xl font-bold font-headline">Mateo S.</h3>
+<span class="bg-tertiary-fixed-dim/20 text-tertiary px-3 py-1 rounded-full text-[10px] font-bold uppercase">Assessing</span>
+</div>
+<p class="text-on-surface-variant text-sm">Case #2024-094 • Age: 9</p>
+</div>
+<div class="space-y-1">
+<div class="flex justify-between text-xs text-on-surface-variant mb-1">
+<span>Healing Progress</span>
+<span class="font-bold">12%</span>
+</div>
+<div class="h-2 w-full bg-surface-container-highest rounded-full overflow-hidden">
+<div class="h-full bg-tertiary-fixed-dim w-[12%] rounded-full"></div>
+</div>
+</div>
+<div class="pt-4 border-t border-surface-container-low flex justify-between items-center text-xs text-on-surface-variant">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-sm">calendar_today</span>
+<span>Intake: Feb 28, 2024</span>
+</div>
+<button class="text-primary font-bold hover:underline">View File</button>
+</div>
+</div>
+</div>
+<!-- Resident Card 3 -->
+<div class="bg-surface-container-lowest rounded-xl shadow-sm hover:shadow-md transition-shadow group overflow-hidden">
+<div class="h-24 bg-primary-container relative">
+<div class="absolute -bottom-6 left-6 ring-4 ring-surface-container-lowest rounded-full overflow-hidden w-16 h-16 bg-surface-container-high">
+<img alt="Profile" class="w-full h-full object-cover" data-alt="Close-up of a smiling young woman with dark hair, looking into the distance with a hopeful expression" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDGTtR7uRGYcr1PQHCIB6lgBtN_wwOr6oZ6fBHjZsCn9_wbZSGSwsuIHBRLNjqZXiKm40dhamM6CHsbQSRDCzsZxt8vb_TCMCSm9gaKVDNtTbB_8LMsqaUMyH7yh0c-U39cHU4bNc9C1Po1EsWmEnkWnxHYnSCJB1WDulMjWz5CCuhjAvXIhKuTh5iL9gumeqpc17-KPGM9zHUu6FEFROif7_3pF4TWC2QRFgHkAUCE_pTA0cV225--48XChJT0oINf--Ek_zVmLA"/>
+</div>
+</div>
+<div class="pt-10 px-6 pb-6 space-y-4">
+<div>
+<div class="flex justify-between items-start">
+<h3 class="text-xl font-bold font-headline">Sofia R.</h3>
+<span class="bg-primary/10 text-primary px-3 py-1 rounded-full text-[10px] font-bold uppercase">Reintegrating</span>
+</div>
+<p class="text-on-surface-variant text-sm">Case #2023-156 • Age: 16</p>
+</div>
+<div class="space-y-1">
+<div class="flex justify-between text-xs text-on-surface-variant mb-1">
+<span>Healing Progress</span>
+<span class="font-bold">92%</span>
+</div>
+<div class="h-2 w-full bg-surface-container-highest rounded-full overflow-hidden">
+<div class="h-full bg-primary w-[92%] rounded-full"></div>
+</div>
+</div>
+<div class="pt-4 border-t border-surface-container-low flex justify-between items-center text-xs text-on-surface-variant">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-sm">calendar_today</span>
+<span>Intake: Oct 05, 2023</span>
+</div>
+<button class="text-primary font-bold hover:underline">View File</button>
+</div>
+</div>
+</div>
+<!-- Resident Card 4 -->
+<div class="bg-surface-container-lowest rounded-xl shadow-sm hover:shadow-md transition-shadow group overflow-hidden">
+<div class="h-24 bg-secondary-container relative">
+<div class="absolute -bottom-6 left-6 ring-4 ring-surface-container-lowest rounded-full overflow-hidden w-16 h-16 bg-surface-container-high">
+<img alt="Profile" class="w-full h-full object-cover" data-alt="Portrait of a young teenager boy in a bright outdoor setting, soft bokeh trees behind him" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCI2OtAjs0aX1uQhGGON_2RP4bIXdec6FkZDe1b_9MgL-tpWYKvOcx7cNilve71sNysiv-fv8zaualta4D8LBJBGIZWbJOSEN-U3O20kzYY1ycBzyODoUHUXpO3B83IXS7dh19MOSaDfX9CzmKzLDM1MRUqes9Gw4uoqnEgac1oiJ5s8eflFdkKjJqQwhnth15o5BoZV6-hBuvAj8TWUBX6_QQcOCUePWZs4RZ4Bgp1sJlGpp-2nlbbrV5p2BZuo0WKACFpfYP5pQ"/>
+</div>
+</div>
+<div class="pt-10 px-6 pb-6 space-y-4">
+<div>
+<div class="flex justify-between items-start">
+<h3 class="text-xl font-bold font-headline">Diego V.</h3>
+<span class="bg-secondary/10 text-secondary px-3 py-1 rounded-full text-[10px] font-bold uppercase">Counseling</span>
+</div>
+<p class="text-on-surface-variant text-sm">Case #2024-022 • Age: 14</p>
+</div>
+<div class="space-y-1">
+<div class="flex justify-between text-xs text-on-surface-variant mb-1">
+<span>Healing Progress</span>
+<span class="font-bold">48%</span>
+</div>
+<div class="h-2 w-full bg-surface-container-highest rounded-full overflow-hidden">
+<div class="h-full bg-secondary w-[48%] rounded-full"></div>
+</div>
+</div>
+<div class="pt-4 border-t border-surface-container-low flex justify-between items-center text-xs text-on-surface-variant">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-sm">calendar_today</span>
+<span>Intake: Jan 30, 2024</span>
+</div>
+<button class="text-primary font-bold hover:underline">View File</button>
+</div>
+</div>
+</div>
+<!-- Quick Action Card (Bento Style) -->
+<div class="bg-surface-container-low rounded-xl p-8 flex flex-col justify-center items-center text-center space-y-4 border-2 border-dashed border-outline-variant/30">
+<div class="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center text-primary">
+<span class="material-symbols-outlined text-3xl">person_add</span>
+</div>
+<div class="space-y-2">
+<h4 class="text-lg font-bold font-headline">Register New Resident</h4>
+<p class="text-sm text-on-surface-variant">Begin a new intake process for a child needing sanctuary.</p>
+</div>
+<button class="bg-primary text-white px-6 py-2 rounded-full font-bold text-sm hover:scale-105 transition-transform">Start Intake</button>
+</div>
+</div>
+</section>
+</main>
+<!-- Footer (Authority: JSON) -->
+<footer class="md:ml-64 bg-slate-50 border-t border-slate-200/20 py-12 mt-20">
+<div class="max-w-7xl mx-auto px-6 flex flex-col md:flex-row justify-between gap-8">
+<div class="space-y-4">
+<div class="text-lg font-bold text-blue-900">Lucero</div>
+<p class="font-inter text-sm leading-relaxed text-slate-500 max-w-xs">© 2024 Lucero. Dedicated to the children of Central America.</p>
+</div>
+<div class="flex flex-wrap gap-8">
+<div class="flex flex-col gap-2">
+<span class="text-xs font-bold text-blue-900 uppercase tracking-widest">Navigation</span>
+<a class="text-slate-500 hover:text-blue-600 transition-colors text-sm" href="#">Transparency Report</a>
+<a class="text-slate-500 hover:text-blue-600 transition-colors text-sm" href="#">Contact Us</a>
+</div>
+<div class="flex flex-col gap-2">
+<span class="text-xs font-bold text-blue-900 uppercase tracking-widest">Legal</span>
+<a class="text-slate-500 hover:text-blue-600 transition-colors text-sm" href="#">Privacy Policy</a>
+<a class="text-slate-500 hover:text-blue-600 transition-colors text-sm" href="#">Careers</a>
+</div>
+</div>
+</div>
+</footer>
+<!-- FAB Action Button - Supressed as it's not a top-level dash, but we keep it here for staff visibility on desktop side -->
+</body></html>

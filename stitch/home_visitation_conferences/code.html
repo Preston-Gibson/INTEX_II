@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Lucero | Home Visitation &amp; Case Conferences</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&amp;family=Inter:wght@300;400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                "on-error-container": "#93000a",
+                "on-secondary-fixed-variant": "#004f4f",
+                "surface-container-highest": "#e1e3e4",
+                "on-tertiary-fixed-variant": "#604100",
+                "secondary": "#006a6a",
+                "on-secondary": "#ffffff",
+                "secondary-container": "#90efef",
+                "on-tertiary-fixed": "#281900",
+                "tertiary-fixed-dim": "#ffba38",
+                "surface-container-low": "#f3f4f5",
+                "inverse-surface": "#2e3132",
+                "surface": "#f8f9fa",
+                "primary-fixed": "#d7e2ff",
+                "surface-dim": "#d9dadb",
+                "outline-variant": "#c2c6d4",
+                "on-secondary-container": "#006e6e",
+                "surface-variant": "#e1e3e4",
+                "on-secondary-fixed": "#002020",
+                "background": "#f8f9fa",
+                "tertiary-fixed": "#ffdeac",
+                "on-primary-fixed": "#001a40",
+                "surface-bright": "#f8f9fa",
+                "surface-container": "#edeeef",
+                "on-surface": "#191c1d",
+                "tertiary-container": "#775200",
+                "outline": "#727784",
+                "surface-container-high": "#e7e8e9",
+                "inverse-on-surface": "#f0f1f2",
+                "primary-fixed-dim": "#acc7ff",
+                "on-primary-fixed-variant": "#004491",
+                "primary-container": "#0056b3",
+                "primary": "#003f87",
+                "surface-tint": "#115cb9",
+                "on-background": "#191c1d",
+                "secondary-fixed": "#93f2f2",
+                "secondary-fixed-dim": "#76d6d5",
+                "on-primary": "#ffffff",
+                "error": "#ba1a1a",
+                "error-container": "#ffdad6",
+                "tertiary": "#593c00",
+                "on-primary-container": "#bbd0ff",
+                "on-tertiary": "#ffffff",
+                "surface-container-lowest": "#ffffff",
+                "inverse-primary": "#acc7ff",
+                "on-tertiary-container": "#ffc769",
+                "on-error": "#ffffff",
+                "on-surface-variant": "#424752"
+            },
+            "borderRadius": {
+                "DEFAULT": "0.125rem",
+                "lg": "0.25rem",
+                "xl": "0.5rem",
+                "full": "0.75rem"
+            },
+            "fontFamily": {
+                "headline": ["Manrope"],
+                "body": ["Inter"],
+                "label": ["Inter"]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+      .material-symbols-outlined {
+        font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+      }
+      body {
+        font-family: 'Inter', sans-serif;
+        background-color: #f8f9fa;
+      }
+      h1, h2, h3, .font-manrope {
+        font-family: 'Manrope', sans-serif;
+      }
+      .custom-scrollbar::-webkit-scrollbar {
+        width: 6px;
+      }
+      .custom-scrollbar::-webkit-scrollbar-track {
+        background: transparent;
+      }
+      .custom-scrollbar::-webkit-scrollbar-thumb {
+        background: #e1e3e4;
+        border-radius: 10px;
+      }
+    </style>
+</head>
+<body class="bg-surface text-on-surface">
+<!-- TopNavBar -->
+<nav class="fixed top-0 w-full z-50 bg-surface/80 backdrop-blur-xl shadow-sm h-20">
+<div class="flex justify-between items-center max-w-7xl mx-auto px-6 h-full">
+<div class="text-2xl font-bold text-blue-900">Lucero</div>
+<div class="hidden md:flex items-center gap-8">
+<a class="font-manrope text-sm font-semibold tracking-tight text-slate-600 hover:text-blue-800 transition-colors" href="#">Our Mission</a>
+<a class="font-manrope text-sm font-semibold tracking-tight text-slate-600 hover:text-blue-800 transition-colors" href="#">Impact</a>
+<a class="font-manrope text-sm font-semibold tracking-tight text-slate-600 hover:text-blue-800 transition-colors" href="#">Donate</a>
+<button class="bg-primary text-on-primary px-6 py-2.5 rounded-xl font-manrope text-sm font-bold shadow-sm hover:opacity-90 transition-all">Portal Login</button>
+</div>
+<button class="md:hidden text-primary">
+<span class="material-symbols-outlined">menu</span>
+</button>
+</div>
+</nav>
+<!-- SideNavBar -->
+<aside class="h-screen w-64 fixed left-0 top-0 bg-slate-50 flex flex-col py-6 z-40 hidden md:flex">
+<div class="px-6 mb-10 mt-20">
+<div class="text-xl font-extrabold text-blue-900">Lucero Admin</div>
+<div class="text-xs text-slate-500 font-manrope">Santa Rosa de Copán</div>
+</div>
+<nav class="flex-1 flex flex-col gap-1">
+<a class="text-slate-500 mx-2 px-4 py-3 hover:bg-slate-200/50 rounded-xl transition-all flex items-center gap-3" href="#">
+<span class="material-symbols-outlined">folder_shared</span>
+<span class="font-manrope font-medium text-sm">Caseload</span>
+</a>
+<a class="text-slate-500 mx-2 px-4 py-3 hover:bg-slate-200/50 rounded-xl transition-all flex items-center gap-3" href="#">
+<span class="material-symbols-outlined">volunteer_activism</span>
+<span class="font-manrope font-medium text-sm">Donors</span>
+</a>
+<a class="text-slate-500 mx-2 px-4 py-3 hover:bg-slate-200/50 rounded-xl transition-all flex items-center gap-3" href="#">
+<span class="material-symbols-outlined">history_edu</span>
+<span class="font-manrope font-medium text-sm">Recordings</span>
+</a>
+<a class="bg-blue-100/50 text-blue-900 rounded-xl mx-2 px-4 py-3 font-bold flex items-center gap-3 translate-x-1 duration-200" href="#">
+<span class="material-symbols-outlined">home_pin</span>
+<span class="font-manrope text-sm">Visits</span>
+</a>
+<a class="text-slate-500 mx-2 px-4 py-3 hover:bg-slate-200/50 rounded-xl transition-all flex items-center gap-3" href="#">
+<span class="material-symbols-outlined">analytics</span>
+<span class="font-manrope font-medium text-sm">Analytics</span>
+</a>
+</nav>
+<div class="px-4 mb-6">
+<button class="w-full bg-primary text-white py-3 rounded-xl font-bold text-sm shadow-md flex items-center justify-center gap-2">
+<span class="material-symbols-outlined text-sm">add</span>
+                New Case
+            </button>
+</div>
+<div class="border-t border-slate-200 pt-6 flex flex-col gap-1">
+<a class="text-slate-500 mx-2 px-4 py-2 hover:bg-slate-200/50 rounded-xl transition-all flex items-center gap-3" href="#">
+<span class="material-symbols-outlined">settings</span>
+<span class="font-manrope font-medium text-sm">Settings</span>
+</a>
+<a class="text-slate-500 mx-2 px-4 py-2 hover:bg-slate-200/50 rounded-xl transition-all flex items-center gap-3" href="#">
+<span class="material-symbols-outlined">help_outline</span>
+<span class="font-manrope font-medium text-sm">Support</span>
+</a>
+</div>
+</aside>
+<!-- Main Content Area -->
+<main class="md:ml-64 pt-24 pb-12 px-6 lg:px-12 bg-surface min-h-screen">
+<header class="mb-10">
+<h1 class="text-4xl font-extrabold text-on-surface tracking-tight mb-2">Visitations &amp; Conferences</h1>
+<p class="text-on-surface-variant font-body">Managing social work interventions and advocacy for residents in Santa Rosa de Copán.</p>
+</header>
+<!-- Bento Grid Layout -->
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+<!-- Column: Upcoming Visits (Calendar View Concept) -->
+<div class="lg:col-span-4 flex flex-col gap-6">
+<section class="bg-surface-container-low rounded-xl p-6 shadow-sm">
+<div class="flex items-center justify-between mb-6">
+<h2 class="font-manrope font-bold text-lg text-primary">Scheduled Visits</h2>
+<span class="bg-primary-fixed text-on-primary-fixed px-3 py-1 rounded-full text-xs font-bold">This Week</span>
+</div>
+<div class="space-y-4">
+<!-- Visit Card -->
+<div class="bg-surface-container-lowest p-4 rounded-xl shadow-sm border-l-4 border-primary">
+<div class="flex justify-between items-start mb-2">
+<span class="text-xs font-bold text-primary-container uppercase tracking-wider">Tomorrow • 10:00 AM</span>
+<span class="material-symbols-outlined text-outline text-sm">more_vert</span>
+</div>
+<h3 class="font-manrope font-bold text-on-surface">Elena Garcia Family</h3>
+<p class="text-xs text-on-surface-variant mb-3">Community: Barrio El Centro</p>
+<div class="flex -space-x-2">
+<img class="w-8 h-8 rounded-full border-2 border-surface-container-lowest object-cover" data-alt="portrait of a social worker with a friendly expression" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAwKMHffLNW7FL5bVbmqZeWwJM2HFj_eMvGS6CNBe0sH60AndI8RvF3CCwHIXTGPDapJ_4iRK6PslgNLApOgSPyMVXUd17SnQuk3myjYkydAUotan5d4kYXtHgeZRxdWXET4MGHvFI7wavldimsVDVlV_HezE0DVTWJN2EyU6cONIzsWT9ICmIGDUN86Q3iXFM8v--kZLyfdH0QBCn08TQz5j1ye-KT_6dBDkyCJvsb1xPjqkE2FRDVgKJy8fR966WF7QKzcdVCMQ"/>
+<div class="w-8 h-8 rounded-full bg-secondary-container flex items-center justify-center border-2 border-surface-container-lowest">
+<span class="text-[10px] font-bold text-on-secondary-container">+2</span>
+</div>
+</div>
+</div>
+<!-- Visit Card -->
+<div class="bg-surface-container-lowest p-4 rounded-xl shadow-sm border-l-4 border-secondary">
+<div class="flex justify-between items-start mb-2">
+<span class="text-xs font-bold text-secondary uppercase tracking-wider">Wed • 2:30 PM</span>
+</div>
+<h3 class="font-manrope font-bold text-on-surface">Mateo Ruiz</h3>
+<p class="text-xs text-on-surface-variant mb-3">Community: San Juan de Opoa</p>
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-sm text-outline">location_on</span>
+<span class="text-[10px] font-medium text-outline">In-Person Home Visit</span>
+</div>
+</div>
+</div>
+<button class="w-full mt-6 py-3 border-2 border-dashed border-outline-variant rounded-xl text-on-surface-variant text-sm font-semibold hover:bg-white/50 transition-colors">
+                        + Schedule New Visit
+                    </button>
+</section>
+<section class="bg-surface-container-low rounded-xl p-6 shadow-sm">
+<h2 class="font-manrope font-bold text-lg text-primary mb-6">Log Outcome</h2>
+<form class="space-y-4">
+<div>
+<label class="block text-xs font-bold text-on-surface-variant mb-1 uppercase tracking-tight">Select Resident</label>
+<select class="w-full bg-surface-container-lowest border-0 rounded-xl focus:ring-2 focus:ring-primary py-3 px-4 text-sm">
+<option>Select a case...</option>
+<option>Elena Garcia</option>
+<option>Mateo Ruiz</option>
+</select>
+</div>
+<div>
+<label class="block text-xs font-bold text-on-surface-variant mb-1 uppercase tracking-tight">Visit Summary</label>
+<textarea class="w-full bg-surface-container-lowest border-0 rounded-xl focus:ring-2 focus:ring-primary py-3 px-4 text-sm" placeholder="Key observations..." rows="3"></textarea>
+</div>
+<button class="w-full bg-primary text-white py-3 rounded-xl font-bold text-sm shadow-md hover:bg-primary-container transition-all" type="submit">
+                            Submit Log
+                        </button>
+</form>
+</section>
+</div>
+<!-- Column: Historical Log & Case Conferences -->
+<div class="lg:col-span-8 space-y-8">
+<!-- Case Conferences -->
+<section class="bg-white rounded-xl shadow-sm overflow-hidden">
+<div class="bg-primary p-6 flex justify-between items-center">
+<div>
+<h2 class="font-manrope font-bold text-xl text-white">Upcoming Case Conferences</h2>
+<p class="text-blue-200 text-sm">Multidisciplinary team reviews</p>
+</div>
+<span class="material-symbols-outlined text-white text-3xl">groups</span>
+</div>
+<div class="divide-y divide-slate-100">
+<!-- Conference Item -->
+<div class="p-6 hover:bg-slate-50 transition-colors flex flex-col md:flex-row md:items-center gap-6">
+<div class="flex-shrink-0 text-center bg-slate-50 p-4 rounded-xl min-w-[100px]">
+<span class="block text-2xl font-bold text-primary">24</span>
+<span class="text-xs font-bold text-on-surface-variant uppercase">Oct</span>
+</div>
+<div class="flex-grow">
+<div class="flex items-center gap-2 mb-1">
+<h3 class="font-manrope font-extrabold text-lg">Advocacy Strategy: Sofia Mendez</h3>
+<span class="bg-tertiary-fixed text-on-tertiary-fixed px-2 py-0.5 rounded text-[10px] font-bold">PRIORITY</span>
+</div>
+<p class="text-sm text-on-surface-variant mb-3">Objective: Reviewing legal status and family reintegration possibilities.</p>
+<div class="flex flex-wrap gap-4">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-sm text-secondary">person</span>
+<span class="text-xs font-medium text-on-surface-variant">Lead: Dr. Arriaga</span>
+</div>
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-sm text-secondary">meeting_room</span>
+<span class="text-xs font-medium text-on-surface-variant">Conf. Room B</span>
+</div>
+</div>
+</div>
+<button class="bg-secondary-container text-on-secondary-container px-4 py-2 rounded-lg font-bold text-xs">Join Link</button>
+</div>
+<!-- Conference Item -->
+<div class="p-6 hover:bg-slate-50 transition-colors flex flex-col md:flex-row md:items-center gap-6">
+<div class="flex-shrink-0 text-center bg-slate-50 p-4 rounded-xl min-w-[100px]">
+<span class="block text-2xl font-bold text-primary">26</span>
+<span class="text-xs font-bold text-on-surface-variant uppercase">Oct</span>
+</div>
+<div class="flex-grow">
+<h3 class="font-manrope font-extrabold text-lg">Monthly Caseload Review</h3>
+<p class="text-sm text-on-surface-variant mb-3">General status updates for all current active cases in Santa Rosa.</p>
+<div class="flex items-center gap-4">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-sm text-secondary">diversity_3</span>
+<span class="text-xs font-medium text-on-surface-variant">All Staff (12 attendees)</span>
+</div>
+</div>
+</div>
+<button class="text-primary font-bold text-xs hover:underline">View Agenda</button>
+</div>
+</div>
+</section>
+<!-- Historical Log -->
+<section>
+<div class="flex items-center justify-between mb-6">
+<h2 class="font-manrope font-bold text-2xl text-on-surface">Historical Visit Logs</h2>
+<div class="flex gap-2">
+<button class="p-2 bg-surface-container-high rounded-lg"><span class="material-symbols-outlined text-sm">filter_list</span></button>
+<button class="p-2 bg-surface-container-high rounded-lg"><span class="material-symbols-outlined text-sm">download</span></button>
+</div>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+<!-- Log Card -->
+<div class="bg-surface-container-low rounded-xl p-5 border-t-2 border-secondary-fixed">
+<div class="flex justify-between items-start mb-3">
+<div class="text-[10px] font-bold text-on-secondary-fixed-variant bg-secondary-fixed px-2 py-0.5 rounded">COMPLETED</div>
+<span class="text-xs text-on-surface-variant">Oct 12, 2024</span>
+</div>
+<h4 class="font-manrope font-bold text-base mb-1">Hernandez Family Home Visit</h4>
+<p class="text-sm text-on-surface-variant line-clamp-3 mb-4">Mother is recovering well from surgery. Children are attending school regularly. Noted a need for food assistance due to crop failure...</p>
+<div class="flex items-center justify-between border-t border-outline-variant/20 pt-4">
+<div class="flex items-center gap-2">
+<img class="w-6 h-6 rounded-full object-cover" data-alt="headshot of a female social worker" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCq--IzZRRVusOmVRDzZCUN8tcA3PuBj1Eg2JHtAJzW_QkkPWsTST6Cf-gJVwvcPmPLlwrfkI1ahw0QzhwfVp6r5NW1tXtmaKSjuxdTAsAyDbd99gkWMV1XD1Vai13iqxuheBG87xmWDJy_ovHbPXKTdzUKUWlZGfofFQcfSkZBQ8B_HcI3Z8Ju14xnOu_yjFH2rx0wFH27QsoUyijIocsWUYsIu0OnIByUVzRsUbXTmzH29wyZUCTGrpkz8nZjQCyIFfLoest-5g"/>
+<span class="text-xs font-medium">Lucia M.</span>
+</div>
+<a class="text-primary text-xs font-bold flex items-center gap-1" href="#">Full Report <span class="material-symbols-outlined text-xs">arrow_forward</span></a>
+</div>
+</div>
+<!-- Log Card -->
+<div class="bg-surface-container-low rounded-xl p-5 border-t-2 border-tertiary-fixed">
+<div class="flex justify-between items-start mb-3">
+<div class="text-[10px] font-bold text-on-tertiary-fixed-variant bg-tertiary-fixed px-2 py-0.5 rounded">FOLLOW-UP REQ</div>
+<span class="text-xs text-on-surface-variant">Oct 10, 2024</span>
+</div>
+<h4 class="font-manrope font-bold text-base mb-1">Rivera Housing Check</h4>
+<p class="text-sm text-on-surface-variant line-clamp-3 mb-4">Significant structural damage noted in the living area. Family requires immediate consultation with community engineering team...</p>
+<div class="flex items-center justify-between border-t border-outline-variant/20 pt-4">
+<div class="flex items-center gap-2">
+<img class="w-6 h-6 rounded-full object-cover" data-alt="professional male social worker portrait" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCHJtBjutdfAMhBnnVQaxhEGB1dwcLGCxuXcLze1Dkq6qUqS_rgs-YmkvCnS-A1UeZxngLVeQ_hnisVvv4dkBEHvmYq3qkYGnFRLGJ8gsPELdOUMy7L6xAM_JZLO2ECqKvggIhGA2B_KXxkhcdANrDC18V5KxgF-AFnnLicGn4F5DAX5GVcOXUbr2qbsYNDQyMBIPh-VDS5uvgikCIDWou8NbI6KUPVeb8skyFExtmDEYT0YXqQyaUuA12Pcf3SkElavgOZDbkDMw"/>
+<span class="text-xs font-medium">David K.</span>
+</div>
+<a class="text-primary text-xs font-bold flex items-center gap-1" href="#">Full Report <span class="material-symbols-outlined text-xs">arrow_forward</span></a>
+</div>
+</div>
+</div>
+</section>
+</div>
+</div>
+</main>
+<!-- Footer -->
+<footer class="md:ml-64 bg-slate-50 py-12 mt-20 border-t border-slate-200/20">
+<div class="max-w-7xl mx-auto px-6 flex flex-col md:flex-row justify-between items-center gap-8">
+<div class="flex flex-col items-center md:items-start">
+<div class="text-lg font-bold text-blue-900 mb-2">Lucero</div>
+<p class="font-inter text-sm leading-relaxed text-slate-500 text-center md:text-left max-w-xs">© 2024 Lucero. Dedicated to the children of Central America.</p>
+</div>
+<div class="flex flex-wrap justify-center gap-6">
+<a class="text-slate-500 hover:text-blue-600 transition-colors text-sm font-inter" href="#">Transparency Report</a>
+<a class="text-slate-500 hover:text-blue-600 transition-colors text-sm font-inter" href="#">Contact Us</a>
+<a class="text-slate-500 hover:text-blue-600 transition-colors text-sm font-inter" href="#">Privacy Policy</a>
+<a class="text-slate-500 hover:text-blue-600 transition-colors text-sm font-inter" href="#">Careers</a>
+</div>
+</div>
+</footer>
+</body></html>

@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Lucero | Process Recordings</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&amp;family=Inter:wght@300;400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "on-error-container": "#93000a",
+                    "on-secondary-fixed-variant": "#004f4f",
+                    "surface-container-highest": "#e1e3e4",
+                    "on-tertiary-fixed-variant": "#604100",
+                    "secondary": "#006a6a",
+                    "on-secondary": "#ffffff",
+                    "secondary-container": "#90efef",
+                    "on-tertiary-fixed": "#281900",
+                    "tertiary-fixed-dim": "#ffba38",
+                    "surface-container-low": "#f3f4f5",
+                    "inverse-surface": "#2e3132",
+                    "surface": "#f8f9fa",
+                    "primary-fixed": "#d7e2ff",
+                    "surface-dim": "#d9dadb",
+                    "outline-variant": "#c2c6d4",
+                    "on-secondary-container": "#006e6e",
+                    "surface-variant": "#e1e3e4",
+                    "on-secondary-fixed": "#002020",
+                    "background": "#f8f9fa",
+                    "tertiary-fixed": "#ffdeac",
+                    "on-primary-fixed": "#001a40",
+                    "surface-bright": "#f8f9fa",
+                    "surface-container": "#edeeef",
+                    "on-surface": "#191c1d",
+                    "tertiary-container": "#775200",
+                    "outline": "#727784",
+                    "surface-container-high": "#e7e8e9",
+                    "inverse-on-surface": "#f0f1f2",
+                    "primary-fixed-dim": "#acc7ff",
+                    "on-primary-fixed-variant": "#004491",
+                    "primary-container": "#0056b3",
+                    "primary": "#003f87",
+                    "surface-tint": "#115cb9",
+                    "on-background": "#191c1d",
+                    "secondary-fixed": "#93f2f2",
+                    "secondary-fixed-dim": "#76d6d5",
+                    "on-primary": "#ffffff",
+                    "error": "#ba1a1a",
+                    "error-container": "#ffdad6",
+                    "tertiary": "#593c00",
+                    "on-primary-container": "#bbd0ff",
+                    "on-tertiary": "#ffffff",
+                    "surface-container-lowest": "#ffffff",
+                    "inverse-primary": "#acc7ff",
+                    "on-tertiary-container": "#ffc769",
+                    "on-error": "#ffffff",
+                    "on-surface-variant": "#424752"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.125rem",
+                    "lg": "0.25rem",
+                    "xl": "0.5rem",
+                    "full": "0.75rem"
+            },
+            "fontFamily": {
+                    "headline": ["Manrope"],
+                    "body": ["Inter"],
+                    "label": ["Inter"]
+            }
+          },
+        }
+      }
+    </script>
+<style>
+        body { font-family: 'Inter', sans-serif; background-color: #f8f9fa; }
+        .font-manrope { font-family: 'Manrope', sans-serif; }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .tonal-carving { background-color: #f3f4f5; }
+    </style>
+</head>
+<body class="bg-surface text-on-surface">
+<!-- Sidebar Navigation Shell -->
+<aside class="h-screen w-64 fixed left-0 top-0 bg-slate-50 dark:bg-slate-950 flex flex-col py-6 z-40">
+<div class="px-6 mb-8">
+<h1 class="text-xl font-extrabold text-blue-900 dark:text-blue-200 font-manrope">Lucero Admin</h1>
+<p class="text-xs font-manrope text-slate-500 uppercase tracking-widest mt-1">Santa Rosa de Copán</p>
+</div>
+<div class="px-4 mb-6">
+<button class="w-full bg-primary text-white py-3 px-4 rounded-xl font-bold flex items-center justify-center gap-2 shadow-lg shadow-primary/20 hover:scale-[0.98] transition-transform">
+<span class="material-symbols-outlined text-lg">add_notes</span>
+                New Case
+            </button>
+</div>
+<nav class="flex-1 space-y-1 overflow-y-auto">
+<a class="text-slate-500 dark:text-slate-400 mx-2 px-4 py-3 flex items-center gap-3 hover:bg-slate-200/50 dark:hover:bg-slate-800/50 rounded-xl transition-all font-manrope text-sm font-medium" href="#">
+<span class="material-symbols-outlined" data-icon="folder_shared">folder_shared</span>
+                Caseload
+            </a>
+<a class="text-slate-500 dark:text-slate-400 mx-2 px-4 py-3 flex items-center gap-3 hover:bg-slate-200/50 dark:hover:bg-slate-800/50 rounded-xl transition-all font-manrope text-sm font-medium" href="#">
+<span class="material-symbols-outlined" data-icon="volunteer_activism">volunteer_activism</span>
+                Donors
+            </a>
+<!-- Active Tab: Recordings -->
+<a class="bg-blue-100/50 dark:bg-blue-900/30 text-blue-900 dark:text-blue-200 rounded-xl mx-2 px-4 py-3 flex items-center gap-3 font-bold translate-x-1 transition-all font-manrope text-sm" href="#">
+<span class="material-symbols-outlined" data-icon="history_edu">history_edu</span>
+                Recordings
+            </a>
+<a class="text-slate-500 dark:text-slate-400 mx-2 px-4 py-3 flex items-center gap-3 hover:bg-slate-200/50 dark:hover:bg-slate-800/50 rounded-xl transition-all font-manrope text-sm font-medium" href="#">
+<span class="material-symbols-outlined" data-icon="home_pin">home_pin</span>
+                Visits
+            </a>
+<a class="text-slate-500 dark:text-slate-400 mx-2 px-4 py-3 flex items-center gap-3 hover:bg-slate-200/50 dark:hover:bg-slate-800/50 rounded-xl transition-all font-manrope text-sm font-medium" href="#">
+<span class="material-symbols-outlined" data-icon="analytics">analytics</span>
+                Analytics
+            </a>
+</nav>
+<div class="mt-auto pt-6 border-t border-slate-200/50 mx-4">
+<a class="text-slate-500 dark:text-slate-400 px-4 py-3 flex items-center gap-3 hover:bg-slate-200/50 dark:hover:bg-slate-800/50 rounded-xl transition-all font-manrope text-sm" href="#">
+<span class="material-symbols-outlined" data-icon="settings">settings</span>
+                Settings
+            </a>
+<a class="text-slate-500 dark:text-slate-400 px-4 py-3 flex items-center gap-3 hover:bg-slate-200/50 dark:hover:bg-slate-800/50 rounded-xl transition-all font-manrope text-sm" href="#">
+<span class="material-symbols-outlined" data-icon="help_outline">help_outline</span>
+                Support
+            </a>
+<div class="mt-4 px-4 py-3 bg-surface-container-low rounded-xl flex items-center gap-3">
+<div class="w-8 h-8 rounded-full bg-primary-fixed flex items-center justify-center overflow-hidden">
+<img alt="Staff User Profile" class="w-full h-full object-cover" data-alt="close up headshot of a professional latin american woman smiling kindly in a bright office" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCpXzNXiUemWnqOkA0ZZxyPKMdPqDDKCQ-Koml45sbI594aFjmHbvJXxIWgUjG74G34xoMuoLqD8MrE1K64rfLTmewSw2CwfHbFKN44QoCDNH6Wsx6C0jGf3o1Kr1jWVfGcfNLBHZDxEFGthEbMzB_B0YtkjwZLCASfVhkI1Uus6afgfyGFXFqVG9QxfvB3ZEGe3jtmvQt83OUGNTx1nrECraDmxorho6U5owlRbqVkCnEg9KhUqLe3ZsOOo3b3_KTquOdzUpXtYw"/>
+</div>
+<div class="flex-1 overflow-hidden">
+<p class="text-xs font-bold truncate">Maria Elena V.</p>
+<p class="text-[10px] text-on-surface-variant">Lead Counselor</p>
+</div>
+</div>
+</div>
+</aside>
+<!-- Main Content Area -->
+<main class="ml-64 min-h-screen">
+<!-- Top Navigation Area -->
+<header class="h-20 fixed top-0 right-0 left-64 bg-surface/80 backdrop-blur-xl z-30 shadow-sm border-b border-transparent">
+<div class="h-full max-w-7xl mx-auto px-8 flex justify-between items-center">
+<div>
+<h2 class="text-2xl font-bold text-blue-900 font-manrope">Process Recordings</h2>
+<p class="text-sm text-on-surface-variant">Confidential Clinical Documentation</p>
+</div>
+<div class="flex items-center gap-4">
+<button class="p-2 text-on-surface-variant hover:bg-surface-container rounded-full transition-colors">
+<span class="material-symbols-outlined">search</span>
+</button>
+<button class="p-2 text-on-surface-variant hover:bg-surface-container rounded-full transition-colors relative">
+<span class="material-symbols-outlined">notifications</span>
+<span class="absolute top-2 right-2 w-2 h-2 bg-error rounded-full"></span>
+</button>
+<div class="h-8 w-[1px] bg-outline-variant/30"></div>
+<button class="flex items-center gap-2 py-2 px-4 bg-primary-container/20 text-primary font-bold rounded-xl text-sm font-manrope">
+<span class="material-symbols-outlined text-base">lock</span>
+                        Secure Session
+                    </button>
+</div>
+</div>
+</header>
+<!-- Content Canvas -->
+<div class="pt-32 pb-20 px-8 max-w-7xl mx-auto">
+<div class="grid grid-cols-12 gap-8">
+<!-- Left Column: New Entry Form (Editorial Layout) -->
+<div class="col-span-12 lg:col-span-5">
+<div class="sticky top-32 space-y-8">
+<div class="p-8 bg-surface-container-lowest rounded-[2rem] shadow-sm border border-outline-variant/10">
+<h3 class="text-xl font-bold font-manrope text-primary mb-6 flex items-center gap-2">
+<span class="material-symbols-outlined">edit_square</span>
+                                New Recording
+                            </h3>
+<form class="space-y-6">
+<div class="space-y-2">
+<label class="block text-sm font-semibold text-on-surface-variant font-manrope">Resident Identity</label>
+<select class="w-full bg-surface-container-low border-0 rounded-xl px-4 py-3 focus:ring-2 focus:ring-primary text-sm">
+<option>Select Resident...</option>
+<option>Mateo S.</option>
+<option>Leticia R.</option>
+<option>Carlos H.</option>
+</select>
+</div>
+<div class="grid grid-cols-2 gap-4">
+<div class="space-y-2">
+<label class="block text-sm font-semibold text-on-surface-variant font-manrope">Session Date</label>
+<input class="w-full bg-surface-container-low border-0 rounded-xl px-4 py-3 focus:ring-2 focus:ring-primary text-sm" type="date"/>
+</div>
+<div class="space-y-2">
+<label class="block text-sm font-semibold text-on-surface-variant font-manrope">Duration (min)</label>
+<input class="w-full bg-surface-container-low border-0 rounded-xl px-4 py-3 focus:ring-2 focus:ring-primary text-sm" placeholder="45" type="number"/>
+</div>
+</div>
+<div class="space-y-2">
+<label class="block text-sm font-semibold text-on-surface-variant font-manrope">Primary Goals</label>
+<textarea class="w-full bg-surface-container-low border-0 rounded-xl px-4 py-3 focus:ring-2 focus:ring-primary text-sm" placeholder="Define the clinical focus..." rows="2"></textarea>
+</div>
+<div class="space-y-2">
+<label class="block text-sm font-semibold text-on-surface-variant font-manrope">Clinical Observations</label>
+<textarea class="w-full bg-surface-container-low border-0 rounded-xl px-4 py-3 focus:ring-2 focus:ring-primary text-sm" placeholder="Detailed notes on affect, behavior, and content..." rows="4"></textarea>
+</div>
+<div class="space-y-2">
+<label class="block text-sm font-semibold text-on-surface-variant font-manrope">Intervention Plan</label>
+<textarea class="w-full bg-surface-container-low border-0 rounded-xl px-4 py-3 focus:ring-2 focus:ring-primary text-sm" placeholder="Follow-up steps and therapeutic trajectory..." rows="2"></textarea>
+</div>
+<div class="pt-4">
+<button class="w-full bg-gradient-to-r from-primary to-primary-container text-white py-4 rounded-xl font-bold shadow-md hover:shadow-lg transition-all flex items-center justify-center gap-3" type="submit">
+<span class="material-symbols-outlined">save</span>
+                                        Finalize &amp; Lock Entry
+                                    </button>
+<p class="text-center text-[10px] text-on-surface-variant mt-4 leading-relaxed px-8">
+                                        Note: Once saved, this recording is encrypted and only accessible to authorized clinical staff.
+                                    </p>
+</div>
+</form>
+</div>
+<!-- Auxiliary Context Card -->
+<div class="p-6 bg-secondary-container/20 rounded-2xl flex items-start gap-4">
+<span class="material-symbols-outlined text-secondary">verified_user</span>
+<div>
+<h4 class="text-sm font-bold text-secondary font-manrope">HIPAA Compliance</h4>
+<p class="text-xs text-on-surface-variant mt-1">Lucero follows international standards for trauma-informed data handling and privacy for all survivors.</p>
+</div>
+</div>
+</div>
+</div>
+<!-- Right Column: Recent Activity Feed (Bento Style) -->
+<div class="col-span-12 lg:col-span-7 space-y-6">
+<div class="flex items-center justify-between">
+<h3 class="text-lg font-bold font-manrope text-on-surface">Recent Timeline</h3>
+<div class="flex gap-2">
+<button class="bg-surface-container text-on-surface-variant px-3 py-1.5 rounded-full text-xs font-semibold hover:bg-surface-container-high transition-colors">All Residents</button>
+<button class="bg-surface-container text-on-surface-variant px-3 py-1.5 rounded-full text-xs font-semibold hover:bg-surface-container-high transition-colors">My Notes Only</button>
+</div>
+</div>
+<!-- Process Recording Card 1 -->
+<div class="group bg-surface-container-low rounded-[1.5rem] p-1 transition-all hover:bg-surface-container">
+<div class="bg-surface-container-lowest rounded-[1.25rem] p-6 shadow-sm border border-outline-variant/10">
+<div class="flex justify-between items-start mb-6">
+<div class="flex items-center gap-4">
+<div class="w-12 h-12 rounded-full bg-tertiary-fixed flex items-center justify-center text-tertiary font-bold text-lg">M</div>
+<div>
+<h4 class="font-bold font-manrope text-on-surface">Mateo S.</h4>
+<p class="text-xs text-on-surface-variant">Resident ID: #LZ-0422</p>
+</div>
+</div>
+<div class="text-right">
+<span class="inline-flex items-center px-3 py-1 bg-secondary-container/30 text-secondary text-[10px] font-bold rounded-full uppercase tracking-wider mb-2">Trauma Informed</span>
+<p class="text-xs font-medium text-on-surface-variant">Oct 24, 2024 • 14:00</p>
+</div>
+</div>
+<div class="space-y-4">
+<div class="flex gap-4">
+<div class="w-1 bg-primary/20 rounded-full"></div>
+<div class="flex-1">
+<p class="text-xs font-bold text-primary-container font-manrope uppercase tracking-tighter">Session Narrative</p>
+<p class="text-sm text-on-surface leading-relaxed mt-1">Patient displayed increased verbal engagement during creative expression tasks. Explored memory anchor points in relation to household safety...</p>
+</div>
+</div>
+<div class="grid grid-cols-3 gap-4 pt-4 border-t border-surface-container">
+<div>
+<p class="text-[10px] font-semibold text-on-surface-variant uppercase">Counselor</p>
+<p class="text-xs font-bold">Dr. Lucía Morales</p>
+</div>
+<div>
+<p class="text-[10px] font-semibold text-on-surface-variant uppercase">Mood</p>
+<p class="text-xs font-bold text-secondary flex items-center gap-1">
+<span class="material-symbols-outlined text-sm">sentiment_satisfied</span> Improved
+                                        </p>
+</div>
+<div class="text-right">
+<button class="text-primary text-xs font-bold flex items-center gap-1 ml-auto hover:underline">
+                                            Full Report <span class="material-symbols-outlined text-sm">arrow_forward</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Process Recording Card 2 -->
+<div class="group bg-surface-container-low rounded-[1.5rem] p-1 transition-all hover:bg-surface-container">
+<div class="bg-surface-container-lowest rounded-[1.25rem] p-6 shadow-sm border border-outline-variant/10">
+<div class="flex justify-between items-start mb-6">
+<div class="flex items-center gap-4">
+<div class="w-12 h-12 rounded-full bg-primary-fixed flex items-center justify-center text-primary font-bold text-lg">L</div>
+<div>
+<h4 class="font-bold font-manrope text-on-surface">Leticia R.</h4>
+<p class="text-xs text-on-surface-variant">Resident ID: #LZ-0518</p>
+</div>
+</div>
+<div class="text-right">
+<span class="inline-flex items-center px-3 py-1 bg-tertiary-fixed/30 text-tertiary text-[10px] font-bold rounded-full uppercase tracking-wider mb-2">Crisis Follow-up</span>
+<p class="text-xs font-medium text-on-surface-variant">Oct 23, 2024 • 09:30</p>
+</div>
+</div>
+<div class="space-y-4">
+<div class="flex gap-4">
+<div class="w-1 bg-tertiary-fixed-dim rounded-full"></div>
+<div class="flex-1">
+<p class="text-xs font-bold text-tertiary font-manrope uppercase tracking-tighter">Session Narrative</p>
+<p class="text-sm text-on-surface leading-relaxed mt-1">Focus on stabilization and de-escalation techniques. Leticia identified three personal triggers and practiced grounding exercises successfully...</p>
+</div>
+</div>
+<div class="grid grid-cols-3 gap-4 pt-4 border-t border-surface-container">
+<div>
+<p class="text-[10px] font-semibold text-on-surface-variant uppercase">Counselor</p>
+<p class="text-xs font-bold">Maria Elena V.</p>
+</div>
+<div>
+<p class="text-[10px] font-semibold text-on-surface-variant uppercase">Mood</p>
+<p class="text-xs font-bold text-tertiary-container flex items-center gap-1">
+<span class="material-symbols-outlined text-sm">sentiment_neutral</span> Stable
+                                        </p>
+</div>
+<div class="text-right">
+<button class="text-primary text-xs font-bold flex items-center gap-1 ml-auto hover:underline">
+                                            Full Report <span class="material-symbols-outlined text-sm">arrow_forward</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Progress Visualization Widget -->
+<div class="grid grid-cols-2 gap-6">
+<div class="bg-surface-container-low rounded-3xl p-6">
+<h5 class="text-xs font-bold text-on-surface-variant uppercase mb-4 tracking-wider">Weekly Activity</h5>
+<div class="flex items-end gap-2 h-20">
+<div class="w-full bg-primary/20 rounded-t-lg h-[40%]"></div>
+<div class="w-full bg-primary/20 rounded-t-lg h-[60%]"></div>
+<div class="w-full bg-primary/20 rounded-t-lg h-[30%]"></div>
+<div class="w-full bg-primary rounded-t-lg h-[90%]"></div>
+<div class="w-full bg-primary/20 rounded-t-lg h-[50%]"></div>
+<div class="w-full bg-primary/20 rounded-t-lg h-[40%]"></div>
+<div class="w-full bg-primary/20 rounded-t-lg h-[20%]"></div>
+</div>
+<p class="text-[10px] font-bold text-primary mt-3">24 Session Logs Completed</p>
+</div>
+<div class="bg-surface-container-low rounded-3xl p-6 flex flex-col justify-between">
+<h5 class="text-xs font-bold text-on-surface-variant uppercase mb-2 tracking-wider">Clinical Capacity</h5>
+<div class="space-y-3">
+<div>
+<div class="flex justify-between text-[10px] mb-1">
+<span class="font-bold">Active Cases</span>
+<span>88%</span>
+</div>
+<div class="w-full h-1.5 bg-surface-container-highest rounded-full overflow-hidden">
+<div class="h-full bg-secondary w-[88%] rounded-full"></div>
+</div>
+</div>
+<div>
+<div class="flex justify-between text-[10px] mb-1">
+<span class="font-bold">Documentation Compliance</span>
+<span>94%</span>
+</div>
+<div class="w-full h-1.5 bg-surface-container-highest rounded-full overflow-hidden">
+<div class="h-full bg-primary w-[94%] rounded-full"></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Footer -->
+<footer class="w-full py-12 mt-20 border-t border-slate-200/20 bg-slate-50 dark:bg-slate-950">
+<div class="max-w-7xl mx-auto px-6 flex flex-col md:flex-row justify-between items-center gap-6">
+<div class="flex flex-col gap-2">
+<span class="text-lg font-bold text-blue-900 dark:text-white font-manrope">Lucero</span>
+<p class="text-sm font-inter text-slate-500 dark:text-slate-400">© 2024 Lucero. Dedicated to the children of Central America.</p>
+</div>
+<div class="flex gap-8">
+<a class="text-slate-500 dark:text-slate-400 hover:text-blue-600 transition-colors text-sm font-medium" href="#">Transparency Report</a>
+<a class="text-slate-500 dark:text-slate-400 hover:text-blue-600 transition-colors text-sm font-medium" href="#">Contact Us</a>
+<a class="text-slate-500 dark:text-slate-400 hover:text-blue-600 transition-colors text-sm font-medium" href="#">Privacy Policy</a>
+<a class="text-slate-500 dark:text-slate-400 hover:text-blue-600 transition-colors text-sm font-medium" href="#">Careers</a>
+</div>
+</div>
+</footer>
+</main>
+<!-- Contextual Floating Action Button -->
+<button class="fixed bottom-8 right-8 w-16 h-16 bg-gradient-to-tr from-primary to-primary-container text-white rounded-full shadow-2xl flex items-center justify-center group hover:scale-110 transition-all z-50">
+<span class="material-symbols-outlined text-3xl">add</span>
+<div class="absolute right-full mr-4 bg-on-surface text-surface text-xs font-bold py-2 px-4 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none">
+            Quick Log Entry
+        </div>
+</button>
+</body></html>

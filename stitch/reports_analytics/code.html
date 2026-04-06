@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Reports &amp; Analytics | Lucero Admin</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&amp;family=Manrope:wght@500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "on-error-container": "#93000a",
+                    "on-secondary-fixed-variant": "#004f4f",
+                    "surface-container-highest": "#e1e3e4",
+                    "on-tertiary-fixed-variant": "#604100",
+                    "secondary": "#006a6a",
+                    "on-secondary": "#ffffff",
+                    "secondary-container": "#90efef",
+                    "on-tertiary-fixed": "#281900",
+                    "tertiary-fixed-dim": "#ffba38",
+                    "surface-container-low": "#f3f4f5",
+                    "inverse-surface": "#2e3132",
+                    "surface": "#f8f9fa",
+                    "primary-fixed": "#d7e2ff",
+                    "surface-dim": "#d9dadb",
+                    "outline-variant": "#c2c6d4",
+                    "on-secondary-container": "#006e6e",
+                    "surface-variant": "#e1e3e4",
+                    "on-secondary-fixed": "#002020",
+                    "background": "#f8f9fa",
+                    "tertiary-fixed": "#ffdeac",
+                    "on-primary-fixed": "#001a40",
+                    "surface-bright": "#f8f9fa",
+                    "surface-container": "#edeeef",
+                    "on-surface": "#191c1d",
+                    "tertiary-container": "#775200",
+                    "outline": "#727784",
+                    "surface-container-high": "#e7e8e9",
+                    "inverse-on-surface": "#f0f1f2",
+                    "primary-fixed-dim": "#acc7ff",
+                    "on-primary-fixed-variant": "#004491",
+                    "primary-container": "#0056b3",
+                    "primary": "#003f87",
+                    "surface-tint": "#115cb9",
+                    "on-background": "#191c1d",
+                    "secondary-fixed": "#93f2f2",
+                    "secondary-fixed-dim": "#76d6d5",
+                    "on-primary": "#ffffff",
+                    "error": "#ba1a1a",
+                    "error-container": "#ffdad6",
+                    "tertiary": "#593c00",
+                    "on-primary-container": "#bbd0ff",
+                    "on-tertiary": "#ffffff",
+                    "surface-container-lowest": "#ffffff",
+                    "inverse-primary": "#acc7ff",
+                    "on-tertiary-container": "#ffc769",
+                    "on-error": "#ffffff",
+                    "on-surface-variant": "#424752"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.125rem",
+                    "lg": "0.25rem",
+                    "xl": "0.5rem",
+                    "full": "0.75rem"
+            },
+            "fontFamily": {
+                    "headline": ["Manrope"],
+                    "body": ["Inter"],
+                    "label": ["Inter"]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .tonal-carving {
+            background: linear-gradient(135deg, rgba(248, 249, 250, 1) 0%, rgba(243, 244, 245, 1) 100%);
+        }
+    </style>
+</head>
+<body class="bg-surface font-body text-on-surface antialiased">
+<!-- TopNavBar (Hidden on desktop as per common Admin UI patterns, but included as per prompt) -->
+<header class="fixed top-0 w-full z-50 bg-surface/80 dark:bg-slate-900/80 backdrop-blur-xl shadow-sm dark:shadow-none h-20 md:hidden">
+<div class="flex justify-between items-center max-w-7xl mx-auto px-6 h-full">
+<span class="text-2xl font-bold text-blue-900 dark:text-white font-headline">Lucero</span>
+<button class="material-symbols-outlined text-blue-900">menu</button>
+</div>
+</header>
+<!-- SideNavBar -->
+<aside class="h-screen w-64 fixed left-0 top-0 border-r-0 bg-slate-50 dark:bg-slate-950 flex flex-col h-full py-6 hidden md:flex">
+<div class="px-6 mb-10">
+<h1 class="text-xl font-extrabold text-blue-900 dark:text-blue-200 font-headline">Lucero Admin</h1>
+<p class="text-slate-500 dark:text-slate-400 text-xs font-medium">Santa Rosa de Copán</p>
+</div>
+<nav class="flex-grow space-y-1">
+<a class="text-slate-500 dark:text-slate-400 mx-2 px-4 py-3 flex items-center gap-3 hover:bg-slate-200/50 dark:hover:bg-slate-800/50 rounded-xl transition-all font-manrope font-medium text-sm" href="#">
+<span class="material-symbols-outlined" data-icon="folder_shared">folder_shared</span>
+                Caseload
+            </a>
+<a class="text-slate-500 dark:text-slate-400 mx-2 px-4 py-3 flex items-center gap-3 hover:bg-slate-200/50 dark:hover:bg-slate-800/50 rounded-xl transition-all font-manrope font-medium text-sm" href="#">
+<span class="material-symbols-outlined" data-icon="volunteer_activism">volunteer_activism</span>
+                Donors
+            </a>
+<a class="text-slate-500 dark:text-slate-400 mx-2 px-4 py-3 flex items-center gap-3 hover:bg-slate-200/50 dark:hover:bg-slate-800/50 rounded-xl transition-all font-manrope font-medium text-sm" href="#">
+<span class="material-symbols-outlined" data-icon="history_edu">history_edu</span>
+                Recordings
+            </a>
+<a class="text-slate-500 dark:text-slate-400 mx-2 px-4 py-3 flex items-center gap-3 hover:bg-slate-200/50 dark:hover:bg-slate-800/50 rounded-xl transition-all font-manrope font-medium text-sm" href="#">
+<span class="material-symbols-outlined" data-icon="home_pin">home_pin</span>
+                Visits
+            </a>
+<a class="bg-blue-100/50 dark:bg-blue-900/30 text-blue-900 dark:text-blue-200 rounded-xl mx-2 px-4 py-3 flex items-center gap-3 font-bold font-manrope text-sm translate-x-1 duration-200" href="#">
+<span class="material-symbols-outlined" data-icon="analytics" style="font-variation-settings: 'FILL' 1;">analytics</span>
+                Analytics
+            </a>
+</nav>
+<div class="px-4 mb-6">
+<button class="w-full py-3 px-4 bg-gradient-to-r from-primary to-primary-container text-white rounded-xl font-semibold text-sm flex items-center justify-center gap-2 shadow-md">
+<span class="material-symbols-outlined text-sm">add</span>
+                New Case
+            </button>
+</div>
+<div class="mt-auto border-t border-slate-200/20 pt-4">
+<a class="text-slate-500 dark:text-slate-400 mx-2 px-4 py-3 flex items-center gap-3 hover:bg-slate-200/50 dark:hover:bg-slate-800/50 rounded-xl transition-all font-manrope font-medium text-sm" href="#">
+<span class="material-symbols-outlined" data-icon="settings">settings</span>
+                Settings
+            </a>
+<a class="text-slate-500 dark:text-slate-400 mx-2 px-4 py-3 flex items-center gap-3 hover:bg-slate-200/50 dark:hover:bg-slate-800/50 rounded-xl transition-all font-manrope font-medium text-sm" href="#">
+<span class="material-symbols-outlined" data-icon="help_outline">help_outline</span>
+                Support
+            </a>
+</div>
+</aside>
+<!-- Main Content Area -->
+<main class="md:ml-64 min-h-screen pt-24 md:pt-10 px-6 pb-20">
+<header class="max-w-6xl mx-auto mb-10 flex flex-col md:flex-row md:items-end justify-between gap-6">
+<div>
+<h2 class="text-4xl font-extrabold font-headline text-on-surface tracking-tight mb-2">Impact Intelligence</h2>
+<p class="text-on-surface-variant text-lg max-w-2xl">Visualizing our mission: From donor retention to longitudinal resident success milestones.</p>
+</div>
+<div class="flex gap-3">
+<button class="bg-surface-container-low text-on-surface px-6 py-3 rounded-xl font-semibold text-sm flex items-center gap-2 hover:bg-surface-container transition-colors">
+<span class="material-symbols-outlined text-[20px]">filter_list</span>
+                    Fiscal Year 2024
+                </button>
+<button class="bg-primary text-on-primary px-6 py-3 rounded-xl font-semibold text-sm flex items-center gap-2 hover:opacity-90 transition-opacity">
+<span class="material-symbols-outlined text-[20px]">ios_share</span>
+                    Export Report
+                </button>
+</div>
+</header>
+<div class="max-w-6xl mx-auto space-y-8">
+<!-- Bento Grid Section 1: Financial & Social Metrics -->
+<section class="grid grid-cols-1 md:grid-cols-12 gap-6">
+<!-- Donor Retention Card (High Emphasis) -->
+<div class="md:col-span-8 bg-surface-container-lowest rounded-xl p-8 border border-outline-variant/10 shadow-sm relative overflow-hidden group">
+<div class="flex justify-between items-start mb-8 relative z-10">
+<div>
+<span class="text-secondary text-xs font-bold uppercase tracking-widest">Growth Engines</span>
+<h3 class="text-2xl font-bold font-headline mt-1">Donor Retention &amp; Cohort Value</h3>
+</div>
+<div class="text-right">
+<span class="text-3xl font-extrabold text-primary font-headline">84.2%</span>
+<p class="text-on-surface-variant text-xs">Retention Rate (+5.1%)</p>
+</div>
+</div>
+<!-- Chart Placeholder UI -->
+<div class="h-64 flex items-end gap-2 relative">
+<div class="w-full h-[60%] bg-primary/10 rounded-t-lg relative group-hover:bg-primary/20 transition-colors"></div>
+<div class="w-full h-[75%] bg-primary/20 rounded-t-lg relative"></div>
+<div class="w-full h-[65%] bg-primary/10 rounded-t-lg relative"></div>
+<div class="w-full h-[85%] bg-primary/40 rounded-t-lg relative"></div>
+<div class="w-full h-[70%] bg-primary/10 rounded-t-lg relative"></div>
+<div class="w-full h-[95%] bg-gradient-to-t from-primary to-primary-container rounded-t-lg relative shadow-lg"></div>
+<!-- Grid lines -->
+<div class="absolute inset-0 border-b border-outline-variant/20"></div>
+<div class="absolute bottom-1/4 w-full border-b border-outline-variant/10 border-dashed"></div>
+<div class="absolute bottom-2/4 w-full border-b border-outline-variant/10 border-dashed"></div>
+<div class="absolute bottom-3/4 w-full border-b border-outline-variant/10 border-dashed"></div>
+</div>
+<div class="flex justify-between mt-4 text-[10px] font-bold text-outline uppercase tracking-tighter">
+<span>Jan</span><span>Feb</span><span>Mar</span><span>Apr</span><span>May</span><span class="text-primary">Jun</span>
+</div>
+</div>
+<!-- Social Media ROI Card -->
+<div class="md:col-span-4 bg-tertiary-container text-on-tertiary-container rounded-xl p-8 flex flex-col justify-between relative overflow-hidden">
+<div class="absolute top-0 right-0 p-4 opacity-20">
+<span class="material-symbols-outlined text-6xl">share_reviews</span>
+</div>
+<div>
+<h3 class="text-xl font-bold font-headline mb-2 leading-tight">Social Media Engagement Impact</h3>
+<p class="text-on-tertiary-container/80 text-sm">Direct correlation between community stories and micro-donations.</p>
+</div>
+<div class="mt-8 space-y-4">
+<div class="flex items-center justify-between">
+<span class="text-sm font-medium">Post Virality</span>
+<span class="font-bold">+22%</span>
+</div>
+<div class="w-full bg-on-tertiary-container/20 h-2 rounded-full overflow-hidden">
+<div class="bg-tertiary-fixed-dim h-full w-[72%] rounded-full"></div>
+</div>
+<p class="text-xs italic opacity-75">Recent "Home Visit" campaign drove $14k in new recurring gifts.</p>
+</div>
+</div>
+</section>
+<!-- Resident Outcomes Section (Editorial Layout) -->
+<section class="bg-surface-container-low rounded-xl p-10">
+<div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-12 gap-4">
+<div>
+<h3 class="text-3xl font-bold font-headline tracking-tight">Longitudinal Resident Outcomes</h3>
+<p class="text-on-surface-variant">Measuring success beyond immediate shelter: Education, Health, and Reintegration.</p>
+</div>
+<div class="flex gap-2 bg-surface-container-lowest p-1 rounded-full border border-outline-variant/10">
+<button class="px-4 py-1.5 rounded-full text-xs font-bold bg-primary text-white">Academic</button>
+<button class="px-4 py-1.5 rounded-full text-xs font-bold text-on-surface-variant hover:bg-surface-container">Wellness</button>
+<button class="px-4 py-1.5 rounded-full text-xs font-bold text-on-surface-variant hover:bg-surface-container">Transition</button>
+</div>
+</div>
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-10">
+<!-- Milestone 1 -->
+<div class="space-y-4">
+<div class="w-12 h-12 bg-secondary/10 rounded-xl flex items-center justify-center text-secondary">
+<span class="material-symbols-outlined">school</span>
+</div>
+<h4 class="text-xl font-bold font-headline">Educational Proficiency</h4>
+<p class="text-sm text-on-surface-variant leading-relaxed">92% of residents attained grade-level proficiency within 18 months of entry, significantly outpacing the regional average.</p>
+<div class="pt-4">
+<div class="flex justify-between text-xs font-bold mb-2">
+<span>Cohort Alpha (3yr+)</span>
+<span class="text-secondary">98%</span>
+</div>
+<div class="w-full h-1.5 bg-surface-container-highest rounded-full">
+<div class="h-full bg-secondary w-[98%] rounded-full"></div>
+</div>
+</div>
+</div>
+<!-- Milestone 2 -->
+<div class="space-y-4">
+<div class="w-12 h-12 bg-primary/10 rounded-xl flex items-center justify-center text-primary">
+<span class="material-symbols-outlined">favorite</span>
+</div>
+<h4 class="text-xl font-bold font-headline">Psychosocial Well-being</h4>
+<p class="text-sm text-on-surface-variant leading-relaxed">Clinical assessments show an 85% reduction in PTSD symptoms and acute anxiety scores during the first year of sanctuary.</p>
+<div class="pt-4">
+<div class="flex justify-between text-xs font-bold mb-2">
+<span>Stability Index</span>
+<span class="text-primary">85%</span>
+</div>
+<div class="w-full h-1.5 bg-surface-container-highest rounded-full">
+<div class="h-full bg-primary w-[85%] rounded-full"></div>
+</div>
+</div>
+</div>
+<!-- Milestone 3 -->
+<div class="space-y-4">
+<div class="w-12 h-12 bg-tertiary-container/20 rounded-xl flex items-center justify-center text-tertiary">
+<span class="material-symbols-outlined">home_work</span>
+</div>
+<h4 class="text-xl font-bold font-headline">Successful Reintegration</h4>
+<p class="text-sm text-on-surface-variant leading-relaxed">Our 'Pathway Home' program has successfully placed 48 youth into stable family environments or independent living this fiscal year.</p>
+<div class="pt-4">
+<div class="flex justify-between text-xs font-bold mb-2">
+<span>Reintegration Rate</span>
+<span class="text-tertiary">74%</span>
+</div>
+<div class="w-full h-1.5 bg-surface-container-highest rounded-full">
+<div class="h-full bg-tertiary-fixed-dim w-[74%] rounded-full"></div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Annual Report CTA Section -->
+<section class="bg-inverse-surface rounded-2xl p-1 relative overflow-hidden group">
+<div class="bg-inverse-surface p-12 rounded-xl flex flex-col md:flex-row items-center justify-between gap-10 relative z-10">
+<div class="max-w-xl">
+<h3 class="text-3xl font-bold font-headline text-white mb-4">Board-Ready Annual Accomplishment Reports</h3>
+<p class="text-slate-300 text-lg">Generate beautifully formatted PDF or interactive reports summarizing the Lucero impact for stakeholders and board members.</p>
+</div>
+<div class="shrink-0">
+<button class="bg-white text-inverse-surface px-8 py-4 rounded-xl font-bold text-md hover:bg-slate-100 transition-colors flex items-center gap-3">
+<span class="material-symbols-outlined">auto_awesome</span>
+                            Generate 2024 Report
+                        </button>
+</div>
+</div>
+<!-- Decorative background elements -->
+<div class="absolute -bottom-20 -right-20 w-96 h-96 bg-primary/20 blur-3xl rounded-full"></div>
+<div class="absolute -top-20 -left-20 w-64 h-64 bg-secondary/10 blur-3xl rounded-full"></div>
+</section>
+</div>
+<footer class="w-full py-12 mt-20 border-t border-slate-200/20 bg-slate-50 dark:bg-slate-950">
+<div class="max-w-7xl mx-auto px-6 flex flex-col md:flex-row justify-between items-center gap-8">
+<div>
+<h4 class="text-lg font-bold text-blue-900 dark:text-white mb-1">Lucero</h4>
+<p class="text-slate-500 dark:text-slate-400 font-inter text-sm leading-relaxed">© 2024 Lucero. Dedicated to the children of Central America.</p>
+</div>
+<div class="flex flex-wrap justify-center gap-6">
+<a class="text-slate-500 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-300 transition-colors font-inter text-sm opacity-80 hover:opacity-100" href="#">Transparency Report</a>
+<a class="text-slate-500 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-300 transition-colors font-inter text-sm opacity-80 hover:opacity-100" href="#">Contact Us</a>
+<a class="text-slate-500 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-300 transition-colors font-inter text-sm opacity-80 hover:opacity-100" href="#">Privacy Policy</a>
+<a class="text-slate-500 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-300 transition-colors font-inter text-sm opacity-80 hover:opacity-100" href="#">Careers</a>
+</div>
+</div>
+</footer>
+</main>
+</body></html>

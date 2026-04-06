@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Lucero Admin Dashboard</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&amp;family=Inter:wght@300;400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "on-error-container": "#93000a",
+                    "on-secondary-fixed-variant": "#004f4f",
+                    "surface-container-highest": "#e1e3e4",
+                    "on-tertiary-fixed-variant": "#604100",
+                    "secondary": "#006a6a",
+                    "on-secondary": "#ffffff",
+                    "secondary-container": "#90efef",
+                    "on-tertiary-fixed": "#281900",
+                    "tertiary-fixed-dim": "#ffba38",
+                    "surface-container-low": "#f3f4f5",
+                    "inverse-surface": "#2e3132",
+                    "surface": "#f8f9fa",
+                    "primary-fixed": "#d7e2ff",
+                    "surface-dim": "#d9dadb",
+                    "outline-variant": "#c2c6d4",
+                    "on-secondary-container": "#006e6e",
+                    "surface-variant": "#e1e3e4",
+                    "on-secondary-fixed": "#002020",
+                    "background": "#f8f9fa",
+                    "tertiary-fixed": "#ffdeac",
+                    "on-primary-fixed": "#001a40",
+                    "surface-bright": "#f8f9fa",
+                    "surface-container": "#edeeef",
+                    "on-surface": "#191c1d",
+                    "tertiary-container": "#775200",
+                    "outline": "#727784",
+                    "surface-container-high": "#e7e8e9",
+                    "inverse-on-surface": "#f0f1f2",
+                    "primary-fixed-dim": "#acc7ff",
+                    "on-primary-fixed-variant": "#004491",
+                    "primary-container": "#0056b3",
+                    "primary": "#003f87",
+                    "surface-tint": "#115cb9",
+                    "on-background": "#191c1d",
+                    "secondary-fixed": "#93f2f2",
+                    "secondary-fixed-dim": "#76d6d5",
+                    "on-primary": "#ffffff",
+                    "error": "#ba1a1a",
+                    "error-container": "#ffdad6",
+                    "tertiary": "#593c00",
+                    "on-primary-container": "#bbd0ff",
+                    "on-tertiary": "#ffffff",
+                    "surface-container-lowest": "#ffffff",
+                    "inverse-primary": "#acc7ff",
+                    "on-tertiary-container": "#ffc769",
+                    "on-error": "#ffffff",
+                    "on-surface-variant": "#424752"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.125rem",
+                    "lg": "0.25rem",
+                    "xl": "0.5rem",
+                    "full": "0.75rem"
+            },
+            "fontFamily": {
+                    "headline": ["Manrope"],
+                    "body": ["Inter"],
+                    "label": ["Inter"]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .tonal-gradient {
+            background: linear-gradient(135deg, #003f87 0%, #0056b3 100%);
+        }
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8f9fa;
+        }
+        h1, h2, h3, .font-headline {
+            font-family: 'Manrope', sans-serif;
+        }
+    </style>
+</head>
+<body class="text-on-surface">
+<aside class="h-screen w-64 fixed left-0 top-0 bg-slate-50 dark:bg-slate-950 flex flex-col py-6 z-40">
+<div class="px-6 mb-8">
+<span class="text-xl font-extrabold text-blue-900 dark:text-blue-200">Lucero Admin</span>
+<p class="text-xs text-slate-500 font-manrope">Santa Rosa de Copán</p>
+</div>
+<nav class="flex-1 space-y-1">
+<a class="bg-blue-100/50 dark:bg-blue-900/30 text-blue-900 dark:text-blue-200 rounded-xl mx-2 px-4 py-3 font-bold flex items-center gap-3 transition-all translate-x-1" href="#">
+<span class="material-symbols-outlined" data-icon="folder_shared">folder_shared</span>
+<span class="font-manrope text-sm font-medium">Caseload</span>
+</a>
+<a class="text-slate-500 dark:text-slate-400 mx-2 px-4 py-3 flex items-center gap-3 hover:bg-slate-200/50 dark:hover:bg-slate-800/50 rounded-xl transition-all" href="#">
+<span class="material-symbols-outlined" data-icon="volunteer_activism">volunteer_activism</span>
+<span class="font-manrope text-sm font-medium">Donors</span>
+</a>
+<a class="text-slate-500 dark:text-slate-400 mx-2 px-4 py-3 flex items-center gap-3 hover:bg-slate-200/50 dark:hover:bg-slate-800/50 rounded-xl transition-all" href="#">
+<span class="material-symbols-outlined" data-icon="history_edu">history_edu</span>
+<span class="font-manrope text-sm font-medium">Recordings</span>
+</a>
+<a class="text-slate-500 dark:text-slate-400 mx-2 px-4 py-3 flex items-center gap-3 hover:bg-slate-200/50 dark:hover:bg-slate-800/50 rounded-xl transition-all" href="#">
+<span class="material-symbols-outlined" data-icon="home_pin">home_pin</span>
+<span class="font-manrope text-sm font-medium">Visits</span>
+</a>
+<a class="text-slate-500 dark:text-slate-400 mx-2 px-4 py-3 flex items-center gap-3 hover:bg-slate-200/50 dark:hover:bg-slate-800/50 rounded-xl transition-all" href="#">
+<span class="material-symbols-outlined" data-icon="analytics">analytics</span>
+<span class="font-manrope text-sm font-medium">Analytics</span>
+</a>
+</nav>
+<div class="px-4 mb-6">
+<button class="w-full py-3 tonal-gradient text-white font-bold rounded-xl flex items-center justify-center gap-2 shadow-sm hover:opacity-90 transition-opacity">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">add_circle</span>
+                New Case
+            </button>
+</div>
+<div class="mt-auto pt-6 border-t border-slate-200/50 space-y-1">
+<a class="text-slate-500 dark:text-slate-400 mx-2 px-4 py-2 flex items-center gap-3 hover:bg-slate-200/50 dark:hover:bg-slate-800/50 rounded-xl transition-all" href="#">
+<span class="material-symbols-outlined" data-icon="settings">settings</span>
+<span class="font-manrope text-sm font-medium">Settings</span>
+</a>
+<a class="text-slate-500 dark:text-slate-400 mx-2 px-4 py-2 flex items-center gap-3 hover:bg-slate-200/50 dark:hover:bg-slate-800/50 rounded-xl transition-all" href="#">
+<span class="material-symbols-outlined" data-icon="help_outline">help_outline</span>
+<span class="font-manrope text-sm font-medium">Support</span>
+</a>
+</div>
+</aside>
+<header class="fixed top-0 right-0 left-64 h-20 bg-surface/80 dark:bg-slate-900/80 backdrop-blur-xl z-30 shadow-sm border-b-0">
+<div class="flex justify-between items-center h-full px-8">
+<div>
+<h1 class="text-xl font-bold text-blue-900 dark:text-white font-headline">Command Center</h1>
+<p class="text-xs text-on-surface-variant font-body">Operational Oversight</p>
+</div>
+<div class="flex items-center gap-6">
+<div class="flex items-center gap-4 text-sm font-semibold tracking-tight text-slate-600 font-manrope">
+<a class="hover:text-blue-800 transition-colors" href="#">Our Mission</a>
+<a class="hover:text-blue-800 transition-colors" href="#">Impact</a>
+<a class="hover:text-blue-800 transition-colors" href="#">Donate</a>
+</div>
+<div class="h-8 w-[1px] bg-outline-variant/30"></div>
+<div class="flex items-center gap-3">
+<div class="text-right hidden sm:block">
+<p class="text-sm font-bold text-blue-900">Admin Staff</p>
+<p class="text-[10px] uppercase tracking-widest text-on-surface-variant">Lucero Portal</p>
+</div>
+<img alt="Staff User Profile" class="w-10 h-10 rounded-full object-cover border-2 border-primary-fixed" data-alt="professional portrait of a confident woman in business casual attire with a warm, empathetic smile and soft office lighting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuA7af92GUulL3pgbhm7aqLe_-9QiDit6G2kp5SE6_0M_Iot1niK609lCnzupJ6WSP6cZ_LwILRU6gj-9y4NfDxzeEG2vz_KCe39VQel49E-_WW4Gk5ocZBrxcFf1qTdIFnLqra7ZIxokgBDOZ_B63xYcMq9VZ6QxgbdTUUlFXkfUMKdCWGBU4Ob4dpbwY4lSkdXFxx8ClVlD9uMqIjEzFWdpCoPxnoVbjFpNgyye-JVRR78NmAeYDiTnLXMDofBXoi_1aR6kNe3UA"/>
+</div>
+</div>
+</div>
+</header>
+<main class="ml-64 pt-20 p-8 min-h-screen">
+<div class="max-w-7xl mx-auto space-y-8">
+<section class="flex flex-col md:flex-row items-end justify-between gap-4">
+<div>
+<h2 class="text-3xl font-extrabold text-primary tracking-tight font-headline">Good morning, Guardian</h2>
+<p class="text-on-surface-variant max-w-md mt-1 leading-relaxed">Your overview for Santa Rosa de Copán is ready. Here are the core metrics for today's operations.</p>
+</div>
+<div class="flex gap-3">
+<button class="bg-secondary-container text-on-secondary-container px-5 py-2.5 rounded-full text-sm font-bold flex items-center gap-2 hover:opacity-90 transition-opacity">
+<span class="material-symbols-outlined text-lg" data-icon="edit_note">edit_note</span>
+                        Log Donation
+                    </button>
+<button class="tonal-gradient text-white px-5 py-2.5 rounded-full text-sm font-bold flex items-center gap-2 hover:opacity-90 transition-opacity">
+<span class="material-symbols-outlined text-lg" data-icon="person_add">person_add</span>
+                        Add New Case
+                    </button>
+</div>
+</section>
+<section class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+<div class="bg-surface-container-lowest p-6 rounded-xl shadow-sm border-l-4 border-primary relative overflow-hidden group">
+<div class="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
+<span class="material-symbols-outlined text-6xl" data-icon="groups">groups</span>
+</div>
+<p class="text-xs font-bold uppercase tracking-widest text-on-surface-variant mb-1">Active Residents</p>
+<h3 class="text-4xl font-extrabold text-primary font-headline">142</h3>
+<div class="mt-4 flex items-center gap-2 text-secondary text-xs font-bold">
+<span class="material-symbols-outlined text-sm" data-icon="trending_up">trending_up</span>
+<span>+4 this week</span>
+</div>
+</div>
+<div class="bg-surface-container-lowest p-6 rounded-xl shadow-sm border-l-4 border-tertiary-fixed-dim relative overflow-hidden group">
+<div class="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
+<span class="material-symbols-outlined text-6xl" data-icon="volunteer_activism">volunteer_activism</span>
+</div>
+<p class="text-xs font-bold uppercase tracking-widest text-on-surface-variant mb-1">Recent Donations</p>
+<h3 class="text-4xl font-extrabold text-primary font-headline">$12,450</h3>
+<p class="mt-4 text-on-surface-variant text-xs">Primary source: <span class="font-bold text-tertiary">Global Hope Found.</span></p>
+</div>
+<div class="bg-surface-container-lowest p-6 rounded-xl shadow-sm border-l-4 border-error relative overflow-hidden group">
+<div class="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
+<span class="material-symbols-outlined text-6xl" data-icon="assignment_late">assignment_late</span>
+</div>
+<p class="text-xs font-bold uppercase tracking-widest text-on-surface-variant mb-1">Pending Case Logs</p>
+<h3 class="text-4xl font-extrabold text-primary font-headline">28</h3>
+<div class="mt-4 flex items-center gap-2 text-error text-xs font-bold">
+<span class="material-symbols-outlined text-sm" data-icon="priority_high">priority_high</span>
+<span>8 require urgent review</span>
+</div>
+</div>
+<div class="bg-surface-container-lowest p-6 rounded-xl shadow-sm border-l-4 border-secondary relative overflow-hidden group">
+<div class="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
+<span class="material-symbols-outlined text-6xl" data-icon="calendar_month">calendar_month</span>
+</div>
+<p class="text-xs font-bold uppercase tracking-widest text-on-surface-variant mb-1">Home Visits Today</p>
+<h3 class="text-4xl font-extrabold text-primary font-headline">12</h3>
+<div class="mt-4 flex items-center gap-2 text-on-surface-variant text-xs font-medium">
+<span class="material-symbols-outlined text-sm" data-icon="schedule">schedule</span>
+<span>Next: 10:30 AM (Sector 4)</span>
+</div>
+</div>
+</section>
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+<div class="lg:col-span-2 space-y-6">
+<div class="bg-surface-container-low p-8 rounded-xl relative overflow-hidden">
+<div class="flex justify-between items-center mb-6">
+<h3 class="text-xl font-bold text-primary font-headline">Operational Velocity</h3>
+<div class="flex gap-2">
+<span class="px-3 py-1 bg-surface-container-lowest text-[10px] font-bold rounded-full text-secondary">WEEKLY VIEW</span>
+</div>
+</div>
+<div class="h-64 flex items-end justify-between gap-2 px-4">
+<div class="w-full bg-primary-container/20 rounded-t-lg h-[40%]"></div>
+<div class="w-full bg-primary-container/20 rounded-t-lg h-[65%]"></div>
+<div class="w-full bg-primary-container/20 rounded-t-lg h-[45%]"></div>
+<div class="w-full bg-primary-container rounded-t-lg h-[90%] relative group">
+<div class="absolute -top-10 left-1/2 -translate-x-1/2 bg-on-surface text-surface text-[10px] px-2 py-1 rounded hidden group-hover:block whitespace-nowrap">Current: 90%</div>
+</div>
+<div class="w-full bg-primary-container/20 rounded-t-lg h-[60%]"></div>
+<div class="w-full bg-primary-container/20 rounded-t-lg h-[30%]"></div>
+<div class="w-full bg-primary-container/20 rounded-t-lg h-[75%]"></div>
+</div>
+<div class="flex justify-between mt-4 text-[10px] font-bold text-on-surface-variant uppercase tracking-tighter">
+<span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span><span>Sun</span>
+</div>
+</div>
+<div class="bg-surface-container-lowest p-8 rounded-xl shadow-sm">
+<div class="flex justify-between items-center mb-6">
+<h3 class="text-xl font-bold text-primary font-headline">Scheduled Visits</h3>
+<button class="text-primary text-sm font-bold hover:underline">View Calendar</button>
+</div>
+<div class="space-y-4">
+<div class="flex items-center justify-between p-4 bg-surface-container-low rounded-xl border-l-4 border-tertiary-fixed-dim">
+<div class="flex items-center gap-4">
+<div class="bg-surface-container-lowest w-12 h-12 rounded-xl flex flex-col items-center justify-center shadow-sm">
+<span class="text-[10px] font-bold text-on-surface-variant">OCT</span>
+<span class="text-lg font-bold text-primary leading-none">24</span>
+</div>
+<div>
+<h4 class="font-bold text-on-surface">Hernandez Family Follow-up</h4>
+<p class="text-xs text-on-surface-variant">Community Health Assessment • Sector 4</p>
+</div>
+</div>
+<div class="text-right">
+<p class="text-sm font-bold text-primary">09:00 AM</p>
+<span class="text-[10px] px-2 py-0.5 bg-secondary-container text-on-secondary-container rounded-full font-bold">ASSIGNED</span>
+</div>
+</div>
+<div class="flex items-center justify-between p-4 bg-surface-container-low rounded-xl border-l-4 border-primary">
+<div class="flex items-center gap-4">
+<div class="bg-surface-container-lowest w-12 h-12 rounded-xl flex flex-col items-center justify-center shadow-sm">
+<span class="text-[10px] font-bold text-on-surface-variant">OCT</span>
+<span class="text-lg font-bold text-primary leading-none">24</span>
+</div>
+<div>
+<h4 class="font-bold text-on-surface">New Intake: Lucia M.</h4>
+<p class="text-xs text-on-surface-variant">Emergency Shelter Placement • Center</p>
+</div>
+</div>
+<div class="text-right">
+<p class="text-sm font-bold text-primary">02:30 PM</p>
+<span class="text-[10px] px-2 py-0.5 bg-primary-container text-white rounded-full font-bold">PENDING</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="space-y-6">
+<div class="bg-surface-container-lowest p-6 rounded-xl shadow-sm">
+<div class="flex items-center justify-between mb-6">
+<h3 class="text-lg font-bold text-primary font-headline">Recent Updates</h3>
+<span class="material-symbols-outlined text-on-surface-variant cursor-pointer hover:text-primary transition-colors">sync</span>
+</div>
+<div class="space-y-6">
+<div class="flex gap-4 relative">
+<div class="absolute left-4 top-10 bottom-[-1.5rem] w-0.5 bg-outline-variant/20"></div>
+<div class="relative z-10 w-8 h-8 rounded-full bg-primary-fixed flex items-center justify-center">
+<span class="material-symbols-outlined text-primary text-sm" style="font-variation-settings: 'FILL' 1;">description</span>
+</div>
+<div>
+<p class="text-sm text-on-surface leading-snug"><span class="font-bold">Maria Lopez</span> updated the 12 pending case logs for Sector A.</p>
+<span class="text-[10px] text-on-surface-variant uppercase font-bold">24 MINUTES AGO</span>
+</div>
+</div>
+<div class="flex gap-4 relative">
+<div class="absolute left-4 top-10 bottom-[-1.5rem] w-0.5 bg-outline-variant/20"></div>
+<div class="relative z-10 w-8 h-8 rounded-full bg-secondary-fixed flex items-center justify-center">
+<span class="material-symbols-outlined text-secondary text-sm" style="font-variation-settings: 'FILL' 1;">payments</span>
+</div>
+<div>
+<p class="text-sm text-on-surface leading-snug"><span class="font-bold">Donation Log:</span> $500 received from local church partnership.</p>
+<span class="text-[10px] text-on-surface-variant uppercase font-bold">2 HOURS AGO</span>
+</div>
+</div>
+<div class="flex gap-4 relative">
+<div class="absolute left-4 top-10 bottom-[-1.5rem] w-0.5 bg-outline-variant/20"></div>
+<div class="relative z-10 w-8 h-8 rounded-full bg-tertiary-fixed flex items-center justify-center">
+<span class="material-symbols-outlined text-tertiary text-sm" style="font-variation-settings: 'FILL' 1;">home_pin</span>
+</div>
+<div>
+<p class="text-sm text-on-surface leading-snug"><span class="font-bold">Visit Completed:</span> Sector 2 nutritional check-in was successful.</p>
+<span class="text-[10px] text-on-surface-variant uppercase font-bold">4 HOURS AGO</span>
+</div>
+</div>
+<div class="flex gap-4">
+<div class="relative z-10 w-8 h-8 rounded-full bg-error-container flex items-center justify-center">
+<span class="material-symbols-outlined text-error text-sm" style="font-variation-settings: 'FILL' 1;">warning</span>
+</div>
+<div>
+<p class="text-sm text-on-surface leading-snug"><span class="font-bold">System Alert:</span> Monthly transparency report is due in 3 days.</p>
+<span class="text-[10px] text-on-surface-variant uppercase font-bold">6 HOURS AGO</span>
+</div>
+</div>
+</div>
+<button class="w-full mt-8 py-3 text-sm font-bold text-primary bg-surface-container hover:bg-surface-container-high rounded-xl transition-colors">View All Activity</button>
+</div>
+<div class="rounded-xl overflow-hidden relative h-48 group">
+<img alt="Lucero Community" class="w-full h-full object-cover" data-alt="vibrant street scene in Santa Rosa de Copan with colonial architecture and lush greenery under a clear blue sky" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDhWQ0gFZC0R2VZPlGnMYQjFlvE67DEcUSFpycBGy0xR3FFTwUPR8v9bj5SlkoBOmBRdlVSZbypzPSm0r1NENqOJ1K5fJ_kLiO7OWJuRdClUdHZYsVnMU_L2uA3HaDgmX5Ti6JU-ZQgg-hpSlWREdPRs4yytDbImwG514-44p-_5GfeX6pAppSUOEqrTng-8QWos_a9G-1ZmnKBTNtwCx6ixV-LOPT6U2s4pjBmx9FFr90KAcUfyg99ro5aGjgdB0oj1ahfOnChVA"/>
+<div class="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent p-6 flex flex-col justify-end">
+<span class="text-[10px] text-white/70 uppercase font-bold tracking-widest mb-1">Local Focus</span>
+<h4 class="text-white font-bold text-lg font-headline">Santa Rosa de Copán</h4>
+<p class="text-white/80 text-xs">Current conditions: Sunny, 24°C</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+</main>
+<footer class="ml-64 bg-slate-50 dark:bg-slate-950 w-auto py-12 mt-20 border-t border-slate-200/20">
+<div class="max-w-7xl mx-auto px-8 flex flex-col md:flex-row justify-between items-start gap-8">
+<div class="space-y-4">
+<span class="text-lg font-bold text-blue-900 dark:text-white">Lucero</span>
+<p class="max-w-sm text-slate-500 dark:text-slate-400 font-inter text-sm leading-relaxed">Dedicated to the protective care and holistic development of children in Central America. Operating from the heart of Honduras.</p>
+<p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">© 2024 Lucero. Dedicated to the children of Central America.</p>
+</div>
+<div class="grid grid-cols-2 gap-12">
+<div class="space-y-3">
+<p class="text-xs font-extrabold text-blue-900 uppercase tracking-wider">Resources</p>
+<ul class="space-y-2">
+<li><a class="text-slate-500 dark:text-slate-400 text-sm hover:text-blue-600 transition-colors" href="#">Transparency Report</a></li>
+<li><a class="text-slate-500 dark:text-slate-400 text-sm hover:text-blue-600 transition-colors" href="#">Careers</a></li>
+</ul>
+</div>
+<div class="space-y-3">
+<p class="text-xs font-extrabold text-blue-900 uppercase tracking-wider">Legal</p>
+<ul class="space-y-2">
+<li><a class="text-slate-500 dark:text-slate-400 text-sm hover:text-blue-600 transition-colors" href="#">Privacy Policy</a></li>
+<li><a class="text-slate-500 dark:text-slate-400 text-sm hover:text-blue-600 transition-colors" href="#">Contact Us</a></li>
+</ul>
+</div>
+</div>
+</div>
+</footer>
+</body></html>
