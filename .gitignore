@@ -1,0 +1,16 @@
+# .NET
+bin/
+obj/
+*.user
+*.suo
+.vs/
+
+# Rider
+.idea/
+
+# macOS
+.DS_Store
+
+# Environment
+.env
+.env*.local
