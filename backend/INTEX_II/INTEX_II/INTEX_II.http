@@ -1,6 +1,0 @@
-@INTEX_II_HostAddress = http://localhost:5229
-
-GET {{INTEX_II_HostAddress}}/weatherforecast/
-Accept: application/json
-
-###
