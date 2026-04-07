@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 
 const API = 'http://localhost:5229/api/reports';
 const MONTH_NAMES = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
@@ -108,6 +109,10 @@ export default function ReportsAnalytics() {
             <span className="material-symbols-outlined text-[16px]">download</span>
             Export PDF
           </button>
+          <Link to="/" className="flex items-center gap-2 text-on-surface-variant text-xs font-semibold px-4 py-2.5 rounded-xl hover:bg-surface-container-low transition-colors">
+            <span className="material-symbols-outlined text-[16px]">arrow_back</span>
+            Back to Home
+          </Link>
         </div>
       </div>
 
