@@ -20,6 +20,7 @@ import AdminReportsAnalytics from './pages/admin/ReportsAnalytics.tsx';
 // Page Elements
 import NavBar from './components/NavBar.tsx';
 import Footer from './components/Footer.tsx';
+import CookieBanner from './components/CookieBanner.tsx';
 
 const DASHBOARD_PATHS = ['/donor-dashboard', '/admin-dashboard', '/admin-donors-contributions', '/admin-caseload-inventory', '/admin-process-recording', '/admin-home-visitation-case-conference', '/admin-reports-analytics'];
 
@@ -46,6 +47,7 @@ function Layout() {
         </Routes>
       </div>
       {!isDashboard && <Footer />}
+      <CookieBanner />
     </>
   );
 }

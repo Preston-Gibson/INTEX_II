@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import ImpactPage from './ImpactPage';
 import GivingPage from './GivingPage';
 import SettingsPage from './SettingsPage';
@@ -67,7 +68,7 @@ export default function DonorDashboard() {
 
   return (
     <div className="flex h-screen bg-surface overflow-hidden font-body">
-      <aside className="w-56 flex-shrink-0 flex flex-col bg-surface-container-lowest border-r border-outline-variant/20 py-6 px-4">
+      <aside className="w-56 flex-shrink-0 flex flex-col bg-surface-container-lowest border-r border-outline-variant/20 py-6 px-4 relative z-10">
         <div className="mb-8 px-2">
           <p className="text-primary font-manrope font-extrabold text-lg leading-tight">Guardian Portal</p>
           <p className="text-on-surface-variant text-[10px] font-bold uppercase tracking-widest mt-0.5">Donor Command Center</p>
@@ -88,9 +89,13 @@ export default function DonorDashboard() {
             </button>
           ))}
         </nav>
-        <button className="w-full aurora-gradient text-white text-sm font-bold py-3 rounded-xl hover:opacity-90 transition-opacity">
+        <button className="w-full aurora-gradient text-white text-sm font-bold py-3 rounded-xl hover:opacity-90 transition-opacity mb-2">
           Donate Now
         </button>
+        <Link to="/" className="w-full flex items-center justify-center gap-2 text-on-surface-variant text-xs font-semibold py-2 rounded-xl hover:bg-surface-container-low transition-colors">
+          <span className="material-symbols-outlined text-[16px]">arrow_back</span>
+          Back to Home
+        </Link>
       </aside>
 
       <div className="flex-1 flex flex-col overflow-hidden">
