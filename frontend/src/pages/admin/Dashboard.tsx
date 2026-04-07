@@ -72,8 +72,8 @@ const ACTIVITY_CFG = {
 
 // ─── Skeleton ─────────────────────────────────────────────────────────────────
 
-function Skeleton({ className = '' }: { className?: string }) {
-  return <div className={`animate-pulse bg-surface-container-high rounded-lg ${className}`} />;
+function Skeleton({ className = '', style }: { className?: string; style?: React.CSSProperties }) {
+  return <div className={`animate-pulse bg-surface-container-high rounded-lg ${className}`} style={style} />;
 }
 
 // ─── Component ────────────────────────────────────────────────────────────────
