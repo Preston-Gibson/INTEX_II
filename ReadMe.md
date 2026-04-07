@@ -50,6 +50,31 @@ dotnet run
 ```
 Wait for all 17 `[Seeder] Inserted...` lines, then stop the app and set `SeedOnStartup` back to `false`.
 
+#### Option C: Force reseed (after updating CSVs)
+
+If the CSV files have been updated and the database needs to reflect the new data, use `ForceReseed` instead of manually clearing tables:
+
+In `appsettings.Development.json`:
+```json
+"DataSeeding": {
+  "CsvDataPath": "../../../pipeline/data",
+  "SeedOnStartup": true,
+  "ForceReseed": true
+}
+```
+
+Then run the app:
+```bash
+dotnet run
+```
+
+This will:
+1. Truncate all 17 seeded tables (`RESTART IDENTITY CASCADE`) — FK constraints are handled automatically.
+2. Re-insert all records from the updated CSVs in the correct dependency order.
+3. Leave Identity/auth tables (`AspNetUsers`, roles, etc.) untouched.
+
+After the reseed completes, set `ForceReseed` back to `false` to prevent wiping data on every restart.
+
 #### Configure the connection string (both options)
 
 Open `backend/INTEX_II/INTEX_II/appsettings.Development.json` and fill in your credentials:
@@ -79,11 +104,11 @@ dotnet ef database update
 
 **2. Seed from CSV files:**
 
-In `appsettings.Development.json` set `SeedOnStartup: true`, then run the app:
+In `appsettings.Development.json` set `SeedOnStartup: true` and `ForceReseed: true` (to ensure clean state), then run the app:
 ```bash
 dotnet run
 ```
-Wait for all 17 `[Seeder] Inserted...` lines in the console, stop the app, and set `SeedOnStartup` back to `false`.
+Wait for all 17 `[Seeder] Inserted...` lines in the console, stop the app, and set both `SeedOnStartup` and `ForceReseed` back to `false`.
 
 **3. Create the new snapshot:**
 ```bash
@@ -176,6 +201,6 @@ Check that PostgreSQL is running and the credentials in `appsettings.Development
 Verify `CsvDataPath` in `appsettings.Development.json` is `../../../pipeline/data`.
 
 **Seeder prints "data already exists" for every table** *(maintainers only)*
-The database was already seeded. Set `SeedOnStartup: false`.
+The database was already seeded. Set `SeedOnStartup: false`. If you need to re-seed after updating CSVs, use `ForceReseed: true` (see Option C above).
 
 ## Deployment

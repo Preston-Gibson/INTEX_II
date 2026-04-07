@@ -9,8 +9,35 @@ namespace INTEX_II.Data;
 
 public static class DbSeeder
 {
-    public static async Task SeedAsync(AppDbContext db, string csvDataPath)
+    public static async Task SeedAsync(AppDbContext db, string csvDataPath, bool forceReseed = false)
     {
+        if (forceReseed)
+        {
+            Console.WriteLine("[Seeder] ForceReseed enabled — clearing all seeded tables...");
+            await db.Database.ExecuteSqlRawAsync(@"
+                TRUNCATE TABLE
+                    public_impact_snapshots,
+                    partner_assignments,
+                    safehouse_monthly_metrics,
+                    intervention_plans,
+                    incident_reports,
+                    education_records,
+                    health_wellbeing_records,
+                    home_visitations,
+                    process_recordings,
+                    in_kind_donation_items,
+                    donation_allocations,
+                    donations,
+                    social_media_posts,
+                    residents,
+                    partners,
+                    supporters,
+                    safehouses
+                RESTART IDENTITY CASCADE;
+            ");
+            Console.WriteLine("[Seeder] All seeded tables cleared.");
+        }
+
         var config = new CsvConfiguration(CultureInfo.InvariantCulture)
         {
             HeaderValidated = null,
