@@ -1,6 +1,6 @@
 export default function HomeVisitationCaseConference () {
   return (
-    <div className="pt-28 px-6">
+    <div className="px-6">
       <p>Admin Home Visitation Case Conference Works</p>
     </div>
   )

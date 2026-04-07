@@ -2,7 +2,6 @@ import { MapContainer, TileLayer, Marker, Popup, CircleMarker } from 'react-leaf
 import { Icon } from 'leaflet'
 import 'leaflet/dist/leaflet.css'
 
-// Fix default marker icon broken by Vite's asset pipeline
 import markerIcon2x from 'leaflet/dist/images/marker-icon-2x.png'
 import markerIcon from 'leaflet/dist/images/marker-icon.png'
 import markerShadow from 'leaflet/dist/images/marker-shadow.png'
@@ -54,19 +53,23 @@ const locations = [
 
 export default function MapSection() {
   return (
-    <section className="map-section">
-      <div className="container">
-        <div className="map-header">
-          <span className="section-eyebrow">Our Reach</span>
-          <h2>Where We Serve</h2>
-          <p>
+    <section className="bg-surface-container-low py-24">
+      <div className="max-w-7xl mx-auto px-6">
+        <div className="mb-12">
+          <span className="inline-block text-[0.72rem] font-extrabold tracking-[0.12em] uppercase text-secondary mb-3">
+            Our Reach
+          </span>
+          <h2 className="font-manrope text-[clamp(1.9rem,3vw,2.5rem)] font-extrabold text-primary mb-3">
+            Where We Serve
+          </h2>
+          <p className="text-[1.02rem] leading-[1.75] text-on-surface-variant max-w-[560px]">
             Operating across Central America, Lucera maintains safe houses, legal
             offices, and partner networks to reach the most vulnerable children.
           </p>
         </div>
 
-        <div className="map-layout">
-          <div className="map-wrap">
+        <div className="grid grid-cols-[1fr_320px] gap-10 items-start">
+          <div className="h-[480px] rounded-[2rem] overflow-hidden shadow-[0_4px_24px_rgba(0,0,0,0.08)]">
             <MapContainer
               center={[14.5, -87.5]}
               zoom={6}
@@ -77,7 +80,6 @@ export default function MapSection() {
                 attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
                 url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
               />
-
               {locations.map((loc) =>
                 loc.primary ? (
                   <Marker key={loc.name} position={loc.position} icon={defaultIcon}>
@@ -105,34 +107,44 @@ export default function MapSection() {
             </MapContainer>
           </div>
 
-          <div className="map-legend">
-            <h3>Presence by Country</h3>
+          <div>
+            <h3 className="font-manrope text-[1.1rem] font-bold text-on-surface mb-5">
+              Presence by Country
+            </h3>
 
-            <div className="map-stat-cards">
-              <div className="map-stat-card map-stat-card--primary">
-                <span className="map-stat-number">65%</span>
-                <span className="map-stat-label">Honduras</span>
+            <div className="flex flex-col gap-3 mb-8">
+              <div className="flex items-center gap-4 px-5 py-4 rounded-[2rem] bg-surface-container-lowest shadow-sm">
+                <span className="font-manrope text-[1.6rem] font-extrabold tracking-tight leading-none text-primary min-w-[3.5rem]">
+                  65%
+                </span>
+                <span className="text-[0.88rem] font-semibold text-on-surface-variant">Honduras</span>
               </div>
-              <div className="map-stat-card map-stat-card--secondary">
-                <span className="map-stat-number">20%</span>
-                <span className="map-stat-label">Guatemala</span>
+              <div className="flex items-center gap-4 px-5 py-4 rounded-[2rem] bg-surface-container-lowest shadow-sm">
+                <span className="font-manrope text-[1.6rem] font-extrabold tracking-tight leading-none text-secondary min-w-[3.5rem]">
+                  20%
+                </span>
+                <span className="text-[0.88rem] font-semibold text-on-surface-variant">Guatemala</span>
               </div>
-              <div className="map-stat-card map-stat-card--muted">
-                <span className="map-stat-number">15%</span>
-                <span className="map-stat-label">El Salvador &amp; Others</span>
+              <div className="flex items-center gap-4 px-5 py-4 rounded-[2rem] bg-surface-container-lowest shadow-sm">
+                <span className="font-manrope text-[1.6rem] font-extrabold tracking-tight leading-none text-outline min-w-[3.5rem]">
+                  15%
+                </span>
+                <span className="text-[0.88rem] font-semibold text-on-surface-variant">
+                  El Salvador &amp; Others
+                </span>
               </div>
             </div>
 
-            <div className="map-location-list">
+            <div className="flex flex-col gap-4">
               {locations.map((loc) => (
-                <div key={loc.name} className="map-location-item">
+                <div key={loc.name} className="flex items-start gap-3">
                   <span
-                    className="map-location-dot"
+                    className="w-2.5 h-2.5 rounded-full flex-shrink-0 mt-[0.35rem]"
                     style={{ background: loc.color }}
                   />
                   <div>
-                    <strong>{loc.name}</strong>
-                    <span>{loc.description}</span>
+                    <strong className="block text-[0.9rem] font-bold text-on-surface">{loc.name}</strong>
+                    <span className="text-[0.8rem] text-on-surface-variant">{loc.description}</span>
                   </div>
                 </div>
               ))}
