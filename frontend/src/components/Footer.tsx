@@ -1,3 +1,5 @@
+import { Link } from 'react-router-dom';
+
 export default function Footer() {
   return (
     <footer className="w-full py-12 mt-10 border-t border-slate-700/50 bg-slate-900">
@@ -38,9 +40,9 @@ export default function Footer() {
             <span className="font-manrope text-xs font-bold text-slate-300 uppercase tracking-widest">
               Legal
             </span>
-            <a className="text-slate-400 text-sm hover:text-blue-400 transition-colors" href="#">
+            <Link to="/privacy-policy" className="text-slate-400 text-sm hover:text-blue-400 transition-colors">
               Privacy Policy
-            </a>
+            </Link>
             <a className="text-slate-400 text-sm hover:text-blue-400 transition-colors" href="#">
               Donor Rights
             </a>

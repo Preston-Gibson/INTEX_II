@@ -21,6 +21,7 @@ import AdminReportsAnalytics from './pages/admin/ReportsAnalytics.tsx';
 import NavBar from './components/NavBar.tsx';
 import Footer from './components/Footer.tsx';
 import CookieBanner from './components/CookieBanner.tsx';
+import ScrollToTop from './components/ScrollToTop.tsx';
 
 const DASHBOARD_PATHS = ['/donor-dashboard', '/admin-dashboard', '/admin-donors-contributions', '/admin-caseload-inventory', '/admin-process-recording', '/admin-home-visitation-case-conference', '/admin-reports-analytics'];
 
@@ -30,6 +31,7 @@ function Layout() {
 
   return (
     <>
+      <ScrollToTop />
       {!isDashboard && <NavBar />}
       <div className={!isDashboard ? 'mt-20' : ''}>
         <Routes>
