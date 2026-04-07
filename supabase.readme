@@ -1,0 +1,164 @@
+# Supabase + Vercel Database Setup Guide
+
+This guide covers the exact flow to:
+1. Import seeded data into Supabase Postgres.
+2. Connect the backend and frontend locally.
+3. Deploy with the same DB config in Vercel.
+
+## 1) Prerequisites
+
+- Supabase project created.
+- New/rotated Supabase **database password**.
+- PostgreSQL CLI tools installed (`psql`, `pg_restore`).
+- Seed dump file exists at:
+  `/Users/michaelpeterson/INTEX_II/backend/INTEX_II/INTEX_II/lighthouse_seed.dump`
+
+## 2) Get Supabase Connection Values
+
+In Supabase dashboard:
+- Open your project.
+- Click `Connect`.
+- Choose `Direct` tab.
+- Select `Transaction pooler`.
+- Turn on `Use IPv4 connection (Shared Pooler)`.
+- Set `Type` to `URI`.
+
+Copy the URI format (example):
+
+```text
+postgresql://postgres.<project-ref>:<db-password>@aws-1-us-east-1.pooler.supabase.com:6543/postgres
+```
+
+## 3) Import Seeded Dump Into Supabase
+
+Use `pg_restore` (the dump is custom format `PGDM`):
+
+```bash
+pg_restore --verbose --clean --if-exists --no-owner --no-privileges \
+  --dbname "postgresql://postgres.<project-ref>:<db-password>@aws-1-us-east-1.pooler.supabase.com:6543/postgres?sslmode=require" \
+  /Users/michaelpeterson/INTEX_II/backend/INTEX_II/INTEX_II/lighthouse_seed.dump
+```
+
+If URI parsing gives shell issues, use explicit flags instead:
+
+```bash
+pg_restore --verbose --clean --if-exists --no-owner --no-privileges \
+  -h aws-1-us-east-1.pooler.supabase.com \
+  -p 6543 \
+  -U postgres.<project-ref> \
+  -d postgres \
+  -W \
+  /Users/michaelpeterson/INTEX_II/backend/INTEX_II/INTEX_II/lighthouse_seed.dump
+```
+
+## 4) Verify Data Was Imported
+
+In Supabase SQL Editor, run:
+
+```sql
+select table_name
+from information_schema.tables
+where table_schema = 'public'
+order by table_name;
+```
+
+```sql
+select count(*) from public.donations;
+```
+
+Check additional known tables as needed.
+
+## 5) Backend Configuration (.NET API)
+
+Do not commit real passwords in `appsettings.json`.
+
+Use a placeholder in:
+- `backend/INTEX_II/INTEX_II/appsettings.json`
+- `backend/INTEX_II/INTEX_II/appsettings.Development.json`
+
+Example placeholder connection:
+
+```text
+Host=aws-1-us-east-1.pooler.supabase.com;Port=6543;Database=postgres;Username=postgres.<project-ref>;Password=REPLACE_ME;SSL Mode=Require
+```
+
+### Local backend env var
+
+Set the real value via env var:
+
+```bash
+export ConnectionStrings__DefaultConnection="Host=aws-1-us-east-1.pooler.supabase.com;Port=6543;Database=postgres;Username=postgres.<project-ref>;Password=<db-password>;SSL Mode=Require"
+```
+
+Then run backend:
+
+```bash
+cd /Users/michaelpeterson/INTEX_II/backend/INTEX_II/INTEX_II
+dotnet run
+```
+
+## 6) Frontend Configuration (Vite)
+
+Create/update:
+`/Users/michaelpeterson/INTEX_II/frontend/.env`
+
+```env
+VITE_SUPABASE_URL=https://<project-ref>.supabase.co
+VITE_SUPABASE_PUBLISHABLE_DEFAULT_KEY=<sb_publishable_key>
+```
+
+Client file:
+`/Users/michaelpeterson/INTEX_II/frontend/src/utils/supabase.ts`
+
+```ts
+import { createClient } from '@supabase/supabase-js';
+
+export const supabase = createClient(
+  import.meta.env.VITE_SUPABASE_URL,
+  import.meta.env.VITE_SUPABASE_PUBLISHABLE_DEFAULT_KEY
+);
+```
+
+Restart frontend dev server after `.env` changes.
+
+## 7) Deploy to Vercel
+
+When creating Vercel project:
+- Use a lowercase project name (`intex`, `intex-ii`, etc.).
+- If deploying frontend app, set Root Directory to `frontend`.
+
+In Vercel `Settings -> Environment Variables`, add:
+- `ConnectionStrings__DefaultConnection`
+- `VITE_SUPABASE_URL`
+- `VITE_SUPABASE_PUBLISHABLE_DEFAULT_KEY`
+
+Redeploy after adding env vars.
+
+## 8) Production Validation Checklist
+
+- Open deployed URL.
+- Test key read paths (dashboard/list endpoints).
+- Test at least one write path if applicable.
+- Check Vercel runtime logs for DB connection errors.
+- Check Supabase logs for auth/connection/query errors.
+
+## 9) Common Errors
+
+- `zsh: no matches found ... ?sslmode=require`
+  - Wrap connection URI in double quotes.
+
+- `Network is unreachable`
+  - Use `Transaction pooler` + `IPv4 shared pooler` host.
+
+- `No such file or directory` on dump
+  - Use full correct path:
+    `/Users/michaelpeterson/INTEX_II/backend/INTEX_II/INTEX_II/lighthouse_seed.dump`
+
+- SQL query typed in terminal (`zsh`) fails
+  - Run SQL in Supabase SQL Editor or via `psql`, not directly in shell.
+
+## 10) Security Notes
+
+- Rotate DB password if it was exposed.
+- Never commit real DB passwords to git.
+- Frontend must only use publishable key, never service role key.
