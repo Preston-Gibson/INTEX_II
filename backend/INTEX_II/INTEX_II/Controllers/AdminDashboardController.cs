@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace INTEX_II.Controllers;
 
-[Authorize]
+//[Authorize]
 [ApiController]
 [Route("api/admin-dashboard")]
 public class AdminDashboardController : ControllerBase
