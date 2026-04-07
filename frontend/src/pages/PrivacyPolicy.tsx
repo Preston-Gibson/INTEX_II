@@ -2,7 +2,7 @@ const SECTIONS = [
   {
     id: 'who-we-are',
     title: '1. Who We Are',
-    content: `Lucero ("we," "us," or "our") is a registered 501(c)(3) non-profit organization providing sanctuary, education, and rehabilitation services to vulnerable children in Central America. Our registered address is available upon request.
+    content: `Lucera ("we," "us," or "our") is a registered 501(c)(3) non-profit organization providing sanctuary, education, and rehabilitation services to vulnerable children in Central America. Our registered address is available upon request.
 
 For questions about this Privacy Policy or your personal data, contact our Data Protection Officer at: privacy@lucero.org`,
   },
@@ -128,7 +128,7 @@ The "Last Updated" date at the top of this page will always reflect the most rec
     content: `For any privacy-related questions, requests, or complaints, please contact our Data Protection Officer:
 
 **Email:** privacy@lucero.org
-**Mailing Address:** Lucero — Data Protection Officer, [Address on request]
+**Mailing Address:** Lucera — Data Protection Officer, [Address on request]
 
 We aim to respond to all inquiries within 30 days. If you are not satisfied with our response, you have the right to escalate your complaint to your national data protection authority.`,
   },
@@ -147,7 +147,7 @@ export default function PrivacyPolicy() {
             Privacy Policy
           </h1>
           <p className="text-on-surface-variant text-sm leading-relaxed max-w-2xl mb-3">
-            At Lucero, we are committed to protecting your personal data and respecting your privacy. This policy explains how we collect, use, and safeguard your information in accordance with the General Data Protection Regulation (GDPR), UK GDPR, and applicable U.S. privacy laws.
+            At Lucera, we are committed to protecting your personal data and respecting your privacy. This policy explains how we collect, use, and safeguard your information in accordance with the General Data Protection Regulation (GDPR), UK GDPR, and applicable U.S. privacy laws.
           </p>
           <p className="text-xs text-on-surface-variant">
             <span className="font-bold">Last Updated:</span> April 7, 2026 &nbsp;·&nbsp;

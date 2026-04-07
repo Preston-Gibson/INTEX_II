@@ -13,7 +13,7 @@ export default function NavBar() {
     <nav className="fixed top-0 w-full z-50 bg-white/90 backdrop-blur-xl shadow-sm border-b border-slate-200/60">
       <div className="flex justify-between items-center max-w-7xl mx-auto px-6 h-20">
         <NavLink to="/" className="text-2xl font-bold text-primary dark:text-white">
-          Lucero
+          Lucera
         </NavLink>
 
         <div className="hidden md:flex items-center gap-8 font-manrope text-sm font-semibold tracking-tight">

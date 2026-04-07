@@ -20,7 +20,7 @@ const stories = [
     tagBg: 'bg-tertiary-fixed text-on-tertiary-fixed',
     tagText: 'Case Highlight: Literacy',
     title: "Mateo's First Chapter",
-    quote: 'Mateo arrived at Lucero with no formal schooling. In just 18 months, he is reading at grade level and leading our weekly youth council meetings.',
+    quote: 'Mateo arrived at Lucera with no formal schooling. In just 18 months, he is reading at grade level and leading our weekly youth council meetings.',
     programValue: 'Accelerated Literacy',
     metaLabel: 'Age',
     metaValue: '9 Years Old',

@@ -6,10 +6,10 @@ export default function Footer() {
       <div className="max-w-7xl mx-auto px-6 flex flex-col md:flex-row justify-between">
         <div className="mb-8 md:mb-0">
           <div className="text-lg font-bold text-white mb-4">
-            Lucero
+            Lucera
           </div>
           <p className="text-slate-400 font-inter text-sm leading-relaxed max-w-xs">
-            © 2024 Lucero. Dedicated to the children of Central America.
+            © 2024 Lucera. Dedicated to the children of Central America.
             Providing safety, education, and hope.
           </p>
         </div>
