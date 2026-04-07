@@ -10,7 +10,7 @@ export default function ImpactStatsGrid() {
   const [stats, setStats] = useState<Stats | null>(null)
 
   useEffect(() => {
-    fetch('http://localhost:5229/api/impact/stats')
+    fetch(`${import.meta.env.VITE_API_URL ?? 'http://localhost:5229'}/api/impact/stats`)
       .then(r => r.json())
       .then(setStats)
       .catch(() => {})

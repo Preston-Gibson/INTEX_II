@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 
-const API = 'http://localhost:5229/api/reports';
+const API = `${import.meta.env.VITE_API_URL ?? 'http://localhost:5229'}/api/reports`;
 const MONTH_NAMES = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
 
 // --- Types ---

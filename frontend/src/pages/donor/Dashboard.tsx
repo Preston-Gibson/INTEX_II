@@ -4,7 +4,7 @@ import ImpactPage from './ImpactPage';
 import GivingPage from './GivingPage';
 import SettingsPage from './SettingsPage';
 
-const API = 'http://localhost:5229/api/donor-dashboard';
+const API = `${import.meta.env.VITE_API_URL ?? 'http://localhost:5229'}/api/donor-dashboard`;
 
 const NAV_ITEMS = [
   { label: 'Overview', icon: 'dashboard' },

@@ -41,12 +41,12 @@ export default function MapSection() {
   const [origins, setOrigins] = useState<ResidentOrigin[]>([])
 
   useEffect(() => {
-    fetch('http://localhost:5229/api/impact/safehouse-locations')
+    fetch(`${import.meta.env.VITE_API_URL ?? 'http://localhost:5229'}/api/impact/safehouse-locations`)
       .then(r => r.json())
       .then(setSafehouses)
       .catch(() => {})
 
-    fetch('http://localhost:5229/api/impact/resident-origins')
+    fetch(`${import.meta.env.VITE_API_URL ?? 'http://localhost:5229'}/api/impact/resident-origins`)
       .then(r => r.json())
       .then(setOrigins)
       .catch(() => {})

@@ -35,7 +35,7 @@ export default function TransparencySection() {
   const [allocations, setAllocations] = useState<Allocation[]>([])
 
   useEffect(() => {
-    fetch('http://localhost:5229/api/impact/donation-allocation')
+    fetch(`${import.meta.env.VITE_API_URL ?? 'http://localhost:5229'}/api/impact/donation-allocation`)
       .then(r => r.json())
       .then((data: Allocation[]) => {
         setAllocations(data.length > 0 ? data : FALLBACK)

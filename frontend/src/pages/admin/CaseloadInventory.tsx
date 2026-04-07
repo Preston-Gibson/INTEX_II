@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 
-const API = 'http://localhost:5229/api/residents';
+const API = `${import.meta.env.VITE_API_URL ?? 'http://localhost:5229'}/api/residents`;
 
 const ADMIN_NAV = [
   { label: 'Dashboard',              icon: 'dashboard',          to: '/admin-dashboard' },
