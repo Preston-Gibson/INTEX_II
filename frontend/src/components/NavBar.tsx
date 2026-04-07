@@ -20,8 +20,6 @@ export default function NavBar() {
           {/* Public */}
           <NavLink to="/" end className={navClass}>Our Mission</NavLink>
           <NavLink to="/impact" className={navClass}>Impact</NavLink>
-          <NavLink to="/privacy-policy" className={navClass}>Privacy Policy</NavLink>
-
           {/* Donor */}
           <NavLink to="/donor-dashboard" className={navClass}>Donor Dashboard</NavLink>
 

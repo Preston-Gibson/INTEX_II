@@ -69,13 +69,14 @@ using (var scope = app.Services.CreateScope())
 
     // Optionally seed CSV data on startup (set SeedOnStartup: true in appsettings)
     var seedOnStartup = builder.Configuration.GetValue<bool>("DataSeeding:SeedOnStartup");
-    if (seedOnStartup)
+    var forceReseed = builder.Configuration.GetValue<bool>("DataSeeding:ForceReseed");
+    if (seedOnStartup || forceReseed)
     {
         var csvPath = builder.Configuration["DataSeeding:CsvDataPath"] ?? string.Empty;
         if (!Path.IsPathRooted(csvPath))
             csvPath = Path.Combine(app.Environment.ContentRootPath, csvPath);
 
-        await DbSeeder.SeedAsync(db, csvPath);
+        await DbSeeder.SeedAsync(db, csvPath, forceReseed);
     }
 }
 
