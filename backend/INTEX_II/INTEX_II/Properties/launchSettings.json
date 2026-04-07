@@ -7,7 +7,8 @@
       "launchBrowser": false,
       "applicationUrl": "http://localhost:5229",
       "environmentVariables": {
-        "ASPNETCORE_ENVIRONMENT": "Development"
+        "ASPNETCORE_ENVIRONMENT": "Development",
+        "ConnectionStrings__DefaultConnection": "Host=aws-1-us-east-1.pooler.supabase.com;Port=6543;Database=postgres;Username=postgres.yddofeuzfmkyyoympexw;Password=REPLACE_WITH_SUPABASE_DB_PASSWORD;SSL Mode=Require;Trust Server Certificate=true"
       }
     },
     "https": {
@@ -16,7 +17,8 @@
       "launchBrowser": false,
       "applicationUrl": "https://localhost:7223;http://localhost:5229",
       "environmentVariables": {
-        "ASPNETCORE_ENVIRONMENT": "Development"
+        "ASPNETCORE_ENVIRONMENT": "Development",
+        "ConnectionStrings__DefaultConnection": "Host=aws-1-us-east-1.pooler.supabase.com;Port=6543;Database=postgres;Username=postgres.yddofeuzfmkyyoympexw;Password=REPLACE_WITH_SUPABASE_DB_PASSWORD;SSL Mode=Require;Trust Server Certificate=true"
       }
     }
   }

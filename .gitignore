@@ -14,3 +14,6 @@ obj/
 # Environment
 .env
 .env*.local
+
+# ASP.NET secrets
+appsettings.Development.json
