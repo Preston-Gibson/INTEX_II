@@ -1,9 +1,11 @@
 using INTEX_II.Data;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
 namespace INTEX_II.Controllers;
 
+[Authorize]
 [ApiController]
 [Route("api/donor-dashboard")]
 public class DonorDashboardController : ControllerBase
@@ -17,6 +19,7 @@ public class DonorDashboardController : ControllerBase
 
     // GET /api/donor-dashboard/stats
     // Returns the three top-level stat cards: residents served, reintegrations, education hours
+
     [HttpGet("stats")]
     public async Task<IActionResult> GetStats()
     {
