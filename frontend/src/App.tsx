@@ -1,4 +1,5 @@
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom';
+
 // General Pages
 import Home from './pages/Home.tsx';
 import Login from './pages/Login.tsx';
@@ -19,27 +20,44 @@ import AdminReportsAnalytics from './pages/admin/ReportsAnalytics.tsx';
 // Page Elements
 import NavBar from './components/NavBar.tsx';
 import Footer from './components/Footer.tsx';
+import CookieBanner from './components/CookieBanner.tsx';
+import ScrollToTop from './components/ScrollToTop.tsx';
+
+const DASHBOARD_PATHS = ['/donor-dashboard', '/admin-dashboard', '/admin-donors-contributions', '/admin-caseload-inventory', '/admin-process-recording', '/admin-home-visitation-case-conference', '/admin-reports-analytics'];
+
+function Layout() {
+  const location = useLocation();
+  const isDashboard = DASHBOARD_PATHS.includes(location.pathname);
+
+  return (
+    <>
+      <ScrollToTop />
+      {!isDashboard && <NavBar />}
+      <div className={!isDashboard ? 'mt-20' : ''}>
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/impact" element={<Impact />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+          <Route path="/donor-dashboard" element={<DonorDashboard />} />
+          <Route path="/admin-dashboard" element={<AdminDashboard />} />
+          <Route path="/admin-donors-contributions" element={<AdminDonorsContributions />} />
+          <Route path="/admin-caseload-inventory" element={<AdminCaseloadInventory />} />
+          <Route path="/admin-process-recording" element={<AdminProcessRecording />} />
+          <Route path="/admin-home-visitation-case-conference" element={<AdminHomeVisitationCaseConference />} />
+          <Route path="/admin-reports-analytics" element={<AdminReportsAnalytics />} />
+        </Routes>
+      </div>
+      {!isDashboard && <Footer />}
+      <CookieBanner />
+    </>
+  );
+}
 
 function App() {
   return (
     <BrowserRouter>
-      <NavBar />
-      <div className="mt-20">
-      <Routes>
-        <Route path="/" element={<Home />} />
-        <Route path="/impact" element={<Impact />} />
-        <Route path="/login" element={<Login />} />
-        <Route path="/privacy-policy" element={<PrivacyPolicy />} />
-        <Route path="/donor-dashboard" element={<DonorDashboard />} />
-        <Route path="/admin-dashboard" element={<AdminDashboard />} />
-        <Route path="/admin-donors-contributions" element={<AdminDonorsContributions />} />
-        <Route path="/admin-caseload-inventory" element={<AdminCaseloadInventory />} />
-        <Route path="/admin-process-recording" element={<AdminProcessRecording />} />
-        <Route path="/admin-home-visitation-case-conference" element={<AdminHomeVisitationCaseConference />} />
-        <Route path="/admin-reports-analytics" element={<AdminReportsAnalytics />} />
-      </Routes>
-      </div>
-      <Footer />
+      <Layout />
     </BrowserRouter>
   );
 }
