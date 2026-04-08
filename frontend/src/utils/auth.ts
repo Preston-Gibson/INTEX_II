@@ -14,6 +14,7 @@ export function clearToken() {
 
 export function isLoggedIn(): boolean {
   return !!sessionStorage.getItem(TOKEN_KEY);
+}
 
 export function isAuthenticated(): boolean {
   return !!getToken();
