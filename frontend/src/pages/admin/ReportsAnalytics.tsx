@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import AdminSidebar from '../../components/AdminSidebar';
-import { authHeaders } from '../../utils/auth';
+import { authHeaders, downloadExport } from '../../utils/auth';
 
 const API = `${import.meta.env.VITE_API_URL ?? 'http://localhost:5229'}/api/reports`;
 const MONTH_NAMES = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
@@ -109,9 +109,11 @@ export default function ReportsAnalytics() {
               </button>
             ))}
           </div>
-          <button className="flex items-center gap-2 bg-surface-container-low text-on-surface text-xs font-bold px-4 py-2.5 rounded-xl hover:bg-surface-container transition-colors">
+          <button
+            onClick={() => downloadExport('/api/export/donations', 'csv', year)}
+            className="flex items-center gap-2 bg-surface-container-low text-on-surface text-xs font-bold px-4 py-2.5 rounded-xl hover:bg-surface-container transition-colors">
             <span className="material-symbols-outlined text-[16px]">download</span>
-            Export PDF
+            Export CSV
           </button>
         </div>
       </div>
@@ -368,7 +370,9 @@ export default function ReportsAnalytics() {
                   <p className="text-sm font-bold mb-0.5">Annual Report Ready for Export</p>
                   <p className="text-white/60 text-xs">Includes all service pillars, beneficiary counts, and program outcomes.</p>
                 </div>
-                <button className="flex items-center gap-2 bg-white text-primary font-bold px-5 py-2.5 rounded-xl text-sm hover:opacity-90 transition-opacity flex-shrink-0">
+                <button
+                  onClick={() => downloadExport('/api/export/tax-report', 'xlsx', year)}
+                  className="flex items-center gap-2 bg-white text-primary font-bold px-5 py-2.5 rounded-xl text-sm hover:opacity-90 transition-opacity flex-shrink-0">
                   <span className="material-symbols-outlined text-[16px]">download</span>
                   Download Report
                 </button>
