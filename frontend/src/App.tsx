@@ -20,6 +20,7 @@ import AdminReportsAnalytics from './pages/admin/ReportsAnalytics.tsx';
 
 // Page Elements
 import NavBar from './components/NavBar.tsx';
+import CrisisHotlineBanner from './components/CrisisHotlineBanner.tsx';
 import Footer from './components/Footer.tsx';
 import CookieBanner from './components/CookieBanner.tsx';
 import ScrollToTop from './components/ScrollToTop.tsx';
@@ -36,8 +37,9 @@ function Layout() {
   return (
     <>
       <ScrollToTop />
+      {!isDashboard && !isNoChrome && <CrisisHotlineBanner />}
       {!isDashboard && !isNoChrome && <NavBar />}
-      <div className={!isDashboard && !isNoChrome ? 'mt-20' : ''}>
+      <div className={!isDashboard && !isNoChrome ? 'mt-[7.25rem]' : ''}>
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/impact" element={<Impact />} />
