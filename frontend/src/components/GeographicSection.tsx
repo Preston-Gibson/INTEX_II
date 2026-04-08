@@ -38,11 +38,12 @@ interface SafehouseLocation {
 }
 
 const DOT_COLORS: Record<string, string> = {
-  Honduras: 'bg-primary',
-  Guatemala: 'bg-secondary',
-  'El Salvador': 'bg-tertiary-fixed-dim',
-  Nicaragua: 'bg-outline-variant',
-  'Costa Rica': 'bg-error',
+  Honduras:      'bg-[#1565C0]',
+  'El Salvador': 'bg-[#E53935]',
+  Guatemala:     'bg-[#2E7D32]',
+  Panama:        'bg-[#F9A825]',
+  Nicaragua:     'bg-[#9E9E9E]',
+  'Costa Rica':  'bg-[#C62828]',
 }
 
 export default function GeographicSection() {
@@ -103,7 +104,7 @@ export default function GeographicSection() {
         <div className="mt-6 flex flex-wrap gap-4 text-sm font-medium text-on-surface-variant">
           {geoDisplay.map(({ country, percentage }, i) => (
             <div key={country} className="flex items-center gap-2">
-              <span className={`w-3 h-3 rounded-full ${DOT_COLORS[country] ?? (i === 0 ? 'bg-primary' : i === 1 ? 'bg-secondary' : 'bg-tertiary-fixed-dim')}`} />
+              <span className={`w-3 h-3 rounded-full ${DOT_COLORS[country] ?? ['bg-[#1565C0]','bg-[#E53935]','bg-[#2E7D32]','bg-[#F9A825]','bg-[#9E9E9E]','bg-[#C62828]'][i % 6]}`} />
               {country} ({percentage}%)
             </div>
           ))}
