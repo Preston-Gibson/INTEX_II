@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import AdminSidebar from '../../components/AdminSidebar';
+import UserAvatar from '../../components/UserAvatar';
 import { authHeaders, downloadExport } from '../../utils/auth';
 
 const API = `${import.meta.env.VITE_API_URL ?? 'http://localhost:5229'}/api/reports`;
@@ -115,6 +116,7 @@ export default function ReportsAnalytics() {
             <span className="material-symbols-outlined text-[16px]">download</span>
             Export CSV
           </button>
+          <UserAvatar />
         </div>
       </div>
 
