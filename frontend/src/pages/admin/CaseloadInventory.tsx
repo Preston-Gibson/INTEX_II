@@ -169,6 +169,9 @@ export default function CaseloadInventory() {
   const [formLoading, setFormLoading] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
 
+  const [caseToClose, setCaseToClose] = useState<ResidentRow | null>(null);
+  const [closing, setClosing] = useState(false);
+
   // Fetch safehouses once on mount
   useEffect(() => {
     fetch(`${API}/safehouses`, { headers: authHeaders() })
@@ -219,6 +222,28 @@ export default function CaseloadInventory() {
       setFormData(rest);
     } finally {
       setFormLoading(false);
+    }
+  }
+
+  async function handleCloseCase() {
+    if (!caseToClose) return;
+    setClosing(true);
+    try {
+      const detail: ResidentDetail = await fetch(`${API}/${caseToClose.residentId}`, { headers: authHeaders() }).then(r => r.json());
+      const updated = {
+        ...detail,
+        caseStatus: 'Closed',
+        dateClosed: new Date().toISOString().slice(0, 10),
+      };
+      await fetch(`${API}/${caseToClose.residentId}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json', ...authHeaders() },
+        body: JSON.stringify(updated),
+      });
+      setCaseToClose(null);
+      setRefreshKey(k => k + 1);
+    } finally {
+      setClosing(false);
     }
   }
 
@@ -366,13 +391,24 @@ export default function CaseloadInventory() {
                             </span>
                           </td>
                           <td className="px-4 py-3">
-                            <button
-                              onClick={() => openEdit(r.residentId)}
-                              className="flex items-center gap-1 text-primary text-xs font-semibold hover:underline whitespace-nowrap"
-                            >
-                              <span className="material-symbols-outlined text-[15px]">edit</span>
-                              View/Edit
-                            </button>
+                            <div className="flex items-center gap-3">
+                              <button
+                                onClick={() => openEdit(r.residentId)}
+                                className="flex items-center gap-1 text-primary text-xs font-semibold hover:underline whitespace-nowrap"
+                              >
+                                <span className="material-symbols-outlined text-[15px]">edit</span>
+                                View/Edit
+                              </button>
+                              {r.caseStatus !== 'Closed' && (
+                                <button
+                                  onClick={() => setCaseToClose(r)}
+                                  className="flex items-center gap-1 text-on-surface-variant text-xs font-semibold hover:text-error hover:underline whitespace-nowrap transition-colors"
+                                >
+                                  <span className="material-symbols-outlined text-[15px]">folder_off</span>
+                                  Close Case
+                                </button>
+                              )}
+                            </div>
                           </td>
                         </tr>
                       ))}
@@ -730,6 +766,43 @@ export default function CaseloadInventory() {
                   className="aurora-gradient text-white text-sm font-bold px-6 py-2 rounded-xl hover:opacity-90 transition-opacity"
                 >
                   {modalMode === 'add' ? 'Create Resident' : 'Save Changes'}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Close Case confirmation modal */}
+      {caseToClose && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
+          <div className="bg-surface-container-lowest rounded-2xl shadow-xl w-full max-w-sm mx-4">
+            <div className="flex items-center justify-between px-6 pt-6 pb-4 border-b border-outline-variant/20">
+              <h2 className="text-base font-manrope font-bold text-on-surface">Close Case</h2>
+              <button onClick={() => setCaseToClose(null)} className="text-on-surface-variant hover:text-on-surface transition-colors">
+                <span className="material-symbols-outlined text-[20px]">close</span>
+              </button>
+            </div>
+            <div className="px-6 py-5">
+              <p className="text-sm text-on-surface mb-1">
+                Close case <strong>{caseToClose.caseControlNo}</strong>?
+              </p>
+              <p className="text-sm text-on-surface-variant mb-4">
+                The case status will be set to <strong>Closed</strong> and today will be recorded as the close date. This can be reversed by editing the case.
+              </p>
+              <div className="flex justify-end gap-3">
+                <button
+                  onClick={() => setCaseToClose(null)}
+                  className="px-4 py-2 rounded-xl text-sm font-semibold text-on-surface-variant hover:bg-surface-container-low transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleCloseCase}
+                  disabled={closing}
+                  className="px-4 py-2 rounded-xl text-sm font-bold text-white aurora-gradient hover:opacity-90 transition-opacity disabled:opacity-50"
+                >
+                  {closing ? 'Closing…' : 'Close Case'}
                 </button>
               </div>
             </div>
