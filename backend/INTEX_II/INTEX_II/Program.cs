@@ -89,6 +89,8 @@ using (var scope = app.Services.CreateScope())
         if (result.Succeeded)
             await userManager.AddToRoleAsync(admin, "Admin");
     }
+}
+
 if (builder.Configuration.GetValue<bool>("DataSeeding:SeedOnStartup"))
 {
     using var scope = app.Services.CreateScope();
