@@ -1,9 +1,11 @@
 import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom';
+import { AuthProvider } from './context/AuthContext';
 
 // General Pages
 import Home from './pages/Home.tsx';
 import Login from './pages/Login.tsx';
 import Register from "./pages/Register.tsx";
+import OAuthCallback from "./pages/OAuthCallback.tsx";
 import PrivacyPolicy from './pages/PrivacyPolicy.tsx';
 import Impact from './pages/Impact.tsx';
 
@@ -25,7 +27,7 @@ import CookieBanner from './components/CookieBanner.tsx';
 import ScrollToTop from './components/ScrollToTop.tsx';
 
 const DASHBOARD_PATHS = ['/donor-dashboard', '/admin-dashboard', '/admin-donors-contributions', '/admin-caseload-inventory', '/admin-process-recording', '/admin-home-visitation-case-conference', '/admin-reports-analytics'];
-const NO_CHROME_PATHS = ['/login', '/register'];
+const NO_CHROME_PATHS = ['/login', '/register', '/oauth-callback'];
 
 function Layout() {
   const location = useLocation();
@@ -42,6 +44,7 @@ function Layout() {
           <Route path="/impact" element={<Impact />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
+          <Route path="/oauth-callback" element={<OAuthCallback />} />
           <Route path="/privacy-policy" element={<PrivacyPolicy />} />
           <Route path="/donor-dashboard" element={<DonorDashboard />} />
           <Route path="/admin-dashboard" element={<AdminDashboard />} />
@@ -60,9 +63,11 @@ function Layout() {
 
 function App() {
   return (
-    <BrowserRouter>
-      <Layout />
-    </BrowserRouter>
+    <AuthProvider>
+      <BrowserRouter>
+        <Layout />
+      </BrowserRouter>
+    </AuthProvider>
   );
 }
 

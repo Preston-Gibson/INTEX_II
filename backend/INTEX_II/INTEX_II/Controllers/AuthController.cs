@@ -70,6 +70,45 @@ public class AuthController : ControllerBase
 
         return new JwtSecurityTokenHandler().WriteToken(token);
     }
+
+    [HttpGet("external-login")]
+    public IActionResult ExternalLogin([FromQuery] string provider)
+    {
+        var redirectUrl = Url.Action(nameof(ExternalCallback), "Auth");
+        var properties = _signInManager.ConfigureExternalAuthenticationProperties(provider, redirectUrl);
+        return Challenge(properties, provider);
+    }
+    
+    [HttpGet("external-callback")]
+public async Task<IActionResult> ExternalCallback()
+{
+    var info = await _signInManager.GetExternalLoginInfoAsync();
+    var frontendUrl = _config["Frontend:Url"]!;
+    if (info == null) return Redirect($"{frontendUrl}/login?error=oauth_failed");
+
+    var email = info.Principal.FindFirstValue(ClaimTypes.Email);
+    if (email == null) return Redirect($"{frontendUrl}/login?error=no_email");
+
+    // Find or create the user
+    var user = await _userManager.FindByEmailAsync(email);
+    if (user == null)
+    {
+        user = new ApplicationUser
+        {
+            UserName  = email,
+            Email     = email,
+            FirstName = info.Principal.FindFirstValue(ClaimTypes.GivenName) ?? "",
+            LastName  = info.Principal.FindFirstValue(ClaimTypes.Surname)  ?? "",
+        };
+        await _userManager.CreateAsync(user);
+    }
+
+    // Link the provider login to the user (idempotent)
+    await _userManager.AddLoginAsync(user, info);
+
+    var token = GenerateJwtToken(user);
+    return Redirect($"{_config["Frontend:Url"]}/oauth-callback?token={token}");
+}
 }
 
 public record RegisterDto(string Email, string Password, string FirstName, string LastName);
