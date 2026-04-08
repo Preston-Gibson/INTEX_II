@@ -15,5 +15,10 @@ obj/
 .env
 .env*.local
 
+# Python
+.venv/
+__pycache__/
+*.pyc
+
 # ASP.NET secrets
 appsettings.Development.json
