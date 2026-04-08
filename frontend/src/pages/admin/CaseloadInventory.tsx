@@ -275,6 +275,28 @@ export default function CaseloadInventory() {
     }
   }
 
+  function openDelete(resident: ResidentDetail) {
+    setSelectedResident(resident);
+    setFormError(null);
+    setModalMode('delete');
+  }
+
+  async function handleDelete() {
+    if (!selectedResident) return;
+    setFormError(null);
+    try {
+      const res = await fetch(`${API}/${selectedResident.residentId}`, {
+        method: 'DELETE',
+        headers: authHeaders(),
+      });
+      if (!res.ok) { setFormError('Delete failed. Please try again.'); return; }
+      setModalMode(null);
+      setRefreshKey(k => k + 1);
+    } catch {
+      setFormError('Network error. Please try again.');
+    }
+  }
+
   return (
     <div className="flex h-screen bg-surface overflow-hidden font-body">
       <AdminSidebar />
