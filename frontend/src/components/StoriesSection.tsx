@@ -29,7 +29,7 @@ const stories = [
 
 export default function StoriesSection() {
   return (
-    <section className="mb-20">
+    <section>
       <div className="flex justify-between items-end mb-12">
         <div className="max-w-xl">
           <h2 className="text-4xl font-extrabold text-primary mb-4 tracking-tight">
