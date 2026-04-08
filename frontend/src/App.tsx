@@ -3,6 +3,7 @@ import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom';
 // General Pages
 import Home from './pages/Home.tsx';
 import Login from './pages/Login.tsx';
+import Register from "./pages/Register.tsx";
 import PrivacyPolicy from './pages/PrivacyPolicy.tsx';
 import Impact from './pages/Impact.tsx';
 
@@ -25,20 +26,23 @@ import ScrollToTop from './components/ScrollToTop.tsx';
 import ProtectedRoute from './components/ProtectedRoute.tsx';
 
 const DASHBOARD_PATHS = ['/donor-dashboard', '/admin-dashboard', '/admin-donors-contributions', '/admin-caseload-inventory', '/admin-process-recording', '/admin-home-visitation-case-conference', '/admin-reports-analytics'];
+const NO_CHROME_PATHS = ['/login', '/register'];
 
 function Layout() {
   const location = useLocation();
   const isDashboard = DASHBOARD_PATHS.includes(location.pathname);
+  const isNoChrome = NO_CHROME_PATHS.includes(location.pathname);
 
   return (
     <>
       <ScrollToTop />
-      {!isDashboard && <NavBar />}
-      <div className={!isDashboard ? 'mt-20' : ''}>
+      {!isDashboard && !isNoChrome && <NavBar />}
+      <div className={!isDashboard && !isNoChrome ? 'mt-20' : ''}>
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/impact" element={<Impact />} />
           <Route path="/login" element={<Login />} />
+          <Route path="/register" element={<Register />} />
           <Route path="/privacy-policy" element={<PrivacyPolicy />} />
           <Route path="/donor-dashboard" element={<ProtectedRoute requiredRole="Donor"><DonorDashboard /></ProtectedRoute>} />
           <Route path="/admin-dashboard" element={<ProtectedRoute requiredRole="Admin"><AdminDashboard /></ProtectedRoute>} />
