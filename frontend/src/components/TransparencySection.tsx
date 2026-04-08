@@ -7,13 +7,17 @@ interface Allocation {
 
 const AREA_COLORS: Record<string, string> = {
   'Direct Care': 'bg-primary',
-  'Education': 'bg-secondary',
-  'Medical': 'bg-tertiary-fixed-dim',
-  'Operations': 'bg-outline-variant',
-  'Nutrition': 'bg-primary',
-  'Mental Health': 'bg-tertiary-fixed-dim',
-  'Vocational': 'bg-secondary',
-  'Administration': 'bg-outline-variant',
+  'Education': 'bg-[#2196F3]',
+  'Medical': 'bg-[#9C27B0]',
+  'Operations': 'bg-[#FF9800]',
+  'Nutrition': 'bg-[#4CAF50]',
+  'Mental Health': 'bg-[#E91E63]',
+  'Vocational': 'bg-[#00BCD4]',
+  'Administration': 'bg-[#795548]',
+  'Wellbeing': 'bg-[#2196F3]',
+  'Transport': 'bg-[#9C27B0]',
+  'Maintenance': 'bg-[#E91E63]',
+  'Outreach': 'bg-[#4CAF50]',
 }
 
 function colorForArea(area: string): string {
@@ -70,13 +74,6 @@ export default function TransparencySection() {
         ))}
       </div>
 
-      <div className="mt-12 p-6 bg-slate-50 rounded-xl flex items-center gap-4">
-        <span className="material-symbols-outlined text-tertiary-container text-4xl">verified_user</span>
-        <div>
-          <p className="font-bold text-primary text-sm">Platinum Transparency Rating</p>
-          <p className="text-xs text-on-surface-variant">Independently audited by GuideStar 2024</p>
-        </div>
-      </div>
     </div>
   )
 }
