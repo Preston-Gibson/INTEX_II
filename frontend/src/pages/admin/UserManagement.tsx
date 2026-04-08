@@ -15,7 +15,7 @@ interface UserRow {
   roles: string[];
 }
 
-type ModalMode = 'add' | 'edit' | 'role' | 'password' | 'delete' | 'add-role' | null;
+type ModalMode = 'add' | 'edit' | 'role' | 'password' | 'delete' | 'add-role' | 'delete-role' | null;
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
@@ -74,6 +74,9 @@ export default function UserManagement() {
 
   // New role form
   const [newRoleName, setNewRoleName] = useState('');
+
+  // Role to delete
+  const [roleToDelete, setRoleToDelete] = useState<string | null>(null);
 
   const fetchData = useCallback(() => {
     setLoading(true);
@@ -255,12 +258,16 @@ export default function UserManagement() {
     }
   };
 
-  const handleDeleteRole = async (name: string) => {
-    if (!confirm(`Delete role "${name}"? This will not remove it from existing users immediately.`)) return;
-    await fetch(`${API}/roles/${encodeURIComponent(name)}`, {
+  const handleDeleteRole = async () => {
+    if (!roleToDelete) return;
+    setSaving(true);
+    await fetch(`${API}/roles/${encodeURIComponent(roleToDelete)}`, {
       method: 'DELETE',
       headers: authHeaders(),
     });
+    setRoleToDelete(null);
+    setModalMode('add-role');
+    setSaving(false);
     fetchData();
   };
 
@@ -477,6 +484,26 @@ export default function UserManagement() {
         </Modal>
       )}
 
+      {/* Delete Role */}
+      {modalMode === 'delete-role' && roleToDelete && (
+        <Modal title="Delete Role" onClose={() => { setRoleToDelete(null); setModalMode('add-role'); }}>
+          <p className="text-sm text-on-surface mb-1">
+            Are you sure you want to delete the <strong>{roleToDelete}</strong> role?
+          </p>
+          <p className="text-sm text-on-surface-variant mb-4">
+            This will not immediately remove the role from existing users.
+          </p>
+          {formError && <p className="text-error text-xs mt-3">{formError}</p>}
+          <ModalFooter
+            onCancel={() => { setRoleToDelete(null); setModalMode('add-role'); }}
+            onConfirm={handleDeleteRole}
+            loading={saving}
+            confirmLabel="Delete Role"
+            danger
+          />
+        </Modal>
+      )}
+
       {/* Manage Roles */}
       {modalMode === 'add-role' && (
         <Modal title="Manage Roles" onClose={closeModal}>
@@ -487,7 +514,7 @@ export default function UserManagement() {
                 <div key={r} className="flex items-center justify-between bg-surface-container-low rounded-xl px-3 py-2">
                   <RoleBadge role={r} />
                   <button
-                    onClick={() => handleDeleteRole(r)}
+                    onClick={() => { setRoleToDelete(r); setModalMode('delete-role'); }}
                     className="text-error text-xs font-semibold hover:underline"
                   >
                     Delete

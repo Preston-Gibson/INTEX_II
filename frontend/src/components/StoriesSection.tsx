@@ -39,10 +39,6 @@ export default function StoriesSection() {
             Names and locations have been changed to protect the privacy and safety of our residents.
           </p>
         </div>
-        <button className="text-primary font-bold flex items-center gap-2 hover:underline">
-          View More Stories
-          <span className="material-symbols-outlined">arrow_forward</span>
-        </button>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">

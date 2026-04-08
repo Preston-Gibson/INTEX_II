@@ -111,6 +111,10 @@ export default function ProcessRecording() {
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [expandedId, setExpandedId] = useState<number | null>(null);
+  const [recPage, setRecPage] = useState(1);
+  const REC_PER_PAGE = 15;
+  const [recordingToDelete, setRecordingToDelete] = useState<number | null>(null);
+  const [deleting, setDeleting] = useState(false);
 
   const [residentPage, setResidentPage] = useState(1);
 
@@ -136,6 +140,7 @@ export default function ProcessRecording() {
     setSelected(r);
     setShowForm(false);
     setExpandedId(null);
+    setRecPage(1);
   }
 
   function handleFormChange(field: string, value: string | number | boolean) {
@@ -166,10 +171,13 @@ export default function ProcessRecording() {
     }
   }
 
-  async function handleDelete(recordingId: number) {
-    if (!confirm('Delete this recording? This cannot be undone.')) return;
-    await fetch(`${API}/${recordingId}`, { method: 'DELETE', headers: authHeaders() });
-    setRecordings(r => r.filter(x => x.recordingId !== recordingId));
+  async function confirmDelete() {
+    if (recordingToDelete === null) return;
+    setDeleting(true);
+    await fetch(`${API}/${recordingToDelete}`, { method: 'DELETE', headers: authHeaders() });
+    setRecordings(r => r.filter(x => x.recordingId !== recordingToDelete));
+    setRecordingToDelete(null);
+    setDeleting(false);
   }
 
   return (
@@ -281,7 +289,7 @@ export default function ProcessRecording() {
                         <span className="material-symbols-outlined text-on-surface-variant text-[32px]">history_edu</span>
                         <p className="text-sm text-on-surface-variant">No recordings yet for this resident.</p>
                       </div>
-                    ) : recordings.map(rec => (
+                    ) : recordings.slice((recPage - 1) * REC_PER_PAGE, recPage * REC_PER_PAGE).map(rec => (
                       <div key={rec.recordingId} className="bg-surface-container-low rounded-2xl overflow-hidden">
                         {/* Summary row */}
                         <button
@@ -334,7 +342,7 @@ export default function ProcessRecording() {
                               <p className="text-sm text-on-surface leading-relaxed whitespace-pre-wrap">{rec.followUpActions || '—'}</p>
                             </div>
                             <div className="flex justify-end">
-                              <button onClick={() => handleDelete(rec.recordingId)} className="text-xs text-error hover:underline flex items-center gap-1">
+                              <button onClick={() => setRecordingToDelete(rec.recordingId)} className="text-xs text-error hover:underline flex items-center gap-1">
                                 <span className="material-symbols-outlined text-[14px]">delete</span>
                                 Delete
                               </button>
@@ -343,6 +351,48 @@ export default function ProcessRecording() {
                         )}
                       </div>
                     ))}
+                    {/* Pagination */}
+                    {recordings.length > REC_PER_PAGE && (
+                      <div className="flex items-center justify-between pt-2 pb-1">
+                        <p className="text-xs text-on-surface-variant">
+                          {(recPage - 1) * REC_PER_PAGE + 1}–{Math.min(recPage * REC_PER_PAGE, recordings.length)} of {recordings.length}
+                        </p>
+                        <div className="flex items-center gap-1">
+                          <button
+                            disabled={recPage === 1}
+                            onClick={() => setRecPage(p => p - 1)}
+                            className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-surface-container-low disabled:opacity-30 transition-colors"
+                          >
+                            <span className="material-symbols-outlined text-[18px]">chevron_left</span>
+                          </button>
+                          {Array.from({ length: Math.ceil(recordings.length / REC_PER_PAGE) }, (_, i) => i + 1)
+                            .filter(p => p === 1 || p === Math.ceil(recordings.length / REC_PER_PAGE) || Math.abs(p - recPage) <= 1)
+                            .reduce<(number | '...')[]>((acc, p, i, arr) => {
+                              if (i > 0 && p - (arr[i - 1] as number) > 1) acc.push('...');
+                              acc.push(p);
+                              return acc;
+                            }, [])
+                            .map((p, i) => p === '...' ? (
+                              <span key={`ellipsis-${i}`} className="text-xs text-on-surface-variant px-1">…</span>
+                            ) : (
+                              <button
+                                key={p}
+                                onClick={() => setRecPage(p as number)}
+                                className={`w-8 h-8 rounded-lg text-xs font-bold transition-colors ${recPage === p ? 'aurora-gradient text-white' : 'hover:bg-surface-container-low text-on-surface-variant'}`}
+                              >
+                                {p}
+                              </button>
+                            ))}
+                          <button
+                            disabled={recPage === Math.ceil(recordings.length / REC_PER_PAGE)}
+                            onClick={() => setRecPage(p => p + 1)}
+                            className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-surface-container-low disabled:opacity-30 transition-colors"
+                          >
+                            <span className="material-symbols-outlined text-[18px]">chevron_right</span>
+                          </button>
+                        </div>
+                      </div>
+                    )}
                   </div>
 
                 </div>
@@ -474,6 +524,39 @@ export default function ProcessRecording() {
           </div>
         </div>
       </div>
+
+      {/* Delete confirmation modal */}
+      {recordingToDelete !== null && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
+          <div className="bg-surface-container-lowest rounded-2xl shadow-xl w-full max-w-sm mx-4">
+            <div className="flex items-center justify-between px-6 pt-6 pb-4 border-b border-outline-variant/20">
+              <h2 className="text-base font-manrope font-bold text-on-surface">Delete Recording</h2>
+              <button onClick={() => setRecordingToDelete(null)} className="text-on-surface-variant hover:text-on-surface transition-colors">
+                <span className="material-symbols-outlined text-[20px]">close</span>
+              </button>
+            </div>
+            <div className="px-6 py-5">
+              <p className="text-sm text-on-surface mb-1">Are you sure you want to delete this session recording?</p>
+              <p className="text-sm text-on-surface-variant">This action cannot be undone.</p>
+              <div className="flex justify-end gap-3 mt-6">
+                <button
+                  onClick={() => setRecordingToDelete(null)}
+                  className="px-4 py-2 rounded-xl text-sm font-semibold text-on-surface-variant hover:bg-surface-container-low transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={confirmDelete}
+                  disabled={deleting}
+                  className="px-4 py-2 rounded-xl text-sm font-bold text-white bg-error hover:opacity-90 transition-opacity disabled:opacity-50"
+                >
+                  {deleting ? 'Deleting…' : 'Delete'}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

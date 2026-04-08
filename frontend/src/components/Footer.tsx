@@ -9,11 +9,11 @@ export default function Footer() {
             Lucera
           </div>
           <p className="text-slate-400 font-inter text-sm leading-relaxed max-w-xs">
-            © 2024 Lucera. Dedicated to the children of Central America.
+            © 2026 Lucera. Dedicated to the children of Central America.
             Providing safety, education, and hope.
           </p>
         </div>
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-8">
+        <div className="grid grid-cols-2 sm:grid-cols-3 gap-8">
           <div className="flex flex-col gap-3">
             <span className="font-manrope text-xs font-bold text-slate-300 uppercase tracking-widest">
               Transparency
@@ -25,18 +25,7 @@ export default function Footer() {
               Audit History
             </a>
           </div>
-          <div className="flex flex-col gap-3">
-            <span className="font-manrope text-xs font-bold text-slate-300 uppercase tracking-widest">
-              Company
-            </span>
-            <a className="text-slate-400 text-sm hover:text-blue-400 transition-colors" href="#">
-              Careers
-            </a>
-            <a className="text-slate-400 text-sm hover:text-blue-400 transition-colors" href="#">
-              Contact Us
-            </a>
-          </div>
-          <div className="flex flex-col gap-3">
+<div className="flex flex-col gap-3">
             <span className="font-manrope text-xs font-bold text-slate-300 uppercase tracking-widest">
               Legal
             </span>
