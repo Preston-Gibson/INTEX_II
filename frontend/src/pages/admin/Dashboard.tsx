@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import AdminSidebar from '../../components/AdminSidebar';
+import { authHeaders } from '../../utils/auth';
 
 // ─── Config ───────────────────────────────────────────────────────────────────
 const API_BASE = import.meta.env.VITE_API_URL ?? 'http://localhost:5229';
@@ -45,7 +46,7 @@ interface ActivityItem {
 // ─── API helpers ──────────────────────────────────────────────────────────────
 
 async function apiFetch<T>(path: string): Promise<T> {
-  const res = await fetch(`${API_BASE}${path}`, { credentials: 'include' });
+  const res = await fetch(`${API_BASE}${path}`, { headers: authHeaders() });
   if (!res.ok) throw new Error(path);
   return res.json();
 }

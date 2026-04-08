@@ -23,6 +23,7 @@ import NavBar from './components/NavBar.tsx';
 import Footer from './components/Footer.tsx';
 import CookieBanner from './components/CookieBanner.tsx';
 import ScrollToTop from './components/ScrollToTop.tsx';
+import ProtectedRoute from './components/ProtectedRoute.tsx';
 
 const DASHBOARD_PATHS = ['/donor-dashboard', '/admin-dashboard', '/admin-donors-contributions', '/admin-caseload-inventory', '/admin-process-recording', '/admin-home-visitation-case-conference', '/admin-reports-analytics'];
 const NO_CHROME_PATHS = ['/login', '/register'];
@@ -43,13 +44,13 @@ function Layout() {
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           <Route path="/privacy-policy" element={<PrivacyPolicy />} />
-          <Route path="/donor-dashboard" element={<DonorDashboard />} />
-          <Route path="/admin-dashboard" element={<AdminDashboard />} />
-          <Route path="/admin-donors-contributions" element={<AdminDonorsContributions />} />
-          <Route path="/admin-caseload-inventory" element={<AdminCaseloadInventory />} />
-          <Route path="/admin-process-recording" element={<AdminProcessRecording />} />
-          <Route path="/admin-home-visitation-case-conference" element={<AdminHomeVisitationCaseConference />} />
-          <Route path="/admin-reports-analytics" element={<AdminReportsAnalytics />} />
+          <Route path="/donor-dashboard" element={<ProtectedRoute requiredRole="Donor"><DonorDashboard /></ProtectedRoute>} />
+          <Route path="/admin-dashboard" element={<ProtectedRoute requiredRole="Admin"><AdminDashboard /></ProtectedRoute>} />
+          <Route path="/admin-donors-contributions" element={<ProtectedRoute requiredRole="Admin"><AdminDonorsContributions /></ProtectedRoute>} />
+          <Route path="/admin-caseload-inventory" element={<ProtectedRoute requiredRole="Admin"><AdminCaseloadInventory /></ProtectedRoute>} />
+          <Route path="/admin-process-recording" element={<ProtectedRoute requiredRole="Admin"><AdminProcessRecording /></ProtectedRoute>} />
+          <Route path="/admin-home-visitation-case-conference" element={<ProtectedRoute requiredRole="Admin"><AdminHomeVisitationCaseConference /></ProtectedRoute>} />
+          <Route path="/admin-reports-analytics" element={<ProtectedRoute requiredRole="Admin"><AdminReportsAnalytics /></ProtectedRoute>} />
         </Routes>
       </div>
       {!isDashboard && <Footer />}

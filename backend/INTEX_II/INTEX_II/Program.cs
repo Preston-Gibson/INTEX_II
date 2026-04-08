@@ -29,10 +29,11 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 
 builder.Services.AddIdentityCore<ApplicationUser>(options =>
 {
-    options.Password.RequireDigit = true;
-    options.Password.RequiredLength = 8;
+    options.Password.RequiredLength = 14;
+    options.Password.RequireDigit = false;
     options.Password.RequireNonAlphanumeric = false;
-    options.Password.RequireUppercase = true;
+    options.Password.RequireUppercase = false;
+    options.Password.RequireLowercase = false;
     options.User.RequireUniqueEmail = true;
 })
 .AddRoles<IdentityRole>()
@@ -63,6 +64,31 @@ builder.Services.AddAuthorization();
 
 var app = builder.Build();
 
+// Seed roles and default admin account
+using (var scope = app.Services.CreateScope())
+{
+    var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
+    foreach (var role in new[] { "Admin", "Donor" })
+    {
+        if (!await roleManager.RoleExistsAsync(role))
+            await roleManager.CreateAsync(new IdentityRole(role));
+    }
+
+    var userManager = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
+    const string adminEmail = "admin@lucera.org";
+    if (await userManager.FindByEmailAsync(adminEmail) == null)
+    {
+        var admin = new ApplicationUser
+        {
+            UserName = adminEmail,
+            Email = adminEmail,
+            FirstName = "Admin",
+            LastName = "User"
+        };
+        var result = await userManager.CreateAsync(admin, "adminadminadmin");
+        if (result.Succeeded)
+            await userManager.AddToRoleAsync(admin, "Admin");
+    }
 if (builder.Configuration.GetValue<bool>("DataSeeding:SeedOnStartup"))
 {
     using var scope = app.Services.CreateScope();
