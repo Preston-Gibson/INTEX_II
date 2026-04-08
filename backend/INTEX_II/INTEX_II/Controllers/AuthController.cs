@@ -128,7 +128,7 @@ public async Task<IActionResult> ExternalCallback()
     // Link the provider login to the user (idempotent)
     await _userManager.AddLoginAsync(user, info);
 
-    var token = GenerateJwtToken(user);
+    var token = await GenerateJwtToken(user);
     return Redirect($"{_config["Frontend:Url"]}/oauth-callback?token={token}");
 }
 }

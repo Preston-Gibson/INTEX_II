@@ -1,19 +1,19 @@
-const TOKEN_KEY = 'auth_token';
-
-export function setToken(token: string) {
-  sessionStorage.setItem(TOKEN_KEY, token);
-}
+const TOKEN_KEY = 'lucera_token';
 
 export function getToken(): string | null {
   return sessionStorage.getItem(TOKEN_KEY);
 }
 
-export function clearToken() {
+export function setToken(token: string): void {
+  sessionStorage.setItem(TOKEN_KEY, token);
+}
+
+export function clearToken(): void {
   sessionStorage.removeItem(TOKEN_KEY);
 }
 
 export function isLoggedIn(): boolean {
-  return !!sessionStorage.getItem(TOKEN_KEY);
+  return !!getToken();
 }
 
 export function isAuthenticated(): boolean {
@@ -25,7 +25,6 @@ export function getRole(): string | null {
   if (!token) return null;
   try {
     const payload = JSON.parse(atob(token.split('.')[1]));
-    // ASP.NET Identity uses the full ClaimTypes.Role URI
     return payload['http://schemas.microsoft.com/ws/2008/06/identity/claims/role'] ?? null;
   } catch {
     return null;
