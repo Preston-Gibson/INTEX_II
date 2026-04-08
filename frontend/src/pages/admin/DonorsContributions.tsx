@@ -13,7 +13,7 @@ const ADMIN_NAV = [
 ];
 
 const SUPPORTER_TYPES  = ['Monetary Donor', 'Volunteer', 'Skills Contributor', 'In-Kind Donor', 'Social Media Ambassador'];
-const DONATION_TYPES   = ['Monetary', 'In-Kind', 'Time', 'Skills', 'Social Media'];
+const DONATION_TYPES   = ['Monetary', 'InKind', 'Time', 'Skills', 'SocialMedia'];
 const STATUS_OPTIONS   = ['Active', 'Inactive'];
 const RELATIONSHIP_TYPES = ['Individual', 'Organization'];
 const PAGE_SIZE = 20;
@@ -32,11 +32,19 @@ const TYPE_BADGE: Record<string, string> = {
 };
 
 const DONATION_TYPE_BADGE: Record<string, string> = {
-  'Monetary':     'bg-primary/10 text-primary',
-  'In-Kind':      'bg-error/10 text-error',
-  'Time':         'bg-tertiary-fixed text-on-surface',
-  'Skills':       'bg-secondary/10 text-secondary',
-  'Social Media': 'bg-surface-container-high text-on-surface-variant',
+  'Monetary':    'bg-primary/10 text-primary',
+  'InKind':      'bg-error/10 text-error',
+  'Time':        'bg-tertiary-fixed text-on-surface',
+  'Skills':      'bg-secondary/10 text-secondary',
+  'SocialMedia': 'bg-surface-container-high text-on-surface-variant',
+};
+
+const DONATION_TYPE_LABEL: Record<string, string> = {
+  'Monetary':    'Monetary',
+  'InKind':      'In-Kind',
+  'Time':        'Time',
+  'Skills':      'Skills',
+  'SocialMedia': 'Social Media',
 };
 
 // ── Interfaces ────────────────────────────────────────────────────────────────
@@ -485,7 +493,7 @@ export default function DonorsContributions() {
               <select value={donType} onChange={e => setDonType(e.target.value)}
                 className="bg-surface-container-low text-sm text-on-surface rounded-xl px-3 py-2 outline-none border-none">
                 <option value="">All Donation Types</option>
-                {DONATION_TYPES.map(t => <option key={t} value={t}>{t}</option>)}
+                {DONATION_TYPES.map(t => <option key={t} value={t}>{DONATION_TYPE_LABEL[t] ?? t}</option>)}
               </select>
             </>
           )}
@@ -611,7 +619,7 @@ export default function DonorsContributions() {
                           <td className="px-4 py-3 text-xs font-semibold text-on-surface whitespace-nowrap">{d.supporterName || '—'}</td>
                           <td className="px-4 py-3">
                             <span className={`inline-block px-2 py-0.5 rounded-full text-[10px] font-bold whitespace-nowrap ${DONATION_TYPE_BADGE[d.donationType] ?? 'bg-surface-container text-on-surface-variant'}`}>
-                              {d.donationType}
+                              {DONATION_TYPE_LABEL[d.donationType] ?? d.donationType}
                             </span>
                           </td>
                           <td className="px-4 py-3 text-xs text-on-surface-variant whitespace-nowrap">{d.donationDate ?? '—'}</td>
@@ -787,7 +795,7 @@ export default function DonorsContributions() {
                             <tr key={d.donationId} className="border-b border-outline-variant/10 hover:bg-surface-container transition-colors">
                               <td className="px-4 py-2.5">
                                 <span className={`inline-block px-2 py-0.5 rounded-full text-[10px] font-bold ${DONATION_TYPE_BADGE[d.donationType] ?? 'bg-surface-container text-on-surface-variant'}`}>
-                                  {d.donationType}
+                                  {DONATION_TYPE_LABEL[d.donationType] ?? d.donationType}
                                 </span>
                               </td>
                               <td className="px-4 py-2.5 text-xs text-on-surface-variant whitespace-nowrap">{d.donationDate ?? '—'}</td>
@@ -850,7 +858,7 @@ export default function DonorsContributions() {
                   <Field label="Donation Type *">
                     <select className={selectCls} value={donForm.donationType} onChange={e => patchDon({ donationType: e.target.value })}>
                       <option value="">Select type</option>
-                      {DONATION_TYPES.map(t => <option key={t} value={t}>{t}</option>)}
+                      {DONATION_TYPES.map(t => <option key={t} value={t}>{DONATION_TYPE_LABEL[t] ?? t}</option>)}
                     </select>
                   </Field>
                   <Field label="Donation Date">
@@ -935,7 +943,7 @@ export default function DonorsContributions() {
                 <div className="grid grid-cols-2 gap-x-8 gap-y-2 text-sm">
                   {[
                     ['Supporter', selectedDonation.supporterName || '—'],
-                    ['Type', selectedDonation.donationType],
+                    ['Type', DONATION_TYPE_LABEL[selectedDonation.donationType] ?? selectedDonation.donationType],
                     ['Date', selectedDonation.donationDate ?? '—'],
                     ['Amount', selectedDonation.amount != null ? `${selectedDonation.currencyCode ?? ''} ${fmt(selectedDonation.amount)}` : '—'],
                     ['Est. Value', `₱${fmt(selectedDonation.estimatedValue)}`],
