@@ -20,7 +20,7 @@ export default function Impact() {
 
         <ImpactStatsGrid />
 
-        <section className="grid grid-cols-1 lg:grid-cols-2 gap-12 mb-20 items-start">
+        <section className="grid grid-cols-1 lg:grid-cols-2  gap-12 mb-20 items-start">
           <GeographicSection />
           <TransparencySection />
         </section>

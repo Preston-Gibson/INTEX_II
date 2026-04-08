@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import AdminSidebar from '../../components/AdminSidebar';
+import { authHeaders } from '../../utils/auth';
 
 const API = `${import.meta.env.VITE_API_URL ?? 'http://localhost:5229'}/api/residents`;
 
@@ -170,7 +171,7 @@ export default function CaseloadInventory() {
 
   // Fetch safehouses once on mount
   useEffect(() => {
-    fetch(`${API}/safehouses`)
+    fetch(`${API}/safehouses`, { headers: authHeaders() })
       .then(r => r.json())
       .then(setSafehouses)
       .catch(console.error);
@@ -187,7 +188,7 @@ export default function CaseloadInventory() {
 
     const delay = search ? 300 : 0;
     const timer = setTimeout(() => {
-      fetch(`${API}?${params}`)
+      fetch(`${API}?${params}`, { headers: authHeaders() })
         .then(r => r.json())
         .then(data => { setResidents(data); setCurrentPage(1); setLoading(false); })
         .catch(() => setLoading(false));
@@ -212,7 +213,7 @@ export default function CaseloadInventory() {
     setFormLoading(true);
     setModalMode('edit');
     try {
-      const data: ResidentDetail = await fetch(`${API}/${id}`).then(r => r.json());
+      const data: ResidentDetail = await fetch(`${API}/${id}`, { headers: authHeaders() }).then(r => r.json());
       setSelectedResident(data);
       const { residentId: _id, ...rest } = data;
       setFormData(rest);
@@ -237,7 +238,7 @@ export default function CaseloadInventory() {
     try {
       const res = await fetch(url, {
         method,
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', ...authHeaders() },
         body: JSON.stringify(body),
       });
       if (!res.ok) { setFormError('Save failed. Please check all fields and try again.'); return; }

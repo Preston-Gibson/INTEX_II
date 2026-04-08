@@ -1,10 +1,12 @@
 using INTEX_II.Data;
 using INTEX_II.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
 namespace INTEX_II.Controllers;
 
+[Authorize(Roles = "Admin")]
 [ApiController]
 [Route("api/supporters")]
 public class SupportersController : ControllerBase

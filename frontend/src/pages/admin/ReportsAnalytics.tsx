@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import AdminSidebar from '../../components/AdminSidebar';
+import { authHeaders } from '../../utils/auth';
 
 const API = `${import.meta.env.VITE_API_URL ?? 'http://localhost:5229'}/api/reports`;
 const MONTH_NAMES = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
@@ -62,11 +63,11 @@ export default function ReportsAnalytics() {
     setLoading(true);
     const y = year;
     Promise.all([
-      fetch(`${API}/pillars?year=${y}`).then(r => r.json()),
-      fetch(`${API}/donation-trends?year=${y}`).then(r => r.json()),
-      fetch(`${API}/outcome-metrics?year=${y}`).then(r => r.json()),
-      fetch(`${API}/safehouses?year=${y}`).then(r => r.json()),
-      fetch(`${API}/reintegration?year=${y}`).then(r => r.json()),
+      fetch(`${API}/pillars?year=${y}`, { headers: authHeaders() }).then(r => r.json()),
+      fetch(`${API}/donation-trends?year=${y}`, { headers: authHeaders() }).then(r => r.json()),
+      fetch(`${API}/outcome-metrics?year=${y}`, { headers: authHeaders() }).then(r => r.json()),
+      fetch(`${API}/safehouses?year=${y}`, { headers: authHeaders() }).then(r => r.json()),
+      fetch(`${API}/reintegration?year=${y}`, { headers: authHeaders() }).then(r => r.json()),
     ]).then(([p, d, o, s, ri]) => {
       setPillars(p);
       setDonations(d);

@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import AdminSidebar from '../../components/AdminSidebar';
+import { authHeaders } from '../../utils/auth';
 
 const API = `${import.meta.env.VITE_API_URL ?? 'http://localhost:5229'}/api/process-recordings`;
 
@@ -82,7 +83,7 @@ export default function ProcessRecording() {
 
   // Load residents
   useEffect(() => {
-    fetch(`${API}/residents?search=${encodeURIComponent(search)}`)
+    fetch(`${API}/residents?search=${encodeURIComponent(search)}`, { headers: authHeaders() })
       .then(r => r.json())
       .then(setResidents)
       .catch(() => {});
@@ -92,7 +93,7 @@ export default function ProcessRecording() {
   useEffect(() => {
     if (!selected) { setRecordings([]); return; }
     setLoadingRecordings(true);
-    fetch(`${API}?residentId=${selected.residentId}`)
+    fetch(`${API}?residentId=${selected.residentId}`, { headers: authHeaders() })
       .then(r => r.json())
       .then(data => { setRecordings(data); setLoadingRecordings(false); })
       .catch(() => setLoadingRecordings(false));
@@ -116,12 +117,12 @@ export default function ProcessRecording() {
     try {
       const res = await fetch(API, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', ...authHeaders() },
         body: JSON.stringify({ ...form, residentId: selected.residentId }),
       });
       if (!res.ok) throw new Error('Failed to save');
       // Reload recordings
-      const updated = await fetch(`${API}?residentId=${selected.residentId}`).then(r => r.json());
+      const updated = await fetch(`${API}?residentId=${selected.residentId}`, { headers: authHeaders() }).then(r => r.json());
       setRecordings(updated);
       setShowForm(false);
       setForm(EMPTY_FORM);
@@ -134,7 +135,7 @@ export default function ProcessRecording() {
 
   async function handleDelete(recordingId: number) {
     if (!confirm('Delete this recording? This cannot be undone.')) return;
-    await fetch(`${API}/${recordingId}`, { method: 'DELETE' });
+    await fetch(`${API}/${recordingId}`, { method: 'DELETE', headers: authHeaders() });
     setRecordings(r => r.filter(x => x.recordingId !== recordingId));
   }
 

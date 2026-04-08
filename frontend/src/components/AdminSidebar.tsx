@@ -1,4 +1,5 @@
 import { NavLink, Link, useNavigate } from 'react-router-dom';
+import { clearToken } from '../utils/auth';
 
 const NAV_ITEMS = [
   { to: '/admin-dashboard',                      icon: 'dashboard',          label: 'Dashboard' },
@@ -15,7 +16,7 @@ export default function AdminSidebar() {
   return (
     <aside className="w-56 flex-shrink-0 flex flex-col bg-surface-container-lowest border-r border-outline-variant/20 py-6 px-4 relative z-10">
       <div className="mb-8 px-2">
-        <p className="text-primary font-headline font-extrabold text-lg leading-tight">Lucero Admin</p>
+        <p className="text-primary font-headline font-extrabold text-lg leading-tight">Lucera Admin</p>
       </div>
 
       <nav className="flex-1 space-y-1">
@@ -50,6 +51,14 @@ export default function AdminSidebar() {
           add_circle
         </span>
         New Case
+      </button>
+
+      <button
+        onClick={() => { clearToken(); navigate('/login'); }}
+        className="flex items-center justify-center gap-2 text-on-surface-variant text-xs font-semibold py-2 rounded-xl hover:bg-surface-container-low transition-colors w-full mb-1"
+      >
+        <span className="material-symbols-outlined text-[16px]">logout</span>
+        Sign out
       </button>
 
       <Link

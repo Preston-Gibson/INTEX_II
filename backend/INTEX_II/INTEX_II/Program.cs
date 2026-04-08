@@ -90,6 +90,33 @@ builder.Services.AddAuthentication(options =>
 
 var app = builder.Build();
 
+// Seed roles and default admin account
+using (var scope = app.Services.CreateScope())
+{
+    var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
+    foreach (var role in new[] { "Admin", "Donor" })
+    {
+        if (!await roleManager.RoleExistsAsync(role))
+            await roleManager.CreateAsync(new IdentityRole(role));
+    }
+
+    var userManager = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
+    const string adminEmail = "admin@lucera.org";
+    if (await userManager.FindByEmailAsync(adminEmail) == null)
+    {
+        var admin = new ApplicationUser
+        {
+            UserName = adminEmail,
+            Email = adminEmail,
+            FirstName = "Admin",
+            LastName = "User"
+        };
+        var result = await userManager.CreateAsync(admin, "adminadminadmin");
+        if (result.Succeeded)
+            await userManager.AddToRoleAsync(admin, "Admin");
+    }
+}
+
 if (builder.Configuration.GetValue<bool>("DataSeeding:SeedOnStartup"))
 {
     using var scope = app.Services.CreateScope();

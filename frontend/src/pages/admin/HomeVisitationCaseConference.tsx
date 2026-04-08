@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import AdminSidebar from '../../components/AdminSidebar';
+import { authHeaders } from '../../utils/auth';
 
 const API = `${import.meta.env.VITE_API_URL ?? 'http://localhost:5229'}/api/home-visitation`;
 
@@ -81,9 +82,9 @@ export default function HomeVisitationCaseConference() {
 
   function loadData() {
     return Promise.all([
-      fetch(`${API}/upcoming-visits`, { credentials: 'include' }).then(r => r.json()),
-      fetch(`${API}/historical-logs`, { credentials: 'include' }).then(r => r.json()),
-      fetch(`${API}/residents`, { credentials: 'include' }).then(r => r.json()),
+      fetch(`${API}/upcoming-visits`, { headers: authHeaders() }).then(r => r.json()),
+      fetch(`${API}/historical-logs`, { headers: authHeaders() }).then(r => r.json()),
+      fetch(`${API}/residents`, { headers: authHeaders() }).then(r => r.json()),
     ]).then(([u, h, r]) => {
       setUpcomingVisits(u);
       setHistoricalLogs(h);
@@ -100,8 +101,7 @@ export default function HomeVisitationCaseConference() {
     setSubmitting(true);
     await fetch(`${API}/log`, {
       method: 'POST',
-      credentials: 'include',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'application/json', ...authHeaders() },
       body: JSON.stringify({
         residentId: parseInt(selectedResident),
         visitType,
