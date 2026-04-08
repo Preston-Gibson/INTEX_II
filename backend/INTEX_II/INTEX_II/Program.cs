@@ -62,6 +62,14 @@ builder.Services.AddAuthorization();
 
 var app = builder.Build();
 
+if (builder.Configuration.GetValue<bool>("DataSeeding:SeedOnStartup"))
+{
+    using var scope = app.Services.CreateScope();
+    var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+    var csvPath = builder.Configuration["DataSeeding:CsvDataPath"]!;
+    var forceReseed = builder.Configuration.GetValue<bool>("DataSeeding:ForcedReseed");
+    await DbSeeder.SeedAsync(db, csvPath, forceReseed);
+}
 
 if (app.Environment.IsDevelopment())
 {
