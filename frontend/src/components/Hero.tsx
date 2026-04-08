@@ -1,6 +1,6 @@
 export default function Hero() {
   return (
-    <section className="relative overflow-hidden min-h-svh flex items-center">
+    <section className="relative overflow-hidden min-h-[calc(100svh-7.25rem)] flex items-center">
       {/* Background image layer */}
       <div className="absolute inset-0 z-0">
         <img
