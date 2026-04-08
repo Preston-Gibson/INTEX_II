@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
 import AdminSidebar from '../../components/AdminSidebar';
+import { authHeaders } from '../../utils/auth';
 
-const API = 'http://localhost:5229/api/supporters';
+const API = `${import.meta.env.VITE_API_URL ?? 'http://localhost:5229'}/api/supporters`;
 
 const SUPPORTER_TYPES  = ['Monetary Donor', 'Volunteer', 'Skills Contributor', 'In-Kind Donor', 'Social Media Ambassador'];
 const DONATION_TYPES   = ['Monetary', 'InKind', 'Time', 'Skills', 'SocialMedia'];
@@ -260,7 +261,7 @@ export default function DonorsContributions() {
 
     const delay = suppSearch ? 300 : 0;
     const timer = setTimeout(() => {
-      fetch(`${API}?${params}`)
+      fetch(`${API}?${params}`, { headers: authHeaders() })
         .then(r => r.json())
         .then(data => { setSupporters(data); setSuppPage(1); setSupportersLoading(false); })
         .catch(() => setSupportersLoading(false));
@@ -277,7 +278,7 @@ export default function DonorsContributions() {
 
     const delay = donSearch ? 300 : 0;
     const timer = setTimeout(() => {
-      fetch(`${API}/donations?${params}`)
+      fetch(`${API}/donations?${params}`, { headers: authHeaders() })
         .then(r => r.json())
         .then(data => { setDonations(data); setDonPage(1); setDonationsLoading(false); })
         .catch(() => setDonationsLoading(false));
@@ -303,8 +304,8 @@ export default function DonorsContributions() {
     setSuppModalMode('edit');
     try {
       const [detail, dons] = await Promise.all([
-        fetch(`${API}/${id}`).then(r => r.json()) as Promise<SupporterDetail>,
-        fetch(`${API}/${id}/donations`).then(r => r.json()) as Promise<DonationRow[]>,
+        fetch(`${API}/${id}`, { headers: authHeaders() }).then(r => r.json()) as Promise<SupporterDetail>,
+        fetch(`${API}/${id}/donations`, { headers: authHeaders() }).then(r => r.json()) as Promise<DonationRow[]>,
       ]);
       setSelectedSupporter(detail);
       const { supporterId: _id, createdAt: _ca, ...rest } = detail;
@@ -382,7 +383,7 @@ export default function DonorsContributions() {
     try {
       const res = await fetch(`${API}/${donTargetSuppId}/donations`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', ...authHeaders() },
         body: JSON.stringify(body),
       });
       if (!res.ok) { setDonFormError('Save failed. Please try again.'); return; }
@@ -392,7 +393,7 @@ export default function DonorsContributions() {
       // If we're in an edit modal, reload that supporter's donations too
       if (suppModalMode === 'edit' && selectedSupporter) {
         setSuppDonLoading(true);
-        fetch(`${API}/${selectedSupporter.supporterId}/donations`)
+        fetch(`${API}/${selectedSupporter.supporterId}/donations`, { headers: authHeaders() })
           .then(r => r.json())
           .then(data => { setSuppDonations(data); setSuppDonPage(1); })
           .finally(() => setSuppDonLoading(false));

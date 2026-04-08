@@ -66,6 +66,47 @@ def ensure_schemas(schemas: list[str]):
     conn.close()
 
 
+def ensure_resident_outcome_predictions_table(schema: str = "operational"):
+    """Create the resident outcome predictions table if it doesn't exist."""
+    with pg_conn(schema) as conn:
+        with conn.cursor() as cur:
+            cur.execute(f"""
+                CREATE TABLE IF NOT EXISTS {schema}.resident_outcome_predictions (
+                    resident_id                     INTEGER PRIMARY KEY,
+                    predicted_reintegration_outcome TEXT,
+                    prob_completed                  DOUBLE PRECISION,
+                    prob_in_progress                DOUBLE PRECISION,
+                    prob_not_started                DOUBLE PRECISION,
+                    prob_on_hold                    DOUBLE PRECISION,
+                    predicted_reintegration_type    TEXT,
+                    predicted_edu_completion        TEXT,
+                    prob_edu_completed              DOUBLE PRECISION,
+                    prob_edu_in_progress            DOUBLE PRECISION,
+                    prob_edu_not_started            DOUBLE PRECISION,
+                    prediction_ts                   TIMESTAMPTZ
+                )
+            """)
+
+
+def ensure_donor_predictions_table(schema: str = "operational"):
+    """Create the donor predictions table if it doesn't exist."""
+    with pg_conn(schema) as conn:
+        with conn.cursor() as cur:
+            cur.execute(f"""
+                CREATE TABLE IF NOT EXISTS {schema}.donor_predictions (
+                    supporter_id          INTEGER PRIMARY KEY,
+                    predicted_churn       BOOLEAN,
+                    prob_churn            DOUBLE PRECISION,
+                    predicted_don_type    TEXT,
+                    prob_monetary         DOUBLE PRECISION,
+                    prob_in_kind          DOUBLE PRECISION,
+                    prob_time             DOUBLE PRECISION,
+                    prob_skills           DOUBLE PRECISION,
+                    prediction_ts         TIMESTAMPTZ
+                )
+            """)
+
+
 def ensure_risk_predictions_table(schema: str = "operational"):
     """Create the predictions table if it doesn't exist."""
     with pg_conn(schema) as conn:

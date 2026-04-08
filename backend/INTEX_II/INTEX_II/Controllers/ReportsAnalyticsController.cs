@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace INTEX_II.Controllers;
 
-//[Authorize]
+[Authorize(Roles = "Admin")]
 [ApiController]
 [Route("api/reports")]
 public class ReportsAnalyticsController : ControllerBase

@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using System.Text;
 using INTEX_II.Models;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.IdentityModel.Tokens;
 
@@ -28,10 +29,11 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 
 builder.Services.AddIdentityCore<ApplicationUser>(options =>
 {
-    options.Password.RequireDigit = true;
-    options.Password.RequiredLength = 8;
+    options.Password.RequiredLength = 14;
+    options.Password.RequireDigit = false;
     options.Password.RequireNonAlphanumeric = false;
-    options.Password.RequireUppercase = true;
+    options.Password.RequireUppercase = false;
+    options.Password.RequireLowercase = false;
     options.User.RequireUniqueEmail = true;
 })
 .AddRoles<IdentityRole>()
@@ -62,11 +64,55 @@ builder.Services.AddAuthorization();
 
 var app = builder.Build();
 
+// Seed roles and default admin account
+using (var scope = app.Services.CreateScope())
+{
+    var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
+    foreach (var role in new[] { "Admin", "Donor" })
+    {
+        if (!await roleManager.RoleExistsAsync(role))
+            await roleManager.CreateAsync(new IdentityRole(role));
+    }
+
+    var userManager = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
+    const string adminEmail = "admin@lucera.org";
+    if (await userManager.FindByEmailAsync(adminEmail) == null)
+    {
+        var admin = new ApplicationUser
+        {
+            UserName = adminEmail,
+            Email = adminEmail,
+            FirstName = "Admin",
+            LastName = "User"
+        };
+        var result = await userManager.CreateAsync(admin, "adminadminadmin");
+        if (result.Succeeded)
+            await userManager.AddToRoleAsync(admin, "Admin");
+    }
+}
+
+if (builder.Configuration.GetValue<bool>("DataSeeding:SeedOnStartup"))
+{
+    using var scope = app.Services.CreateScope();
+    var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+    var csvPath = builder.Configuration["DataSeeding:CsvDataPath"]!;
+    var forceReseed = builder.Configuration.GetValue<bool>("DataSeeding:ForcedReseed");
+    await DbSeeder.SeedAsync(db, csvPath, forceReseed);
+}
 
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
 }
+else
+{
+    app.UseHsts();
+}
+
+app.UseForwardedHeaders(new ForwardedHeadersOptions
+{
+    ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto
+});
 
 app.UseHttpsRedirection();
 app.UseCors("FrontendPolicy");

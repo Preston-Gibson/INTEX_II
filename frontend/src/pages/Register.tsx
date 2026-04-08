@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom';
 
-export default function Login() {
+export default function Register() {
   return (
     <div className="min-h-screen flex">
       {/* Left branding panel */}
@@ -24,23 +24,29 @@ export default function Login() {
         {/* Center content */}
         <div className="relative z-10 space-y-6">
           <div className="inline-flex items-center gap-2 bg-white/15 text-white text-sm font-semibold px-4 py-2 rounded-full">
-            <span className="material-symbols-outlined text-base">favorite</span>
-            Transforming lives together
+            <span className="material-symbols-outlined text-base">handshake</span>
+            Join the mission
           </div>
           <h2 className="font-manrope font-bold text-4xl text-white leading-tight">
-            Empowering families.<br />Building futures.
+            Be part of<br />the change.
           </h2>
           <p className="text-white/80 text-lg leading-relaxed max-w-sm">
-            Your work makes a measurable difference. Sign in to track impact, manage cases, and connect with the community.
+            Create your account to access tools that help you serve more families, track impact, and collaborate with your team.
           </p>
         </div>
 
-        {/* Quote card */}
-        <div className="relative z-10 bg-white/15 backdrop-blur-sm rounded-[1.25rem] p-6 border border-white/20">
-          <p className="text-white/90 italic text-sm leading-relaxed">
-            "Lucera has helped us reach families we never could have before. Every data point represents a life changed."
-          </p>
-          <p className="text-white/60 text-xs mt-3 font-semibold">— Field Case Manager</p>
+        {/* Stats row */}
+        <div className="relative z-10 grid grid-cols-3 gap-4">
+          {[
+            { value: '2,400+', label: 'Families served' },
+            { value: '98%', label: 'Case resolution' },
+            { value: '12', label: 'Partner agencies' },
+          ].map(({ value, label }) => (
+            <div key={label} className="bg-white/15 backdrop-blur-sm rounded-xl p-4 border border-white/20 text-center">
+              <p className="font-manrope font-bold text-2xl text-white">{value}</p>
+              <p className="text-white/70 text-xs mt-1">{label}</p>
+            </div>
+          ))}
         </div>
       </div>
 
@@ -56,13 +62,37 @@ export default function Login() {
 
           <div className="bg-surface-container-lowest rounded-[1.25rem] shadow-[0_8px_32px_rgba(0,63,135,0.1)] p-10">
             <h1 className="font-manrope font-bold text-3xl text-primary mb-2">
-              Welcome back
+              Create your account
             </h1>
             <p className="text-on-surface-variant mb-8">
-              Sign in to your Lucera account
+              Join Lucera to make a difference
             </p>
 
             <form className="space-y-5">
+              {/* Name row */}
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-on-surface-variant mb-1.5">
+                    First name
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="Jane"
+                    className="w-full px-4 py-3 bg-surface-container-low border border-slate-200 rounded-xl text-on-surface placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-on-surface-variant mb-1.5">
+                    Last name
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="Doe"
+                    className="w-full px-4 py-3 bg-surface-container-low border border-slate-200 rounded-xl text-on-surface placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition"
+                  />
+                </div>
+              </div>
+
               {/* Email */}
               <div>
                 <label className="block text-sm font-medium text-on-surface-variant mb-1.5">
@@ -77,14 +107,21 @@ export default function Login() {
 
               {/* Password */}
               <div>
-                <div className="flex items-center justify-between mb-1.5">
-                  <label className="block text-sm font-medium text-on-surface-variant">
-                    Password
-                  </label>
-                  <a href="#" className="text-sm font-semibold text-primary hover:opacity-80 transition">
-                    Forgot password?
-                  </a>
-                </div>
+                <label className="block text-sm font-medium text-on-surface-variant mb-1.5">
+                  Password
+                </label>
+                <input
+                  type="password"
+                  placeholder="••••••••"
+                  className="w-full px-4 py-3 bg-surface-container-low border border-slate-200 rounded-xl text-on-surface placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition"
+                />
+              </div>
+
+              {/* Confirm password */}
+              <div>
+                <label className="block text-sm font-medium text-on-surface-variant mb-1.5">
+                  Confirm password
+                </label>
                 <input
                   type="password"
                   placeholder="••••••••"
@@ -97,14 +134,14 @@ export default function Login() {
                 type="submit"
                 className="aurora-gradient text-white w-full py-3.5 rounded-[0.75rem] font-manrope font-bold shadow-[0_4px_16px_rgba(0,63,135,0.35)] hover:opacity-90 active:scale-[0.97] transition-all mt-2"
               >
-                Sign In
+                Create Account
               </button>
             </form>
 
             <p className="text-center text-sm text-on-surface-variant mt-6">
-              Don't have an account?{' '}
-              <Link to="/register" className="font-semibold text-primary hover:opacity-80 transition">
-                Create one
+              Already have an account?{' '}
+              <Link to="/login" className="font-semibold text-primary hover:opacity-80 transition">
+                Sign in
               </Link>
             </p>
           </div>
