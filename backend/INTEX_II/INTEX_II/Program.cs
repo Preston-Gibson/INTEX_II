@@ -124,6 +124,9 @@ if (builder.Configuration.GetValue<bool>("DataSeeding:SeedOnStartup"))
     var csvPath = builder.Configuration["DataSeeding:CsvDataPath"]!;
     var forceReseed = builder.Configuration.GetValue<bool>("DataSeeding:ForcedReseed");
     await DbSeeder.SeedAsync(db, csvPath, forceReseed);
+
+    var userManager = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
+    await DbSeeder.SeedUsersAsync(userManager);
 }
 
 if (app.Environment.IsDevelopment())
