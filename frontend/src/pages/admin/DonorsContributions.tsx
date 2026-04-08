@@ -4,6 +4,22 @@ import { authHeaders, downloadExport } from '../../utils/auth';
 
 const API = `${import.meta.env.VITE_API_URL ?? 'http://localhost:5229'}/api/supporters`;
 
+// Approximate fixed rates to USD (updated periodically)
+const TO_USD: Record<string, number> = {
+  USD: 1,
+  NIO: 0.027,   // Nicaraguan córdoba
+  HNL: 0.040,   // Honduran lempira
+  CRC: 0.0019,  // Costa Rican colón
+  GTQ: 0.129,   // Guatemalan quetzal
+  PHP: 0.017,   // Philippine peso
+};
+
+function toUSD(amount: number, currency: string | null): string {
+  const rate = TO_USD[(currency ?? 'USD').toUpperCase()] ?? 1;
+  const usd = amount * rate;
+  return `$${usd.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+}
+
 const SUPPORTER_TYPES  = ['Monetary Donor', 'Volunteer', 'Skills Contributor', 'In-Kind Donor', 'Social Media Ambassador'];
 const DONATION_TYPES   = ['Monetary', 'InKind', 'Time', 'Skills', 'SocialMedia'];
 const STATUS_OPTIONS   = ['Active', 'Inactive'];
@@ -544,7 +560,7 @@ export default function DonorsContributions() {
                           <td className="px-4 py-3 text-xs text-on-surface-variant whitespace-nowrap">{s.email || '—'}</td>
                           <td className="px-4 py-3 text-xs text-on-surface-variant whitespace-nowrap">{s.acquisitionChannel || '—'}</td>
                           <td className="px-4 py-3 text-xs text-on-surface font-semibold whitespace-nowrap text-center">{s.donationCount}</td>
-                          <td className="px-4 py-3 text-xs text-on-surface whitespace-nowrap">₱{fmt(s.totalEstimatedValue)}</td>
+                          <td className="px-4 py-3 text-xs text-on-surface whitespace-nowrap">${fmt(s.totalEstimatedValue)}</td>
                           <td className="px-4 py-3 whitespace-nowrap">
                             <button onClick={() => openEditSupporter(s.supporterId)}
                               className="flex items-center gap-1 text-primary text-xs font-semibold hover:underline whitespace-nowrap">
@@ -598,9 +614,9 @@ export default function DonorsContributions() {
                           </td>
                           <td className="px-4 py-3 text-xs text-on-surface-variant whitespace-nowrap">{d.donationDate ?? '—'}</td>
                           <td className="px-4 py-3 text-xs whitespace-nowrap">
-                            {d.amount != null ? `${d.currencyCode ?? ''} ${fmt(d.amount)}` : '—'}
+                            {d.amount != null ? toUSD(d.amount, d.currencyCode) : '—'}
                           </td>
-                          <td className="px-4 py-3 text-xs whitespace-nowrap">₱{fmt(d.estimatedValue)}</td>
+                          <td className="px-4 py-3 text-xs whitespace-nowrap">{toUSD(d.estimatedValue, d.currencyCode ?? 'USD')}</td>
                           <td className="px-4 py-3 text-xs text-on-surface-variant whitespace-nowrap">{d.campaignName || '—'}</td>
                           <td className="px-4 py-3 text-xs text-on-surface-variant whitespace-nowrap">{d.channelSource || '—'}</td>
                           <td className="px-4 py-3 text-xs whitespace-nowrap">
@@ -774,9 +790,9 @@ export default function DonorsContributions() {
                               </td>
                               <td className="px-4 py-2.5 text-xs text-on-surface-variant whitespace-nowrap">{d.donationDate ?? '—'}</td>
                               <td className="px-4 py-2.5 text-xs whitespace-nowrap">
-                                {d.amount != null ? `${d.currencyCode ?? ''} ${fmt(d.amount)}` : '—'}
+                                {d.amount != null ? toUSD(d.amount, d.currencyCode) : '—'}
                               </td>
-                              <td className="px-4 py-2.5 text-xs whitespace-nowrap">₱{fmt(d.estimatedValue)}</td>
+                              <td className="px-4 py-2.5 text-xs whitespace-nowrap">{toUSD(d.estimatedValue, d.currencyCode ?? 'USD')}</td>
                               <td className="px-4 py-2.5 text-xs text-on-surface-variant whitespace-nowrap">{d.campaignName || '—'}</td>
                               <td className="px-4 py-2.5 text-xs whitespace-nowrap">
                                 <span className={`inline-block px-2 py-0.5 rounded-full text-[10px] font-bold ${d.isRecurring ? 'bg-secondary/10 text-secondary' : 'bg-surface-container text-on-surface-variant'}`}>
@@ -919,8 +935,8 @@ export default function DonorsContributions() {
                     ['Supporter', selectedDonation.supporterName || '—'],
                     ['Type', DONATION_TYPE_LABEL[selectedDonation.donationType] ?? selectedDonation.donationType],
                     ['Date', selectedDonation.donationDate ?? '—'],
-                    ['Amount', selectedDonation.amount != null ? `${selectedDonation.currencyCode ?? ''} ${fmt(selectedDonation.amount)}` : '—'],
-                    ['Est. Value', `₱${fmt(selectedDonation.estimatedValue)}`],
+                    ['Amount', selectedDonation.amount != null ? toUSD(selectedDonation.amount, selectedDonation.currencyCode) : '—'],
+                    ['Est. Value', toUSD(selectedDonation.estimatedValue, selectedDonation.currencyCode ?? 'USD')],
                     ['Campaign', selectedDonation.campaignName || '—'],
                     ['Channel', selectedDonation.channelSource || '—'],
                     ['Recurring', selectedDonation.isRecurring ? 'Yes' : 'No'],
@@ -967,7 +983,7 @@ export default function DonorsContributions() {
                           <tr key={a.allocationId} className="border-b border-outline-variant/10 hover:bg-surface-container-low transition-colors">
                             <td className="px-4 py-2.5 text-xs whitespace-nowrap">{a.safehouseName || '—'}</td>
                             <td className="px-4 py-2.5 text-xs whitespace-nowrap">{a.programArea}</td>
-                            <td className="px-4 py-2.5 text-xs whitespace-nowrap">₱{fmt(a.amountAllocated)}</td>
+                            <td className="px-4 py-2.5 text-xs whitespace-nowrap">${fmt(a.amountAllocated)}</td>
                             <td className="px-4 py-2.5 text-xs text-on-surface-variant whitespace-nowrap">{a.allocationDate}</td>
                             <td className="px-4 py-2.5 text-xs text-on-surface-variant">{a.allocationNotes || '—'}</td>
                           </tr>

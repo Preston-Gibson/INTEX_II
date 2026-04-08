@@ -55,8 +55,9 @@ public class ProcessRecordingController : ControllerBase
     [HttpGet]
     public async Task<IActionResult> GetRecordings([FromQuery] int residentId)
     {
+        var today = DateOnly.FromDateTime(DateTime.UtcNow);
         var recordings = await _db.ProcessRecordings
-            .Where(p => p.ResidentId == residentId)
+            .Where(p => p.ResidentId == residentId && p.SessionDate <= today)
             .OrderByDescending(p => p.SessionDate)
             .Select(p => new
             {
