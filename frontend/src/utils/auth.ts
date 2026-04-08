@@ -1,16 +1,19 @@
-const TOKEN_KEY = 'lucera_token';
+const TOKEN_KEY = 'auth_token';
+
+export function setToken(token: string) {
+  sessionStorage.setItem(TOKEN_KEY, token);
+}
 
 export function getToken(): string | null {
-  return localStorage.getItem(TOKEN_KEY);
+  return sessionStorage.getItem(TOKEN_KEY);
 }
 
-export function setToken(token: string): void {
-  localStorage.setItem(TOKEN_KEY, token);
+export function clearToken() {
+  sessionStorage.removeItem(TOKEN_KEY);
 }
 
-export function clearToken(): void {
-  localStorage.removeItem(TOKEN_KEY);
-}
+export function isLoggedIn(): boolean {
+  return !!sessionStorage.getItem(TOKEN_KEY);
 
 export function isAuthenticated(): boolean {
   return !!getToken();
