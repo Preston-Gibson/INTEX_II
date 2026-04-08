@@ -94,6 +94,18 @@ public class HomeVisitationController : ControllerBase
         return Ok(residents);
     }
 
+    // DELETE /api/home-visitation/{id}
+    [HttpDelete("{id}")]
+    public async Task<IActionResult> DeleteVisit(int id)
+    {
+        var visit = await _db.HomeVisitations.FindAsync(id);
+        if (visit == null) return NotFound();
+
+        _db.HomeVisitations.Remove(visit);
+        await _db.SaveChangesAsync();
+        return NoContent();
+    }
+
     // POST /api/home-visitation/log
     // Logs a new home visit outcome
     [HttpPost("log")]

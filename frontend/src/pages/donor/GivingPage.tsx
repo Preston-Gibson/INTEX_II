@@ -1,11 +1,7 @@
-import { useState } from 'react';
+import { useState, useEffect, useCallback } from 'react';
+import { authHeaders, downloadExport } from '../../utils/auth';
 
-const HISTORY = [
-  { date: 'Oct 12, 2023', amount: '$150.00', program: 'Nutrition Center', status: 'Processed' },
-  { date: 'Sep 05, 2023', amount: '$500.00', program: 'General Fund', status: 'Processed' },
-  { date: 'Aug 28, 2023', amount: '$100.00', program: 'Emergency Housing', status: 'Pending' },
-  { date: 'Aug 10, 2023', amount: '$25.00', program: 'Health Clinic', status: 'Processed' },
-];
+const API = `${import.meta.env.VITE_API_URL ?? 'http://localhost:5229'}/api/donor-dashboard`;
 
 const PROGRAMS = [
   'Greatest Need (General Fund)',
@@ -15,10 +11,78 @@ const PROGRAMS = [
   'Health Clinic',
 ];
 
+interface Donation {
+  donationId: number;
+  donationType: string;
+  donationDate: string | null;
+  amount: number | null;
+  currencyCode: string | null;
+  estimatedValue: number;
+  campaignName: string | null;
+  isRecurring: boolean;
+  notes: string | null;
+}
+
 export default function GivingPage() {
   const [selectedAmount, setSelectedAmount] = useState<number | null>(50);
   const [customAmount, setCustomAmount] = useState('');
   const [program, setProgram] = useState(PROGRAMS[0]);
+  const [isRecurring, setIsRecurring] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [submitMsg, setSubmitMsg] = useState<{ ok: boolean; text: string } | null>(null);
+
+  const [donations, setDonations] = useState<Donation[]>([]);
+  const [lifetimeTotal, setLifetimeTotal] = useState<number>(0);
+  const [loading, setLoading] = useState(true);
+
+  const loadDonations = useCallback(() => {
+    setLoading(true);
+    fetch(`${API}/my-donations`, { headers: authHeaders() })
+      .then(r => r.json())
+      .then(data => {
+        setDonations(data.donations ?? []);
+        setLifetimeTotal(data.lifetimeTotal ?? 0);
+      })
+      .catch(() => {})
+      .finally(() => setLoading(false));
+  }, []);
+
+  useEffect(() => { loadDonations(); }, [loadDonations]);
+
+  const handleSubmit = async () => {
+    const amount = selectedAmount ?? parseFloat(customAmount);
+    if (!amount || amount <= 0) {
+      setSubmitMsg({ ok: false, text: 'Please enter a valid amount.' });
+      return;
+    }
+    setSubmitting(true);
+    setSubmitMsg(null);
+    try {
+      const res = await fetch(`${API}/my-donations`, {
+        method: 'POST',
+        headers: { ...authHeaders(), 'Content-Type': 'application/json' },
+        body: JSON.stringify({ amount, campaignName: program, isRecurring, notes: null }),
+      });
+      if (res.ok) {
+        setSubmitMsg({ ok: true, text: `Thank you! Your $${amount.toFixed(2)} gift has been recorded.` });
+        setSelectedAmount(50);
+        setCustomAmount('');
+        loadDonations();
+      } else {
+        const msg = await res.text().catch(() => 'Submission failed.');
+        setSubmitMsg({ ok: false, text: msg });
+      }
+    } catch {
+      setSubmitMsg({ ok: false, text: 'Network error. Please try again.' });
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const formatDate = (d: string | null) => {
+    if (!d) return '—';
+    return new Date(d).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+  };
 
   return (
     <div className="space-y-6">
@@ -74,7 +138,7 @@ export default function GivingPage() {
           </div>
 
           <p className="text-[10px] font-bold text-on-surface-variant uppercase tracking-widest mb-2">Designate Your Impact</p>
-          <div className="relative mb-8">
+          <div className="relative mb-4">
             <select
               value={program}
               onChange={(e) => setProgram(e.target.value)}
@@ -85,25 +149,48 @@ export default function GivingPage() {
             <span className="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-on-surface-variant text-[18px] pointer-events-none">expand_more</span>
           </div>
 
-          <button className="w-full aurora-gradient text-white font-bold py-3.5 rounded-xl text-sm hover:opacity-90 transition-opacity flex items-center justify-center gap-2">
-            Proceed to Secure Gift
-            <span className="material-symbols-outlined text-[18px]">arrow_forward</span>
+          <label className="flex items-center gap-2 mb-6 cursor-pointer">
+            <input
+              type="checkbox"
+              checked={isRecurring}
+              onChange={e => setIsRecurring(e.target.checked)}
+              className="w-4 h-4 accent-primary"
+            />
+            <span className="text-xs text-on-surface-variant font-medium">Make this a monthly recurring gift</span>
+          </label>
+
+          {submitMsg && (
+            <div className={`text-xs font-semibold px-3 py-2 rounded-lg mb-4 ${submitMsg.ok ? 'bg-secondary/10 text-secondary' : 'bg-error/10 text-error'}`}>
+              {submitMsg.text}
+            </div>
+          )}
+
+          <button
+            onClick={handleSubmit}
+            disabled={submitting}
+            className="w-full aurora-gradient text-white font-bold py-3.5 rounded-xl text-sm hover:opacity-90 transition-opacity flex items-center justify-center gap-2 disabled:opacity-60"
+          >
+            {submitting ? 'Processing…' : 'Proceed to Secure Gift'}
+            {!submitting && <span className="material-symbols-outlined text-[18px]">arrow_forward</span>}
           </button>
         </div>
 
         {/* Right column */}
         <div className="col-span-3 space-y-4">
-          {/* Stat cards */}
           <div className="grid grid-cols-2 gap-4">
             <div className="bg-secondary-container/30 rounded-xl p-4">
               <span className="material-symbols-outlined text-secondary text-[24px] mb-2 block" style={{ fontVariationSettings: "'FILL' 1" }}>savings</span>
-              <p className="font-manrope text-2xl font-extrabold text-primary">$12,450</p>
+              <p className="font-manrope text-2xl font-extrabold text-primary">
+                {loading ? '—' : `$${lifetimeTotal.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
+              </p>
               <p className="text-xs text-on-surface-variant font-medium">Lifetime Giving</p>
             </div>
             <div className="bg-tertiary-fixed/40 rounded-xl p-4">
-              <span className="material-symbols-outlined text-tertiary text-[24px] mb-2 block" style={{ fontVariationSettings: "'FILL' 1" }}>school</span>
-              <p className="font-manrope text-2xl font-extrabold text-tertiary">24</p>
-              <p className="text-xs text-on-surface-variant font-medium">Students Sponsored</p>
+              <span className="material-symbols-outlined text-tertiary text-[24px] mb-2 block" style={{ fontVariationSettings: "'FILL' 1" }}>volunteer_activism</span>
+              <p className="font-manrope text-2xl font-extrabold text-tertiary">
+                {loading ? '—' : donations.length}
+              </p>
+              <p className="text-xs text-on-surface-variant font-medium">Total Contributions</p>
             </div>
           </div>
 
@@ -111,44 +198,48 @@ export default function GivingPage() {
           <div className="bg-surface-container-low rounded-xl p-5">
             <div className="flex items-center justify-between mb-4">
               <p className="font-manrope font-bold text-on-surface">Recent History</p>
-              <button className="flex items-center gap-1 text-xs text-primary font-bold hover:underline">
+              <button
+                onClick={() => downloadExport('/api/export/my-tax-receipt', 'xlsx')}
+                className="flex items-center gap-1 text-xs text-primary font-bold hover:underline"
+              >
                 <span className="material-symbols-outlined text-[14px]">download</span>
-                Download Tax Receipts (2023)
+                Download Tax Receipt
               </button>
             </div>
-            <table className="w-full text-xs">
-              <thead>
-                <tr className="text-on-surface-variant font-bold uppercase tracking-wide">
-                  <th className="text-left pb-4">Date</th>
-                  <th className="text-left pb-4">Amount</th>
-                  <th className="text-left pb-4">Program</th>
-                  <th className="text-left pb-4">Status</th>
-                  <th className="pb-4"></th>
-                </tr>
-              </thead>
-              <tbody>
-                {HISTORY.map((row, i) => (
-                  <tr key={i}>
-                    <td className="py-2.5 text-on-surface-variant">{row.date}</td>
-                    <td className="py-2.5 font-bold text-on-surface">{row.amount}</td>
-                    <td className="py-2.5 text-on-surface-variant">{row.program}</td>
-                    <td className="py-2.5">
-                      <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
-                        row.status === 'Processed'
-                          ? 'bg-secondary/10 text-secondary'
-                          : 'bg-tertiary-fixed text-tertiary'
-                      }`}>
-                        {row.status}
-                      </span>
-                    </td>
-                    <td className="py-2.5">
-                      <span className="material-symbols-outlined text-on-surface-variant text-[16px]">receipt</span>
-                    </td>
+            {loading ? (
+              <p className="text-xs text-on-surface-variant py-4 text-center">Loading…</p>
+            ) : donations.length === 0 ? (
+              <p className="text-xs text-on-surface-variant py-4 text-center">No donations recorded yet.</p>
+            ) : (
+              <table className="w-full text-xs">
+                <thead>
+                  <tr className="text-on-surface-variant font-bold uppercase tracking-wide">
+                    <th className="text-left pb-4">Date</th>
+                    <th className="text-left pb-4">Amount</th>
+                    <th className="text-left pb-4">Campaign</th>
+                    <th className="text-left pb-4">Type</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-            <button className="mt-3 text-xs text-primary font-bold hover:underline">View Full History</button>
+                </thead>
+                <tbody>
+                  {donations.slice(0, 5).map((d) => (
+                    <tr key={d.donationId}>
+                      <td className="py-2.5 text-on-surface-variant">{formatDate(d.donationDate)}</td>
+                      <td className="py-2.5 font-bold text-on-surface">
+                        {d.amount != null ? `$${d.amount.toFixed(2)}` : `~$${d.estimatedValue.toFixed(2)}`}
+                      </td>
+                      <td className="py-2.5 text-on-surface-variant">{d.campaignName ?? '—'}</td>
+                      <td className="py-2.5">
+                        <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
+                          d.isRecurring ? 'bg-secondary/10 text-secondary' : 'bg-surface-container-high text-on-surface-variant'
+                        }`}>
+                          {d.isRecurring ? 'Monthly' : 'One-time'}
+                        </span>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            )}
           </div>
         </div>
       </div>

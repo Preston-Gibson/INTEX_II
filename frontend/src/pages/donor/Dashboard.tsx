@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import { downloadExport } from '../../utils/auth';
 import ImpactPage from './ImpactPage';
 import GivingPage from './GivingPage';
 import SettingsPage from './SettingsPage';
@@ -271,16 +272,22 @@ export default function DonorDashboard() {
               <div className="bg-surface-container-low rounded-xl p-4">
                 <p className="text-[10px] font-bold text-on-surface-variant uppercase tracking-widest mb-3">Command Resources</p>
                 <div className="space-y-2">
-                  {[
-                    { icon: 'description', label: '2023 Impact Tax Receipt' },
-                    { icon: 'receipt_long', label: 'Transparency Ledger' },
-                    { icon: 'mail', label: 'Contact Guardian Support' },
-                  ].map(({ icon, label }) => (
-                    <button key={label} className="w-full flex items-center gap-2 text-sm text-primary font-medium hover:underline">
-                      <span className="material-symbols-outlined text-[16px]">{icon}</span>
-                      {label}
-                    </button>
-                  ))}
+                  <button
+                    onClick={() => downloadExport('/api/export/my-tax-receipt', 'xlsx')}
+                    className="w-full flex items-center gap-2 text-sm text-primary font-medium hover:underline">
+                    <span className="material-symbols-outlined text-[16px]">description</span>
+                    Download Tax Receipt (All Years)
+                  </button>
+                  <button
+                    onClick={() => downloadExport('/api/export/my-tax-receipt', 'xlsx', new Date().getFullYear())}
+                    className="w-full flex items-center gap-2 text-sm text-primary font-medium hover:underline">
+                    <span className="material-symbols-outlined text-[16px]">receipt_long</span>
+                    Download Tax Receipt ({new Date().getFullYear()})
+                  </button>
+                  <button className="w-full flex items-center gap-2 text-sm text-primary font-medium hover:underline">
+                    <span className="material-symbols-outlined text-[16px]">mail</span>
+                    Contact Guardian Support
+                  </button>
                 </div>
               </div>
             </div>

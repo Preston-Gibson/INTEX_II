@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import AdminSidebar from '../../components/AdminSidebar';
-import { authHeaders } from '../../utils/auth';
+import { authHeaders, downloadExport } from '../../utils/auth';
 
 const API = `${import.meta.env.VITE_API_URL ?? 'http://localhost:5229'}/api/supporters`;
 
@@ -492,6 +492,18 @@ export default function DonorsContributions() {
             </button>
           </div>
 
+          <button
+            onClick={() => downloadExport('/api/export/donations', 'csv')}
+            className="flex items-center gap-2 bg-surface-container-low text-on-surface text-xs font-bold px-4 py-2 rounded-xl hover:bg-surface-container transition-colors flex-shrink-0">
+            <span className="material-symbols-outlined text-[16px]">download</span>
+            Export CSV
+          </button>
+          <button
+            onClick={() => downloadExport('/api/export/donations', 'xlsx')}
+            className="flex items-center gap-2 bg-surface-container-low text-on-surface text-xs font-bold px-4 py-2 rounded-xl hover:bg-surface-container transition-colors flex-shrink-0">
+            <span className="material-symbols-outlined text-[16px]">table_view</span>
+            Export XLSX
+          </button>
           {activeTab === 'supporters' && (
             <button onClick={openAddSupporter}
               className="aurora-gradient text-white text-sm font-bold px-4 py-2 rounded-xl hover:opacity-90 transition-opacity flex items-center gap-2 flex-shrink-0">
