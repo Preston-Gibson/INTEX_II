@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react';
-import { Link, useLocation } from 'react-router-dom';
 import AdminSidebar from '../../components/AdminSidebar';
 
 const API = 'http://localhost:5229/api/supporters';
@@ -212,7 +211,6 @@ function PaginationBar({
 // ── Main component ────────────────────────────────────────────────────────────
 
 export default function DonorsContributions() {
-  const location = useLocation();
   const [activeTab, setActiveTab] = useState<'supporters' | 'donations'>('supporters');
 
   // ── Supporters state ──────────────────────────────────────────────────────
