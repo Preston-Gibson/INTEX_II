@@ -80,6 +80,8 @@ export default function ProcessRecording() {
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [expandedId, setExpandedId] = useState<number | null>(null);
+  const [recPage, setRecPage] = useState(1);
+  const REC_PER_PAGE = 15;
 
   // Load residents
   useEffect(() => {
@@ -103,6 +105,7 @@ export default function ProcessRecording() {
     setSelected(r);
     setShowForm(false);
     setExpandedId(null);
+    setRecPage(1);
   }
 
   function handleFormChange(field: string, value: string | number | boolean) {
@@ -241,7 +244,7 @@ export default function ProcessRecording() {
                         <span className="material-symbols-outlined text-on-surface-variant text-[32px]">history_edu</span>
                         <p className="text-sm text-on-surface-variant">No recordings yet for this resident.</p>
                       </div>
-                    ) : recordings.map(rec => (
+                    ) : recordings.slice((recPage - 1) * REC_PER_PAGE, recPage * REC_PER_PAGE).map(rec => (
                       <div key={rec.recordingId} className="bg-surface-container-low rounded-2xl overflow-hidden">
                         {/* Summary row */}
                         <button
@@ -303,6 +306,48 @@ export default function ProcessRecording() {
                         )}
                       </div>
                     ))}
+                    {/* Pagination */}
+                    {recordings.length > REC_PER_PAGE && (
+                      <div className="flex items-center justify-between pt-2 pb-1">
+                        <p className="text-xs text-on-surface-variant">
+                          {(recPage - 1) * REC_PER_PAGE + 1}–{Math.min(recPage * REC_PER_PAGE, recordings.length)} of {recordings.length}
+                        </p>
+                        <div className="flex items-center gap-1">
+                          <button
+                            disabled={recPage === 1}
+                            onClick={() => setRecPage(p => p - 1)}
+                            className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-surface-container-low disabled:opacity-30 transition-colors"
+                          >
+                            <span className="material-symbols-outlined text-[18px]">chevron_left</span>
+                          </button>
+                          {Array.from({ length: Math.ceil(recordings.length / REC_PER_PAGE) }, (_, i) => i + 1)
+                            .filter(p => p === 1 || p === Math.ceil(recordings.length / REC_PER_PAGE) || Math.abs(p - recPage) <= 1)
+                            .reduce<(number | '...')[]>((acc, p, i, arr) => {
+                              if (i > 0 && p - (arr[i - 1] as number) > 1) acc.push('...');
+                              acc.push(p);
+                              return acc;
+                            }, [])
+                            .map((p, i) => p === '...' ? (
+                              <span key={`ellipsis-${i}`} className="text-xs text-on-surface-variant px-1">…</span>
+                            ) : (
+                              <button
+                                key={p}
+                                onClick={() => setRecPage(p as number)}
+                                className={`w-8 h-8 rounded-lg text-xs font-bold transition-colors ${recPage === p ? 'aurora-gradient text-white' : 'hover:bg-surface-container-low text-on-surface-variant'}`}
+                              >
+                                {p}
+                              </button>
+                            ))}
+                          <button
+                            disabled={recPage === Math.ceil(recordings.length / REC_PER_PAGE)}
+                            onClick={() => setRecPage(p => p + 1)}
+                            className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-surface-container-low disabled:opacity-30 transition-colors"
+                          >
+                            <span className="material-symbols-outlined text-[18px]">chevron_right</span>
+                          </button>
+                        </div>
+                      </div>
+                    )}
                   </div>
                 </div>
 

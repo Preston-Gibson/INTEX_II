@@ -48,10 +48,13 @@ public class ResidentController : ControllerBase
         var query = _db.Residents.Include(r => r.Safehouse).AsQueryable();
 
         if (!string.IsNullOrWhiteSpace(search))
+        {
+            var pattern = $"%{search}%";
             query = query.Where(r =>
-                r.CaseControlNo.Contains(search) ||
-                r.InternalCode.Contains(search) ||
-                r.AssignedSocialWorker.Contains(search));
+                EF.Functions.ILike(r.CaseControlNo, pattern) ||
+                EF.Functions.ILike(r.InternalCode, pattern) ||
+                EF.Functions.ILike(r.AssignedSocialWorker, pattern));
+        }
 
         if (!string.IsNullOrWhiteSpace(caseStatus))
             query = query.Where(r => r.CaseStatus == caseStatus);

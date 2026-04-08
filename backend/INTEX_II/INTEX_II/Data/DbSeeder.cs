@@ -130,7 +130,7 @@ public static class DbSeeder
         {
             if (await userManager.FindByEmailAsync(email) != null) continue;
 
-            var user = new ApplicationUser { UserName = email, Email = email, FirstName = first, LastName = last };
+            var user = new ApplicationUser { UserName = email, Email = email, FirstName = first, LastName = last, EmailConfirmed = true };
             var result = await userManager.CreateAsync(user, password);
             if (result.Succeeded)
                 await userManager.AddToRoleAsync(user, role);
