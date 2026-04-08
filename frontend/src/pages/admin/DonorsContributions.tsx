@@ -3,15 +3,6 @@ import { Link, useLocation } from 'react-router-dom';
 
 const API = 'http://localhost:5229/api/supporters';
 
-const ADMIN_NAV = [
-  { label: 'Dashboard',              icon: 'dashboard',          to: '/admin-dashboard' },
-  { label: 'Donors & Contributions', icon: 'volunteer_activism', to: '/admin-donors-contributions' },
-  { label: 'Caseload Inventory',     icon: 'folder_shared',      to: '/admin-caseload-inventory' },
-  { label: 'Process Recording',      icon: 'edit_note',          to: '/admin-process-recording' },
-  { label: 'Home Visitation',        icon: 'home_pin',           to: '/admin-home-visitation-case-conference' },
-  { label: 'Reports & Analytics',    icon: 'bar_chart',          to: '/admin-reports-analytics' },
-];
-
 const SUPPORTER_TYPES  = ['Monetary Donor', 'Volunteer', 'Skills Contributor', 'In-Kind Donor', 'Social Media Ambassador'];
 const DONATION_TYPES   = ['Monetary', 'InKind', 'Time', 'Skills', 'SocialMedia'];
 const STATUS_OPTIONS   = ['Active', 'Inactive'];
@@ -218,6 +209,7 @@ function PaginationBar({
 }
 
 // ── Main component ────────────────────────────────────────────────────────────
+import AdminSidebar from '../../components/AdminSidebar';
 
 export default function DonorsContributions() {
   const location = useLocation();

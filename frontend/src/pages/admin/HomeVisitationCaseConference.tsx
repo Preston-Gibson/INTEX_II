@@ -1,13 +1,5 @@
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
-
-const NAV_ITEMS = [
-  { label: 'Caseload', icon: 'folder_shared', path: '/admin-caseload-inventory' },
-  { label: 'Donors', icon: 'volunteer_activism', path: '/admin-donors-contributions' },
-  { label: 'Recordings', icon: 'history_edu', path: '/admin-process-recording' },
-  { label: 'Visits', icon: 'home_pin', path: '/admin-home-visitation-case-conference' },
-  { label: 'Analytics', icon: 'analytics', path: '/admin-reports-analytics' },
-];
+import AdminSidebar from '../../components/AdminSidebar';
 
 const SCHEDULED_VISITS = [
   {
@@ -95,57 +87,7 @@ export default function HomeVisitationCaseConference() {
 
   return (
     <div className="flex h-screen bg-surface overflow-hidden font-body">
-      {/* Sidebar */}
-      <aside className="w-64 flex-shrink-0 flex flex-col bg-slate-50 border-r border-outline-variant/20 py-6 relative z-10">
-        <div className="px-6 mb-10">
-          <div className="text-xl font-extrabold text-blue-900 font-manrope">Lucero Admin</div>
-          <div className="text-xs text-slate-500 font-manrope">Santa Rosa de Copán</div>
-        </div>
-
-        <nav className="flex-1 flex flex-col gap-1">
-          {NAV_ITEMS.map(({ label, icon, path }) => {
-            const isActive = label === 'Visits';
-            return (
-              <Link
-                key={label}
-                to={path}
-                className={`mx-2 px-4 py-3 rounded-xl flex items-center gap-3 transition-all ${
-                  isActive
-                    ? 'bg-blue-100/50 text-blue-900 font-bold translate-x-1 duration-200'
-                    : 'text-slate-500 hover:bg-slate-200/50 font-medium'
-                }`}
-              >
-                <span className="material-symbols-outlined">{icon}</span>
-                <span className="font-manrope text-sm">{label}</span>
-              </Link>
-            );
-          })}
-        </nav>
-
-        <div className="px-4 mb-6">
-          <button className="w-full bg-primary text-white py-3 rounded-xl font-bold text-sm shadow-md flex items-center justify-center gap-2">
-            <span className="material-symbols-outlined text-sm">add</span>
-            New Case
-          </button>
-        </div>
-
-        <div className="border-t border-slate-200 pt-6 flex flex-col gap-1">
-          <a
-            href="#"
-            className="text-slate-500 mx-2 px-4 py-2 hover:bg-slate-200/50 rounded-xl transition-all flex items-center gap-3"
-          >
-            <span className="material-symbols-outlined">settings</span>
-            <span className="font-manrope font-medium text-sm">Settings</span>
-          </a>
-          <a
-            href="#"
-            className="text-slate-500 mx-2 px-4 py-2 hover:bg-slate-200/50 rounded-xl transition-all flex items-center gap-3"
-          >
-            <span className="material-symbols-outlined">help_outline</span>
-            <span className="font-manrope font-medium text-sm">Support</span>
-          </a>
-        </div>
-      </aside>
+      <AdminSidebar />
 
       {/* Content */}
       <div className="flex-1 flex flex-col overflow-hidden">

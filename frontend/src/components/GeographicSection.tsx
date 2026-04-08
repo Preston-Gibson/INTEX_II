@@ -51,13 +51,13 @@ export default function GeographicSection() {
   const [safehouses, setSafehouses] = useState<SafehouseLocation[]>([])
 
   useEffect(() => {
-    fetch('http://localhost:5229/api/impact/geographic-reach')
+    fetch(`${import.meta.env.VITE_API_URL ?? 'http://localhost:5229'}/api/impact/geographic-reach`)
       .then(r => r.json()).then(setGeoReach).catch(() => {})
 
-    fetch('http://localhost:5229/api/impact/yearly-impact')
+    fetch(`${import.meta.env.VITE_API_URL ?? 'http://localhost:5229'}/api/impact/yearly-impact`)
       .then(r => r.json()).then(setYearlyImpact).catch(() => {})
 
-    fetch('http://localhost:5229/api/impact/safehouse-locations')
+    fetch(`${import.meta.env.VITE_API_URL ?? 'http://localhost:5229'}/api/impact/safehouse-locations`)
       .then(r => r.json()).then(setSafehouses).catch(() => {})
   }, [])
 

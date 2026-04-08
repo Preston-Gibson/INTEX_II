@@ -1,16 +1,7 @@
 import { useState, useEffect } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import AdminSidebar from '../../components/AdminSidebar';
 
-const API = 'http://localhost:5229/api/residents';
-
-const ADMIN_NAV = [
-  { label: 'Dashboard',              icon: 'dashboard',          to: '/admin-dashboard' },
-  { label: 'Donors & Contributions', icon: 'volunteer_activism', to: '/admin-donors-contributions' },
-  { label: 'Caseload Inventory',     icon: 'folder_shared',      to: '/admin-caseload-inventory' },
-  { label: 'Process Recording',      icon: 'edit_note',          to: '/admin-process-recording' },
-  { label: 'Home Visitation',        icon: 'home_pin',           to: '/admin-home-visitation-case-conference' },
-  { label: 'Reports & Analytics',    icon: 'bar_chart',          to: '/admin-reports-analytics' },
-];
+const API = `${import.meta.env.VITE_API_URL ?? 'http://localhost:5229'}/api/residents`;
 
 const CASE_STATUS_OPTIONS = ['Active', 'Closed', 'Transferred'];
 const CASE_CATEGORY_OPTIONS = ['Abandoned', 'Foundling', 'Neglected', 'Surrendered'];
@@ -157,7 +148,7 @@ const selectCls = 'w-full bg-surface-container-low rounded-xl px-3 py-2 text-sm 
 // ── Main component ───────────────────────────────────────────────────────────
 
 export default function CaseloadInventory() {
-  const location = useLocation();
+
 
   const [residents, setResidents] = useState<ResidentRow[]>([]);
   const [safehouses, setSafehouses] = useState<SafehouseOption[]>([]);
@@ -259,36 +250,7 @@ export default function CaseloadInventory() {
 
   return (
     <div className="flex h-screen bg-surface overflow-hidden font-body">
-      {/* ── Sidebar ── */}
-      <aside className="w-56 flex-shrink-0 flex flex-col bg-surface-container-lowest border-r border-outline-variant/20 py-6 px-4 relative z-10">
-        <div className="mb-8 px-2">
-          <p className="text-primary font-manrope font-extrabold text-lg leading-tight">Guardian Admin</p>
-          <p className="text-on-surface-variant text-[10px] font-bold uppercase tracking-widest mt-0.5">Case Management</p>
-        </div>
-        <nav className="flex-1 space-y-1">
-          {ADMIN_NAV.map(({ label, icon, to }) => (
-            <Link
-              key={to}
-              to={to}
-              className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold transition-colors ${
-                location.pathname === to
-                  ? 'bg-primary/10 text-primary border-l-2 border-primary'
-                  : 'text-on-surface-variant hover:bg-surface-container-low'
-              }`}
-            >
-              <span className="material-symbols-outlined text-[20px]">{icon}</span>
-              {label}
-            </Link>
-          ))}
-        </nav>
-        <Link
-          to="/"
-          className="w-full flex items-center justify-center gap-2 text-on-surface-variant text-xs font-semibold py-2 rounded-xl hover:bg-surface-container-low transition-colors"
-        >
-          <span className="material-symbols-outlined text-[16px]">arrow_back</span>
-          Back to Home
-        </Link>
-      </aside>
+      <AdminSidebar />
 
       {/* ── Content ── */}
       <div className="flex-1 flex flex-col overflow-hidden">
