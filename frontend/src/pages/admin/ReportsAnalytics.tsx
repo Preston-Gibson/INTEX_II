@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import AdminSidebar from '../../components/AdminSidebar';
 
 const API = `${import.meta.env.VITE_API_URL ?? 'http://localhost:5229'}/api/reports`;
 const MONTH_NAMES = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
@@ -83,7 +83,10 @@ export default function ReportsAnalytics() {
   const totalResidents = safehouses.reduce((s, sh) => s + sh.residents, 0);
 
   return (
-    <div className="min-h-screen bg-surface p-6 max-w-7xl mx-auto">
+    <div className="flex h-screen bg-surface overflow-hidden font-body">
+      <AdminSidebar />
+      <div className="flex-1 overflow-y-auto">
+      <div className="p-6 max-w-7xl mx-auto">
 
       {/* Header */}
       <div className="flex items-start justify-between mb-8">
@@ -109,10 +112,6 @@ export default function ReportsAnalytics() {
             <span className="material-symbols-outlined text-[16px]">download</span>
             Export PDF
           </button>
-          <Link to="/" className="flex items-center gap-2 text-on-surface-variant text-xs font-semibold px-4 py-2.5 rounded-xl hover:bg-surface-container-low transition-colors">
-            <span className="material-symbols-outlined text-[16px]">arrow_back</span>
-            Back to Home
-          </Link>
         </div>
       </div>
 
@@ -377,6 +376,8 @@ export default function ReportsAnalytics() {
           </section>
         </>
       )}
+    </div>
+      </div>
     </div>
   );
 }

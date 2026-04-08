@@ -1,18 +1,7 @@
 import { useState, useEffect } from 'react';
-import { NavLink, Link } from 'react-router-dom';
+import AdminSidebar from '../../components/AdminSidebar';
 
 const API = `${import.meta.env.VITE_API_URL ?? 'http://localhost:5229'}/api/process-recordings`;
-
-// ── Nav ───────────────────────────────────────────────────────────────────────
-
-const ADMIN_NAV = [
-  { label: 'Dashboard',           icon: 'dashboard',          to: '/admin-dashboard' },
-  { label: 'Donors',              icon: 'volunteer_activism', to: '/admin-donors-contributions' },
-  { label: 'Caseload',            icon: 'folder_shared',      to: '/admin-caseload-inventory' },
-  { label: 'Process Recording',   icon: 'edit_note',          to: '/admin-process-recording' },
-  { label: 'Home Visitation',     icon: 'home_pin',           to: '/admin-home-visitation-case-conference' },
-  { label: 'Analytics',           icon: 'bar_chart',          to: '/admin-reports-analytics' },
-];
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -152,30 +141,7 @@ export default function ProcessRecording() {
   return (
     <div className="flex h-screen bg-surface overflow-hidden font-body">
 
-      {/* ── Sidebar ── */}
-      <aside className="w-56 flex-shrink-0 flex flex-col bg-surface-container-lowest border-r border-outline-variant/20 py-6 px-4 relative z-10">
-        <div className="mb-8 px-2">
-          <p className="text-primary font-headline font-extrabold text-lg leading-tight">Lucera Admin</p>
-          <p className="text-on-surface-variant text-[10px] font-bold uppercase tracking-widest mt-0.5">Santa Rosa de Copán</p>
-        </div>
-        <nav className="flex-1 space-y-1">
-          {ADMIN_NAV.map(({ to, icon, label }) => (
-            <NavLink key={to} to={to} end={to === '/admin-dashboard'}
-              className={({ isActive }) =>
-                `flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold transition-colors ${
-                  isActive ? 'bg-primary/10 text-primary border-l-2 border-primary' : 'text-on-surface-variant hover:bg-surface-container-low'
-                }`}
-            >
-              <span className="material-symbols-outlined text-[20px]">{icon}</span>
-              {label}
-            </NavLink>
-          ))}
-        </nav>
-        <Link to="/" className="flex items-center justify-center gap-2 text-on-surface-variant text-xs font-semibold py-2 rounded-xl hover:bg-surface-container-low transition-colors mt-4">
-          <span className="material-symbols-outlined text-[16px]">arrow_back</span>
-          Back to Home
-        </Link>
-      </aside>
+      <AdminSidebar />
 
       {/* ── Main ── */}
       <div className="flex-1 flex flex-col overflow-hidden">
