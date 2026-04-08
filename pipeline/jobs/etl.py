@@ -256,6 +256,89 @@ def build_warehouse():
 
 
 # ---------------------------------------------------------------------------
+# Phase C — Build social media warehouse table
+# ---------------------------------------------------------------------------
+
+PLATFORM_MAP = {
+    "Facebook": 0, "Instagram": 1, "LinkedIn": 2,
+    "TikTok": 3, "Twitter": 4, "WhatsApp": 5, "YouTube": 6,
+}
+POST_TYPE_MAP = {
+    "Campaign": 0, "EducationalContent": 1, "EventPromotion": 2,
+    "FundraisingAppeal": 3, "ImpactStory": 4, "ThankYou": 5,
+}
+MEDIA_TYPE_MAP = {"Carousel": 0, "Photo": 1, "Reel": 2, "Text": 3, "Video": 4}
+DAY_OF_WEEK_MAP = {
+    "Friday": 0, "Monday": 1, "Saturday": 2, "Sunday": 3,
+    "Thursday": 4, "Tuesday": 5, "Wednesday": 6,
+}
+CTA_TYPE_MAP = {"DonateNow": 0, "LearnMore": 1, "None": 2, "ShareStory": 3, "SignUp": 4}
+CONTENT_TOPIC_MAP = {
+    "AwarenessRaising": 0, "CampaignLaunch": 1, "DonorImpact": 2,
+    "Education": 3, "EventRecap": 4, "Gratitude": 5,
+    "Health": 6, "Reintegration": 7, "SafehouseLife": 8,
+}
+SENTIMENT_TONE_MAP = {
+    "Celebratory": 0, "Emotional": 1, "Grateful": 2,
+    "Hopeful": 3, "Informative": 4, "Urgent": 5,
+}
+
+
+def build_social_warehouse():
+    op_engine = get_engine(OPERATIONAL_SCHEMA)
+    posts = pd.read_sql("SELECT * FROM social_media_posts", op_engine)
+
+    # ---- Null fills --------------------------------------------------------
+    posts["call_to_action_type"] = posts["call_to_action_type"].fillna("None")
+    posts["boost_budget_php"]    = posts["boost_budget_php"].fillna(0.0)
+
+    # ---- Boolean → int -----------------------------------------------------
+    for col in ["has_call_to_action", "features_resident_story", "is_boosted"]:
+        posts[col] = posts[col].astype(int)
+
+    # ---- Categorical encoding ----------------------------------------------
+    posts["platform_encoded"]          = posts["platform"].map(PLATFORM_MAP).fillna(-1).astype(int)
+    posts["post_type_encoded"]         = posts["post_type"].map(POST_TYPE_MAP).fillna(-1).astype(int)
+    posts["media_type_encoded"]        = posts["media_type"].map(MEDIA_TYPE_MAP).fillna(-1).astype(int)
+    posts["day_of_week_encoded"]       = posts["day_of_week"].map(DAY_OF_WEEK_MAP).fillna(-1).astype(int)
+    posts["call_to_action_type_encoded"] = posts["call_to_action_type"].map(CTA_TYPE_MAP).fillna(-1).astype(int)
+    posts["content_topic_encoded"]     = posts["content_topic"].map(CONTENT_TOPIC_MAP).fillna(-1).astype(int)
+    posts["sentiment_tone_encoded"]    = posts["sentiment_tone"].map(SENTIMENT_TONE_MAP).fillna(-1).astype(int)
+
+    # ---- Target labels -----------------------------------------------------
+    q33 = posts["engagement_rate"].quantile(1 / 3)
+    q67 = posts["engagement_rate"].quantile(2 / 3)
+
+    def _engagement_tier(rate):
+        if rate <= q33:
+            return "Low"
+        elif rate <= q67:
+            return "Medium"
+        return "High"
+
+    posts["engagement_tier"] = posts["engagement_rate"].apply(_engagement_tier)
+    posts["has_donations"]   = (posts["donation_referrals"] > 0).astype(int)
+
+    # ---- Select modeling columns -------------------------------------------
+    keep = [
+        "post_id",
+        # encoded categoricals
+        "platform_encoded", "post_type_encoded", "media_type_encoded",
+        "day_of_week_encoded", "call_to_action_type_encoded",
+        "content_topic_encoded", "sentiment_tone_encoded",
+        # boolean features
+        "has_call_to_action", "features_resident_story", "is_boosted",
+        # numeric features
+        "post_hour", "num_hashtags", "mentions_count", "caption_length",
+        "boost_budget_php", "follower_count_at_post",
+        # targets
+        "engagement_tier", "has_donations",
+    ]
+    df_model = posts[[c for c in keep if c in posts.columns]].copy()
+
+    wh_engine = get_engine(WAREHOUSE_SCHEMA)
+    df_model.to_sql(
+        "fact_social_media_ml",
 # Phase C — Build donor warehouse modeling table
 # ---------------------------------------------------------------------------
 
@@ -498,6 +581,12 @@ def build_resident_outcome_warehouse():
         index=False,
     )
 
+    print(f"fact_social_media_ml written to schema '{WAREHOUSE_SCHEMA}'")
+    print(f"  {len(df_model)} rows, {len(df_model.columns)} columns")
+    print(f"  Engagement tier distribution:\n{df_model['engagement_tier'].value_counts().to_string()}")
+    print(f"  Has donations distribution:\n{df_model['has_donations'].value_counts().to_string()}")
+    print(f"  Tertile thresholds — q33: {q33:.6f}, q67: {q67:.6f}")
+    return len(df_model), q33, q67
     print(f"fact_resident_outcomes_ml written to schema '{WAREHOUSE_SCHEMA}'")
     print(f"  {len(df)} rows, {len(df.columns)} columns")
     print(f"  Reintegration outcome:\n{df['reintegration_outcome_label'].value_counts().to_string()}")
@@ -517,6 +606,11 @@ if __name__ == "__main__":
     print("\n=== Phase A: Loading CSVs into operational schema ===")
     load_csvs_to_operational()
 
+    print("\n=== Phase B: Building warehouse modeling table (residents) ===")
+    build_warehouse()
+
+    print("\n=== Phase C: Building warehouse modeling table (social media) ===")
+    build_social_warehouse()
     print("\n=== Phase B: Building resident warehouse modeling table ===")
     build_warehouse()
 

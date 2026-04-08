@@ -122,3 +122,21 @@ def ensure_risk_predictions_table(schema: str = "operational"):
                     prediction_ts  TIMESTAMPTZ
                 )
             """)
+
+
+def ensure_social_predictions_table(schema: str = "operational"):
+    """Create the social media predictions table if it doesn't exist."""
+    with pg_conn(schema) as conn:
+        with conn.cursor() as cur:
+            cur.execute(f"""
+                CREATE TABLE IF NOT EXISTS {schema}.social_media_predictions (
+                    post_id                    INTEGER          PRIMARY KEY,
+                    predicted_engagement_tier  TEXT,
+                    prob_engagement_low        DOUBLE PRECISION,
+                    prob_engagement_medium     DOUBLE PRECISION,
+                    prob_engagement_high       DOUBLE PRECISION,
+                    predicted_has_donations    INTEGER,
+                    prob_has_donations         DOUBLE PRECISION,
+                    prediction_ts              TIMESTAMPTZ
+                )
+            """)

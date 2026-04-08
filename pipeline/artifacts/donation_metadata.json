@@ -1,0 +1,51 @@
+{
+  "model_name": "social_media_donation_classifier",
+  "model_version": "1.0.0",
+  "trained_at_utc": "2026-04-08T17:49:51.932200+00:00",
+  "warehouse_table": "fact_social_media_ml",
+  "num_training_rows": 609,
+  "num_test_rows": 203,
+  "label_col": "has_donations",
+  "feature_cols": [
+    "platform_encoded",
+    "post_type_encoded",
+    "media_type_encoded",
+    "day_of_week_encoded",
+    "call_to_action_type_encoded",
+    "content_topic_encoded",
+    "sentiment_tone_encoded",
+    "has_call_to_action",
+    "features_resident_story",
+    "is_boosted",
+    "post_hour",
+    "num_hashtags",
+    "mentions_count",
+    "caption_length",
+    "boost_budget_php",
+    "follower_count_at_post"
+  ],
+  "cat_cols": [
+    "platform_encoded",
+    "post_type_encoded",
+    "media_type_encoded",
+    "day_of_week_encoded",
+    "call_to_action_type_encoded",
+    "content_topic_encoded",
+    "sentiment_tone_encoded"
+  ],
+  "num_cols": [
+    "has_call_to_action",
+    "features_resident_story",
+    "is_boosted",
+    "post_hour",
+    "num_hashtags",
+    "mentions_count",
+    "caption_length",
+    "boost_budget_php",
+    "follower_count_at_post"
+  ],
+  "classes": [
+    0,
+    1
+  ]
+}
