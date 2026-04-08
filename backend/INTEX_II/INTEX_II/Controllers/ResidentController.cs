@@ -304,6 +304,18 @@ public class ResidentController : ControllerBase
         await _db.SaveChangesAsync();
         return NoContent();
     }
+
+    // DELETE /api/residents/{id}
+    [HttpDelete("{id}")]
+    public async Task<IActionResult> Delete(int id)
+    {
+        var entity = await _db.Residents.FindAsync(id);
+        if (entity == null) return NotFound();
+
+        _db.Residents.Remove(entity);
+        await _db.SaveChangesAsync();
+        return NoContent();
+    }
 }
 
 public record ResidentCreateDto(

@@ -62,7 +62,7 @@ public class ProcessRecordingController : ControllerBase
             {
                 p.RecordingId,
                 p.ResidentId,
-                SessionDate = p.SessionDate.ToString(),
+                SessionDate = p.SessionDate.ToString("yyyy-MM-dd"),
                 p.SocialWorker,
                 p.SessionType,
                 p.SessionDurationMinutes,

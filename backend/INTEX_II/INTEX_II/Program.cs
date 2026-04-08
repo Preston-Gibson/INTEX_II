@@ -90,6 +90,16 @@ builder.Services.AddAuthentication(options =>
 
 var app = builder.Build();
 
+// TO DO: Once everyone runs this, delete it. Just to populate profile picture. 
+using (var scope = app.Services.CreateScope())
+{
+    var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+    await db.Database.ExecuteSqlRawAsync(@"
+        ALTER TABLE ""AspNetUsers""
+        ADD COLUMN IF NOT EXISTS profile_picture_url text NULL;
+    ");
+}
+
 // Seed roles and default admin account
 using (var scope = app.Services.CreateScope())
 {
@@ -127,6 +137,13 @@ if (builder.Configuration.GetValue<bool>("DataSeeding:SeedOnStartup"))
 
     var userManager = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
     await DbSeeder.SeedUsersAsync(userManager);
+}
+
+// Always reset sequences on startup to keep them in sync with seeded data.
+using (var scope = app.Services.CreateScope())
+{
+    var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+    await DbSeeder.ResetSequencesAsync(db);
 }
 
 if (app.Environment.IsDevelopment())

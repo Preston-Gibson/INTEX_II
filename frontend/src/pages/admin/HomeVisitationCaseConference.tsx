@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import AdminSidebar from '../../components/AdminSidebar';
+import UserAvatar from '../../components/UserAvatar';
 import { authHeaders } from '../../utils/auth';
 
 const API = `${import.meta.env.VITE_API_URL ?? 'http://localhost:5229'}/api/home-visitation`;
@@ -142,7 +143,7 @@ export default function HomeVisitationCaseConference() {
               <span className="material-symbols-outlined text-on-surface-variant text-[22px]">notifications</span>
               <span className="absolute -top-1 -right-1 w-4 h-4 bg-error rounded-full text-white text-[9px] font-bold flex items-center justify-center">2</span>
             </button>
-            <div className="w-8 h-8 rounded-full bg-primary-container flex items-center justify-center text-xs font-bold text-on-primary">LA</div>
+            <UserAvatar />
           </div>
         </header>
 

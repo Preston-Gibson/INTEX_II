@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import UserAvatar from '../../components/UserAvatar';
 import ImpactPage from './ImpactPage';
 import GivingPage from './GivingPage';
 import SettingsPage from './SettingsPage';
@@ -118,13 +119,7 @@ export default function DonorDashboard() {
             <button>
               <span className="material-symbols-outlined text-on-surface-variant text-[22px]">help</span>
             </button>
-            <div className="flex items-center gap-2">
-              <div className="w-8 h-8 rounded-full bg-primary-container flex items-center justify-center text-xs font-bold text-on-primary">ER</div>
-              <div className="text-right">
-                <p className="text-xs font-bold text-on-surface leading-tight">Elena Rodriguez</p>
-                <p className="text-[10px] text-secondary font-semibold">Gold Guardian</p>
-              </div>
-            </div>
+            <UserAvatar />
           </div>
         </header>
 
