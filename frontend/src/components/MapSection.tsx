@@ -157,8 +157,8 @@ export default function MapSection() {
               <div className="flex flex-col gap-3">
                 {safehouses.length > 0 ? safehouses.map(sh => (
                   <div key={sh.safehouseId} className="bg-surface-container-lowest rounded-xl px-4 py-3">
-                    <p className="text-[0.88rem] font-bold text-on-surface">{sh.name}</p>
-                    <p className="text-[0.78rem] text-on-surface-variant">{sh.city}, {sh.country}</p>
+                    <p className="text-[0.88rem] font-bold text-on-surface">{sh.city}</p>
+                    <p className="text-[0.78rem] text-on-surface-variant">{sh.country}</p>
                   </div>
                 )) : (
                   <p className="text-[0.85rem] text-on-surface-variant">Loading safehouses...</p>

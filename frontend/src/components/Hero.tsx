@@ -1,4 +1,13 @@
+import { useNavigate } from 'react-router-dom'
+import { isAuthenticated } from '../utils/auth'
+
 export default function Hero() {
+  const navigate = useNavigate()
+
+  const handleDonateNow = () => {
+    navigate(isAuthenticated() ? '/donor-dashboard' : '/login')
+  }
+
   return (
     <section className="relative overflow-hidden min-h-[calc(100svh-7.25rem)] flex items-center">
       {/* Background image layer */}
@@ -38,14 +47,14 @@ export default function Hero() {
           </p>
 
           <div className="flex gap-4 flex-wrap">
-            <button className="aurora-gradient inline-flex items-center gap-2 px-8 py-3.5 text-white font-manrope font-bold text-base rounded-[0.75rem] shadow-[0_4px_16px_rgba(0,63,135,0.35)] hover:opacity-90 active:scale-[0.97] transition-all">
+            <button onClick={handleDonateNow} className="aurora-gradient inline-flex items-center gap-2 px-8 py-3.5 text-white font-manrope font-bold text-base rounded-[0.75rem] shadow-[0_4px_16px_rgba(0,63,135,0.35)] hover:opacity-90 active:scale-[0.97] transition-all">
               Donate Now
               <span className="material-symbols-outlined" style={{ fontSize: '1.2rem' }}>
                 volunteer_activism
               </span>
             </button>
-            <button className="inline-flex items-center gap-2 px-8 py-3.5 bg-surface-container-lowest text-on-surface font-manrope font-bold text-base rounded-[0.75rem] border border-outline-variant/20 hover:bg-surface-container-low transition-colors">
-              Our Story
+            <button onClick={() => navigate('/impact')} className="inline-flex items-center gap-2 px-8 py-3.5 bg-surface-container-lowest text-on-surface font-manrope font-bold text-base rounded-[0.75rem] border border-outline-variant/20 hover:bg-surface-container-low transition-colors">
+              Our Impact
             </button>
           </div>
         </div>
