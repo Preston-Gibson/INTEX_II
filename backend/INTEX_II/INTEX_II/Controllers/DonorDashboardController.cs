@@ -1,4 +1,6 @@
+using System.IdentityModel.Tokens.Jwt;
 using INTEX_II.Data;
+using INTEX_II.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -81,6 +83,104 @@ public class DonorDashboardController : ControllerBase
         return Ok(byYear);
     }
 
+    // GET /api/donor-dashboard/my-donations
+    // Returns the logged-in donor's donation history and lifetime total
+    [HttpGet("my-donations")]
+    public async Task<IActionResult> GetMyDonations()
+    {
+        var email = User.FindFirst(JwtRegisteredClaimNames.Email)?.Value
+                    ?? User.FindFirst(System.Security.Claims.ClaimTypes.Email)?.Value;
+        if (string.IsNullOrEmpty(email)) return Unauthorized();
+
+        var supporter = await _db.Supporters.FirstOrDefaultAsync(s => s.Email == email);
+
+        if (supporter is null)
+            return Ok(new { lifetimeTotal = 0m, donations = Array.Empty<object>() });
+
+        var donations = await _db.Donations
+            .Where(d => d.SupporterId == supporter.SupporterId)
+            .OrderByDescending(d => d.DonationDate)
+            .Select(d => new
+            {
+                d.DonationId,
+                d.DonationType,
+                d.DonationDate,
+                d.Amount,
+                d.CurrencyCode,
+                d.EstimatedValue,
+                d.CampaignName,
+                d.IsRecurring,
+                d.Notes
+            })
+            .ToListAsync();
+
+        var lifetimeTotal = donations.Sum(d => d.Amount ?? 0);
+
+        return Ok(new { lifetimeTotal, donations });
+    }
+
+    // POST /api/donor-dashboard/my-donations
+    // Records a new monetary donation for the logged-in donor
+    [HttpPost("my-donations")]
+    public async Task<IActionResult> SubmitDonation([FromBody] SubmitDonationDto dto)
+    {
+        var email = User.FindFirst(JwtRegisteredClaimNames.Email)?.Value
+                    ?? User.FindFirst(System.Security.Claims.ClaimTypes.Email)?.Value;
+        if (string.IsNullOrEmpty(email)) return Unauthorized();
+
+        var supporter = await _db.Supporters.FirstOrDefaultAsync(s => s.Email == email);
+        if (supporter is null)
+        {
+            // Auto-create a supporter record for self-registered donors
+            supporter = new Supporter
+            {
+                Email              = email,
+                FirstName          = string.Empty,
+                LastName           = string.Empty,
+                DisplayName        = email,
+                OrganizationName   = string.Empty,
+                SupporterType      = "Monetary Donor",
+                RelationshipType   = "Individual",
+                Region             = string.Empty,
+                Country            = string.Empty,
+                Phone              = string.Empty,
+                Status             = "Active",
+                CreatedAt          = DateTime.UtcNow,
+                AcquisitionChannel = "Self-Registration",
+            };
+            await _db.Database.ExecuteSqlRawAsync(
+                "SELECT setval('supporters_supporter_id_seq', GREATEST((SELECT MAX(supporter_id) FROM supporters), nextval('supporters_supporter_id_seq') - 1))");
+            _db.Supporters.Add(supporter);
+            await _db.SaveChangesAsync();
+        }
+
+        if (dto.Amount <= 0)
+            return BadRequest("Amount must be greater than zero.");
+
+        var donation = new Donation
+        {
+            SupporterId    = supporter.SupporterId,
+            DonationType   = "Monetary",
+            DonationDate   = DateOnly.FromDateTime(DateTime.UtcNow),
+            IsRecurring    = dto.IsRecurring,
+            CampaignName   = dto.CampaignName,
+            CurrencyCode   = "USD",
+            Amount         = dto.Amount,
+            EstimatedValue = dto.Amount,
+            ImpactUnit     = "dollars",
+            Notes          = dto.Notes
+        };
+
+        // Ensure the sequence is ahead of any CSV-seeded rows
+        await _db.Database.ExecuteSqlRawAsync(
+            "SELECT setval('donations_donation_id_seq', GREATEST((SELECT MAX(donation_id) FROM donations), nextval('donations_donation_id_seq') - 1))");
+
+        _db.Donations.Add(donation);
+        await _db.SaveChangesAsync();
+
+        return Ok(new { donation.DonationId });
+    }
+
     // GET /api/donor-dashboard/donation-allocation
     // Returns donation allocation breakdown by program area
     [HttpGet("donation-allocation")]
@@ -111,3 +211,10 @@ public class DonorDashboardController : ControllerBase
         return Ok(result);
     }
 }
+
+public record SubmitDonationDto(
+    decimal Amount,
+    string? CampaignName,
+    bool IsRecurring,
+    string? Notes
+);

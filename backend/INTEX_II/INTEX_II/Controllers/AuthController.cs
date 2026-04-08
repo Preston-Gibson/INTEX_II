@@ -2,10 +2,12 @@ using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
+using INTEX_II.Data;
 using INTEX_II.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 
 namespace INTEX_II.Controllers;
@@ -17,16 +19,18 @@ public class AuthController : ControllerBase
     private readonly UserManager<ApplicationUser> _userManager;
     private readonly SignInManager<ApplicationUser> _signInManager;
     private readonly IConfiguration _config;
+    private readonly AppDbContext _db;
 
     public AuthController(UserManager<ApplicationUser> userManager,
-        SignInManager<ApplicationUser> signInManager, IConfiguration config)
+        SignInManager<ApplicationUser> signInManager, IConfiguration config, AppDbContext db)
     {
         _userManager = userManager;
         _signInManager = signInManager;
         _config = config;
+        _db = db;
     }
 
-    // Public registration — always creates a Donor
+    // Public registration — always creates a Donor + Supporter record
     [HttpPost("register")]
     public async Task<IActionResult> Register([FromBody] RegisterDto dto)
     {
@@ -36,6 +40,7 @@ public class AuthController : ControllerBase
             return BadRequest(result.Errors);
 
         await _userManager.AddToRoleAsync(user, "Donor");
+        await EnsureSupporterExists(dto.Email, dto.FirstName, dto.LastName);
         return Ok(new { message = "User registered successfully" });
     }
 
@@ -127,9 +132,43 @@ public async Task<IActionResult> ExternalCallback()
 
     // Link the provider login to the user (idempotent)
     await _userManager.AddLoginAsync(user, info);
+    await EnsureSupporterExists(
+        email,
+        info.Principal.FindFirstValue(ClaimTypes.GivenName) ?? "",
+        info.Principal.FindFirstValue(ClaimTypes.Surname) ?? "");
 
     var token = await GenerateJwtToken(user);
     return Redirect($"{_config["Frontend:Url"]}/oauth-callback?token={token}");
+}
+
+private async Task EnsureSupporterExists(string email, string firstName, string lastName)
+{
+    var existing = await _db.Supporters.FirstOrDefaultAsync(s => s.Email == email);
+    if (existing is not null) return;
+
+    var displayName = $"{firstName} {lastName}".Trim();
+    if (string.IsNullOrEmpty(displayName)) displayName = email;
+
+    await _db.Database.ExecuteSqlRawAsync(
+        "SELECT setval('supporters_supporter_id_seq', GREATEST((SELECT MAX(supporter_id) FROM supporters), nextval('supporters_supporter_id_seq') - 1))");
+
+    _db.Supporters.Add(new Supporter
+    {
+        Email              = email,
+        FirstName          = firstName,
+        LastName           = lastName,
+        DisplayName        = displayName,
+        OrganizationName   = string.Empty,
+        SupporterType      = "Monetary Donor",
+        RelationshipType   = "Individual",
+        Region             = string.Empty,
+        Country            = string.Empty,
+        Phone              = string.Empty,
+        Status             = "Active",
+        CreatedAt          = DateTime.UtcNow,
+        AcquisitionChannel = "Self-Registration",
+    });
+    await _db.SaveChangesAsync();
 }
 }
 
