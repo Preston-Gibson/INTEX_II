@@ -4,7 +4,7 @@ const SECTIONS = [
     title: '1. Who We Are',
     content: `Lucera ("we," "us," or "our") is a registered 501(c)(3) non-profit organization providing sanctuary, education, and rehabilitation services to vulnerable children in Central America. Our registered address is available upon request.
 
-For questions about this Privacy Policy or your personal data, contact our Data Protection Officer at: privacy@lucero.org`,
+For questions about this Privacy Policy or your personal data, contact our Data Protection Officer at: privacy@lucera.org`,
   },
   {
     id: 'data-we-collect',
@@ -86,7 +86,7 @@ When data is no longer required, we securely delete or anonymize it.`,
 - **Right to object:** Object to processing based on legitimate interests or for direct marketing
 - **Rights related to automated decision-making:** We do not use solely automated decision-making that produces significant effects on you
 
-To exercise any of these rights, contact us at privacy@lucero.org. We will respond within 30 days. You also have the right to lodge a complaint with your local supervisory authority (e.g., the ICO in the UK, or your national data protection authority in the EU).`,
+To exercise any of these rights, contact us at privacy@lucera.org. We will respond within 30 days. You also have the right to lodge a complaint with your local supervisory authority (e.g., the ICO in the UK, or your national data protection authority in the EU).`,
   },
   {
     id: 'security',
@@ -110,7 +110,7 @@ In the event of a data breach that poses a risk to your rights and freedoms, we 
 - The right to delete your personal information
 - The right to opt-out of the sale of personal information
 
-**We do not sell personal information.** To exercise your CCPA rights, contact privacy@lucero.org or submit a request through our website.`,
+**We do not sell personal information.** To exercise your CCPA rights, contact privacy@lucera.org or submit a request through our website.`,
   },
   {
     id: 'changes',
@@ -127,7 +127,7 @@ The "Last Updated" date at the top of this page will always reflect the most rec
     title: '11. Contact Us',
     content: `For any privacy-related questions, requests, or complaints, please contact our Data Protection Officer:
 
-**Email:** privacy@lucero.org
+**Email:** privacy@lucera.org
 **Mailing Address:** Lucera — Data Protection Officer, [Address on request]
 
 We aim to respond to all inquiries within 30 days. If you are not satisfied with our response, you have the right to escalate your complaint to your national data protection authority.`,
@@ -243,17 +243,19 @@ export default function PrivacyPolicy() {
         </div>
 
         {/* Footer CTA */}
-        <div className="mt-12 aurora-gradient rounded-2xl p-8 text-center text-white">
-          <span className="material-symbols-outlined text-[32px] mb-3 block" style={{ fontVariationSettings: "'FILL' 1" }}>shield</span>
-          <h3 className="font-manrope text-xl font-extrabold mb-2">Your privacy is our priority</h3>
-          <p className="text-white/70 text-sm mb-5 max-w-md mx-auto">
+        <div className="mt-12 bg-surface-container-low border border-outline-variant/20 rounded-2xl p-8 text-center">
+          <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-primary/10 mb-4">
+            <span className="material-symbols-outlined text-primary text-[24px]" style={{ fontVariationSettings: "'FILL' 1" }}>shield</span>
+          </div>
+          <h3 className="font-manrope text-xl font-extrabold text-primary mb-2">Your privacy is our priority</h3>
+          <p className="text-on-surface-variant text-sm mb-6 max-w-md mx-auto leading-relaxed">
             Questions about how we handle your data? Our Data Protection Officer is here to help.
           </p>
           <a
-            href="mailto:privacy@lucero.org"
-            className="inline-block bg-white text-primary font-bold px-6 py-2.5 rounded-xl text-sm hover:opacity-90 transition-opacity"
+            href="mailto:privacy@lucera.org"
+            className="inline-block bg-primary text-white font-bold px-6 py-2.5 rounded-xl text-sm hover:opacity-90 transition-opacity"
           >
-            Contact privacy@lucero.org
+            Contact privacy@lucera.org
           </a>
         </div>
       </div>
