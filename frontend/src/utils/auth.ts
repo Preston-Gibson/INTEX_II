@@ -45,15 +45,23 @@ export async function downloadExport(
 ): Promise<void> {
   const yearParam = year ? `&year=${year}` : '';
   const url = `${API_BASE}${path}?format=${format}${yearParam}`;
-  const res = await fetch(url, { headers: authHeaders() });
-  if (!res.ok) return;
-  const blob = await res.blob();
-  const disposition = res.headers.get('Content-Disposition') ?? '';
-  const match = disposition.match(/filename="(.+)"/);
-  const fileName = match ? match[1] : `export.${format}`;
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(blob);
-  a.download = fileName;
-  a.click();
-  URL.revokeObjectURL(a.href);
+  try {
+    const res = await fetch(url, { headers: authHeaders() });
+    if (!res.ok) {
+      const msg = await res.text().catch(() => res.statusText);
+      alert(`Export failed (${res.status}): ${msg}`);
+      return;
+    }
+    const blob = await res.blob();
+    const disposition = res.headers.get('Content-Disposition') ?? '';
+    const match = disposition.match(/filename="(.+)"/);
+    const fileName = match ? match[1] : `export.${format}`;
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = fileName;
+    a.click();
+    URL.revokeObjectURL(a.href);
+  } catch (e) {
+    alert(`Export failed: ${e instanceof Error ? e.message : 'Network error'}`);
+  }
 }

@@ -126,11 +126,11 @@ public class ExportController : ControllerBase
         var supporter = await _db.Supporters
             .FirstOrDefaultAsync(s => s.Email == email);
 
-        if (supporter is null)
-            return NotFound("No supporter record found for your account.");
+        // If no supporter record, return an empty file with just headers rather than 404
+        var supporterId = supporter?.SupporterId;
 
         var query = _db.Donations
-            .Where(d => d.SupporterId == supporter.SupporterId);
+            .Where(d => supporterId != null && d.SupporterId == supporterId);
 
         if (year.HasValue)
             query = query.Where(d => d.DonationDate != null && d.DonationDate.Value.Year == year.Value);
