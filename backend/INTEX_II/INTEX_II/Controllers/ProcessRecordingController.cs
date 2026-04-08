@@ -1,12 +1,12 @@
 using INTEX_II.Data;
 using INTEX_II.Models;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+// using Microsoft.AspNetCore.Authorization; // TODO: re-enable when login is wired up
 
 namespace INTEX_II.Controllers;
 
-[Authorize]
+// [Authorize] // TODO: re-enable when login is wired up
 [ApiController]
 [Route("api/process-recordings")]
 public class ProcessRecordingController : ControllerBase
