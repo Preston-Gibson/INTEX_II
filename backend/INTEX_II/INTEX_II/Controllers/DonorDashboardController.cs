@@ -257,6 +257,66 @@ public class DonorDashboardController : ControllerBase
         return Ok(new { donation.DonationId });
     }
 
+    // POST /api/donor-dashboard/my-time-donations
+    // Records a new volunteer / time-donation request for the logged-in donor
+    [HttpPost("my-time-donations")]
+    public async Task<IActionResult> SubmitTimeDonation([FromBody] SubmitTimeDonationDto dto)
+    {
+        var email = User.FindFirst(JwtRegisteredClaimNames.Email)?.Value
+                    ?? User.FindFirst(System.Security.Claims.ClaimTypes.Email)?.Value;
+        if (string.IsNullOrEmpty(email)) return Unauthorized();
+
+        var supporter = await _db.Supporters.FirstOrDefaultAsync(s => s.Email == email);
+        if (supporter is null)
+        {
+            supporter = new Supporter
+            {
+                Email              = email,
+                FirstName          = string.Empty,
+                LastName           = string.Empty,
+                DisplayName        = email,
+                OrganizationName   = string.Empty,
+                SupporterType      = "Volunteer",
+                RelationshipType   = "Individual",
+                Region             = string.Empty,
+                Country            = string.Empty,
+                Phone              = string.Empty,
+                Status             = "Active",
+                CreatedAt          = DateTime.UtcNow,
+                AcquisitionChannel = "Self-Registration",
+            };
+            await _db.Database.ExecuteSqlRawAsync(
+                "SELECT setval('supporters_supporter_id_seq', GREATEST((SELECT MAX(supporter_id) FROM supporters), nextval('supporters_supporter_id_seq') - 1))");
+            _db.Supporters.Add(supporter);
+            await _db.SaveChangesAsync();
+        }
+
+        if (string.IsNullOrWhiteSpace(dto.FullName))
+            return BadRequest("Full name is required.");
+
+        var donation = new Donation
+        {
+            SupporterId    = supporter.SupporterId,
+            DonationType   = "Time",
+            DonationDate   = DateOnly.FromDateTime(DateTime.UtcNow),
+            IsRecurring    = false,
+            CampaignName   = dto.CampaignName,
+            CurrencyCode   = null,
+            Amount         = null,
+            EstimatedValue = 0,
+            ImpactUnit     = "hours",
+            Notes          = $"[Volunteer Request] {dto.FullName} | {dto.Email ?? email} | {dto.Phone ?? "—"}\nAvailability: {dto.Availability ?? "—"}\n{dto.Notes ?? ""}"
+        };
+
+        await _db.Database.ExecuteSqlRawAsync(
+            "SELECT setval('donations_donation_id_seq', GREATEST((SELECT MAX(donation_id) FROM donations), nextval('donations_donation_id_seq') - 1))");
+
+        _db.Donations.Add(donation);
+        await _db.SaveChangesAsync();
+
+        return Ok(new { donation.DonationId });
+    }
+
     // GET /api/donor-dashboard/donation-allocation
     // Returns donation allocation breakdown by program area
     [HttpGet("donation-allocation")]
@@ -304,6 +364,15 @@ public record InKindItemDto(
 
 public record SubmitInKindDonationDto(
     List<InKindItemDto> Items,
+    string? CampaignName,
+    string? Notes
+);
+
+public record SubmitTimeDonationDto(
+    string FullName,
+    string? Email,
+    string? Phone,
+    string? Availability,
     string? CampaignName,
     string? Notes
 );
