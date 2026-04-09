@@ -84,6 +84,25 @@ export default function HomeVisitationCaseConference() {
   const [logToDelete, setLogToDelete] = useState<HistoricalLog | null>(null);
   const [deleting, setDeleting] = useState(false);
 
+  const [showScheduleForm, setShowScheduleForm] = useState(false);
+  const [scheduleForm, setScheduleForm] = useState({
+    residentId: '',
+    visitDate: '',
+    socialWorker: '',
+    visitType: '',
+    locationVisited: '',
+  });
+  const [scheduling, setScheduling] = useState(false);
+  const [scheduleError, setScheduleError] = useState<string | null>(null);
+  const [socialWorkers, setSocialWorkers] = useState<string[]>([]);
+
+  useEffect(() => {
+    fetch(`${import.meta.env.VITE_API_URL ?? 'http://localhost:5229'}/api/process-recordings/social-workers`, { headers: authHeaders() })
+      .then(r => r.json())
+      .then(setSocialWorkers)
+      .catch(() => {});
+  }, []);
+
   function loadData() {
     return Promise.all([
       fetch(`${API}/upcoming-visits`, { headers: authHeaders() }).then(r => r.json()),
@@ -98,6 +117,38 @@ export default function HomeVisitationCaseConference() {
   }
 
   useEffect(() => { loadData(); }, []);
+
+  async function handleScheduleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    if (!scheduleForm.residentId || !scheduleForm.visitDate || !scheduleForm.visitType || !scheduleForm.socialWorker) {
+      setScheduleError('Please fill in all required fields.');
+      return;
+    }
+    setScheduling(true);
+    setScheduleError(null);
+    try {
+      const res = await fetch(`${import.meta.env.VITE_API_URL ?? 'http://localhost:5229'}/api/home-visitation/schedule`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', ...authHeaders() },
+        body: JSON.stringify({
+          residentId: parseInt(scheduleForm.residentId),
+          visitDate: scheduleForm.visitDate,
+          socialWorker: scheduleForm.socialWorker,
+          visitType: scheduleForm.visitType,
+          locationVisited: scheduleForm.locationVisited,
+        }),
+      });
+      if (!res.ok) throw new Error();
+      setShowScheduleForm(false);
+      setScheduleForm({ residentId: '', visitDate: '', socialWorker: '', visitType: '', locationVisited: '' });
+      setLoading(true);
+      loadData();
+    } catch {
+      setScheduleError('Failed to schedule visit. Please try again.');
+    } finally {
+      setScheduling(false);
+    }
+  }
 
   async function handleDeleteLog() {
     if (!logToDelete) return;
@@ -212,7 +263,10 @@ export default function HomeVisitationCaseConference() {
                   )}
                 </div>
 
-                <button className="w-full mt-6 py-3 border-2 border-dashed border-outline-variant rounded-xl text-on-surface-variant text-sm font-semibold hover:bg-white/50 transition-colors">
+                <button
+                  onClick={() => { setShowScheduleForm(true); setScheduleError(null); }}
+                  className="w-full mt-6 py-3 border-2 border-dashed border-outline-variant rounded-xl text-on-surface-variant text-sm font-semibold hover:bg-surface-container transition-colors"
+                >
                   + Schedule New Visit
                 </button>
               </section>
@@ -421,6 +475,97 @@ export default function HomeVisitationCaseConference() {
           </div>
         </main>
       </div>
+      {/* Schedule New Visit modal */}
+      {showScheduleForm && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
+          <div className="bg-surface-container-lowest rounded-2xl shadow-xl w-full max-w-md mx-4">
+            <div className="flex items-center justify-between px-6 pt-6 pb-4 border-b border-outline-variant/20">
+              <h2 className="text-base font-manrope font-bold text-on-surface">Schedule New Visit</h2>
+              <button onClick={() => setShowScheduleForm(false)} className="text-on-surface-variant hover:text-on-surface transition-colors">
+                <span className="material-symbols-outlined text-[20px]">close</span>
+              </button>
+            </div>
+            <form onSubmit={handleScheduleSubmit} className="px-6 py-5 space-y-4">
+              <div>
+                <label className="block text-[10px] font-bold text-on-surface-variant uppercase tracking-widest mb-1">Resident *</label>
+                <select
+                  required
+                  value={scheduleForm.residentId}
+                  onChange={e => setScheduleForm(f => ({ ...f, residentId: e.target.value }))}
+                  className="w-full bg-surface-container-low rounded-xl px-3 py-2 text-sm text-on-surface outline-none focus:ring-2 focus:ring-primary/20"
+                >
+                  <option value="">Select a case…</option>
+                  {residents.map(r => <option key={r.residentId} value={r.residentId}>{r.caseControlNo}</option>)}
+                </select>
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-[10px] font-bold text-on-surface-variant uppercase tracking-widest mb-1">Visit Date *</label>
+                  <input
+                    type="date"
+                    required
+                    value={scheduleForm.visitDate}
+                    onChange={e => setScheduleForm(f => ({ ...f, visitDate: e.target.value }))}
+                    className="w-full bg-surface-container-low rounded-xl px-3 py-2 text-sm text-on-surface outline-none focus:ring-2 focus:ring-primary/20"
+                  />
+                </div>
+                <div>
+                  <label className="block text-[10px] font-bold text-on-surface-variant uppercase tracking-widest mb-1">Visit Type *</label>
+                  <select
+                    required
+                    value={scheduleForm.visitType}
+                    onChange={e => setScheduleForm(f => ({ ...f, visitType: e.target.value }))}
+                    className="w-full bg-surface-container-low rounded-xl px-3 py-2 text-sm text-on-surface outline-none focus:ring-2 focus:ring-primary/20"
+                  >
+                    <option value="">Select…</option>
+                    {VISIT_TYPES.map(t => <option key={t} value={t}>{t}</option>)}
+                  </select>
+                </div>
+              </div>
+              <div>
+                <label className="block text-[10px] font-bold text-on-surface-variant uppercase tracking-widest mb-1">Social Worker *</label>
+                <select
+                  required
+                  value={scheduleForm.socialWorker}
+                  onChange={e => setScheduleForm(f => ({ ...f, socialWorker: e.target.value }))}
+                  className="w-full bg-surface-container-low rounded-xl px-3 py-2 text-sm text-on-surface outline-none focus:ring-2 focus:ring-primary/20"
+                >
+                  <option value="">Select…</option>
+                  {socialWorkers.map(sw => <option key={sw} value={sw}>{sw}</option>)}
+                </select>
+              </div>
+              <div>
+                <label className="block text-[10px] font-bold text-on-surface-variant uppercase tracking-widest mb-1">Location</label>
+                <input
+                  type="text"
+                  placeholder="e.g. Family Home, Community Center…"
+                  value={scheduleForm.locationVisited}
+                  onChange={e => setScheduleForm(f => ({ ...f, locationVisited: e.target.value }))}
+                  className="w-full bg-surface-container-low rounded-xl px-3 py-2 text-sm text-on-surface outline-none focus:ring-2 focus:ring-primary/20"
+                />
+              </div>
+              {scheduleError && <p className="text-xs text-error">{scheduleError}</p>}
+              <div className="flex justify-end gap-3 pt-2">
+                <button
+                  type="button"
+                  onClick={() => setShowScheduleForm(false)}
+                  className="px-4 py-2 rounded-xl text-sm font-semibold text-on-surface-variant hover:bg-surface-container-low transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={scheduling}
+                  className="px-5 py-2 rounded-xl text-sm font-bold text-white aurora-gradient hover:opacity-90 transition-opacity disabled:opacity-50"
+                >
+                  {scheduling ? 'Scheduling…' : 'Schedule Visit'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
       {/* Delete log confirmation modal */}
       {logToDelete && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
