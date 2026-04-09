@@ -189,7 +189,7 @@ export default function DonorDashboard() {
         </header>
 
         <main className="flex-1 overflow-y-auto p-4 md:p-6">
-          {activeNav === 'Impact' && <ImpactPage />}
+          {activeNav === 'Impact' && <ImpactPage onNavigate={setActiveNav} />}
           {activeNav === 'Giving' && <GivingPage />}
           {activeNav === 'Settings' && <SettingsPage />}
           {activeNav !== 'Overview' ? null : <>
@@ -210,14 +210,14 @@ export default function DonorDashboard() {
                 <span className="material-symbols-outlined text-primary text-[18px]">home_pin</span>
               </div>
               <p className="text-[10px] font-bold text-on-surface-variant uppercase tracking-widest mb-1">Residents Served</p>
-              <p className="font-manrope text-2xl font-extrabold text-primary">{loading ? '—' : stats?.residentsServed.toLocaleString()}</p>
+              <p className="font-manrope text-2xl font-extrabold text-primary">{loading ? '—' : (stats?.residentsServed ?? 0).toLocaleString()}</p>
             </div>
             <div className="bg-surface-container-low rounded-xl p-4">
               <div className="w-8 h-8 rounded-lg bg-secondary/10 flex items-center justify-center mb-3">
                 <span className="material-symbols-outlined text-secondary text-[18px]">volunteer_activism</span>
               </div>
               <p className="text-[10px] font-bold text-on-surface-variant uppercase tracking-widest mb-1">Reintegrations</p>
-              <p className="font-manrope text-2xl font-extrabold text-primary">{loading ? '—' : stats?.successfulReintegrations.toLocaleString()}</p>
+              <p className="font-manrope text-2xl font-extrabold text-primary">{loading ? '—' : (stats?.successfulReintegrations ?? 0).toLocaleString()}</p>
             </div>
             <div className="bg-surface-container-low rounded-xl p-4">
               <div className="w-8 h-8 rounded-lg bg-tertiary/10 flex items-center justify-center mb-3">
