@@ -21,9 +21,9 @@ export default function NavBar() {
 
   return (
     <nav className="fixed top-9 w-full z-[1001] bg-white/90 backdrop-blur-xl shadow-sm border-b border-slate-200/60">
-      <div className="flex justify-between md:grid md:grid-cols-3 items-center max-w-7xl mx-auto px-6 h-20">
-        <NavLink to="/" className="text-2xl font-bold text-primary dark:text-white">
-          Lucera
+      <div className="grid grid-cols-3 items-center max-w-7xl mx-auto px-6 h-20">
+        <NavLink to="/" className="flex items-center">
+          <img src="/logo.png" alt="Lucera" className="h-10 w-auto object-contain" />
         </NavLink>
 
         <div className="hidden md:flex justify-center items-center gap-8 font-manrope text-sm font-semibold tracking-tight">
