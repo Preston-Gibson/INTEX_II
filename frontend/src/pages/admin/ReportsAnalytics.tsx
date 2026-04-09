@@ -87,21 +87,10 @@ export default function ReportsAnalytics() {
   return (
     <div className="flex h-screen bg-surface overflow-hidden font-body">
       <AdminSidebar />
-      <div className="flex-1 overflow-y-auto">
-      <div className="p-6 max-w-7xl mx-auto">
+      <div className="flex-1 flex flex-col overflow-hidden">
 
-      {/* Header */}
-      <div className="flex items-start justify-between mb-8">
-        <div>
-          <p className="text-[10px] font-bold text-on-surface-variant uppercase tracking-widest mb-2">Admin · Analytics</p>
-          <h1 className="font-manrope text-3xl font-extrabold text-primary tracking-tight mb-2">
-            Reports &amp; Analytics
-          </h1>
-          <p className="text-on-surface-variant text-sm max-w-xl leading-relaxed">
-            Aggregated insights across all safehouses, aligned with the Annual Accomplishment Report format — tracking caring, healing, and teaching outcomes.
-          </p>
-        </div>
-        <div className="flex items-center gap-2">
+        {/* Standard top bar */}
+        <header className="flex items-center gap-3 px-6 py-3 bg-surface-container-lowest border-b border-outline-variant/20 flex-shrink-0">
           <div className="flex bg-surface-container-low rounded-xl p-1 gap-1">
             {(['2026', '2025', '2024', '2023', '2022'] as ReportYear[]).map((y) => (
               <button key={y} onClick={() => setYear(y)}
@@ -110,21 +99,31 @@ export default function ReportsAnalytics() {
               </button>
             ))}
           </div>
-          <button
-            onClick={() => downloadExport('/api/export/donations', 'csv', year)}
-            className="flex items-center gap-2 bg-surface-container-low text-on-surface text-xs font-bold px-4 py-2.5 rounded-xl hover:bg-surface-container transition-colors">
-            <span className="material-symbols-outlined text-[16px]">download</span>
-            Export CSV
-          </button>
-          <UserAvatar />
-        </div>
+          <div className="ml-auto flex items-center gap-3">
+            <button
+              onClick={() => downloadExport('/api/export/donations', 'csv', year)}
+              className="flex items-center gap-2 bg-surface-container-low text-on-surface text-xs font-bold px-4 py-2.5 rounded-xl hover:bg-surface-container transition-colors">
+              <span className="material-symbols-outlined text-[16px]">download</span>
+              Export CSV
+            </button>
+            <UserAvatar />
+          </div>
+        </header>
+
+      <div className="flex-1 overflow-y-auto">
+      <div className="p-6 max-w-7xl mx-auto">
+
+      {/* Page heading */}
+      <div className="mb-8">
+        <h1 className="font-manrope text-3xl font-extrabold text-primary tracking-tight mb-2">
+          Reports &amp; Analytics
+        </h1>
+        <p className="text-on-surface-variant text-sm max-w-xl leading-relaxed">
+          Aggregated insights across all safehouses, aligned with the Annual Accomplishment Report format — tracking caring, healing, and teaching outcomes.
+        </p>
       </div>
 
-      {loading ? (
-        <div className="flex items-center justify-center h-64">
-          <div className="w-8 h-8 rounded-full aurora-gradient animate-spin opacity-80" />
-        </div>
-      ) : (
+      {!loading && (
         <>
           {/* Annual Accomplishment — 3 Service Pillars */}
           <section className="mb-8">
@@ -384,6 +383,7 @@ export default function ReportsAnalytics() {
         </>
       )}
     </div>
+      </div>
       </div>
     </div>
   );

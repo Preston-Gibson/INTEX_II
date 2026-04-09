@@ -1,12 +1,11 @@
 import { useState } from 'react';
 import { NavLink, Link, useNavigate } from 'react-router-dom';
-import { clearToken } from '../utils/auth';
 
 const NAV_ITEMS = [
   { to: '/admin-dashboard',                      icon: 'dashboard',          label: 'Dashboard' },
-  { to: '/admin-caseload-inventory',             icon: 'folder_shared',      label: 'Caseload' },
+  { to: '/admin-caseload-inventory',             icon: 'folder_shared',      label: 'Residents' },
   { to: '/admin-donors-contributions',           icon: 'volunteer_activism', label: 'Donors' },
-  { to: '/admin-process-recording',              icon: 'history_edu',        label: 'Recordings' },
+  { to: '/admin-process-recording',              icon: 'history_edu',        label: 'Counseling' },
   { to: '/admin-home-visitation-case-conference',icon: 'home_pin',           label: 'Visits' },
   { to: '/admin-reports-analytics',             icon: 'analytics',          label: 'Analytics' },
 ];
@@ -58,14 +57,6 @@ export default function AdminSidebar() {
           add_circle
         </span>
         New Case
-      </button>
-
-      <button
-        onClick={() => { clearToken(); navigate('/login'); }}
-        className="flex items-center justify-center gap-2 text-on-surface-variant text-xs font-semibold py-2 rounded-xl hover:bg-surface-container-low transition-colors w-full mb-1"
-      >
-        <span className="material-symbols-outlined text-[16px]">logout</span>
-        Sign out
       </button>
 
       <Link

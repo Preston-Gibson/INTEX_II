@@ -233,7 +233,6 @@ export default function ProcessRecording() {
               onChange={e => setSearch(e.target.value)}
             />
           </div>
-          <p className="flex-1 text-center text-sm font-bold text-on-surface">Process Recording — Session Documentation</p>
           <div className="flex items-center gap-3 flex-1 justify-end">
             {selected && (
               <button
