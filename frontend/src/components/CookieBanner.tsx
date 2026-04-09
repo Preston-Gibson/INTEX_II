@@ -1,8 +1,10 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import { useLanguage } from '../context/LanguageContext';
 
 export default function CookieBanner() {
   const [visible, setVisible] = useState(false);
+  const { t } = useLanguage();
 
   useEffect(() => {
     if (!localStorage.getItem('cookie-notice-acknowledged')) {
@@ -24,16 +26,16 @@ export default function CookieBanner() {
           cookie
         </span>
         <p className="text-sm text-on-surface leading-relaxed flex-1">
-          We use only strictly necessary cookies to keep you securely logged in. No tracking or analytics.{' '}
+          {t('cookie.message')}{' '}
           <Link to="/privacy-policy" className="text-primary font-bold hover:underline">
-            Learn more
+            {t('cookie.learn')}
           </Link>
         </p>
         <button
           onClick={acknowledge}
           className="aurora-gradient text-white text-sm font-bold px-5 py-2.5 rounded-xl hover:opacity-90 transition-opacity flex-shrink-0"
         >
-          Got it
+          {t('cookie.accept')}
         </button>
       </div>
     </div>

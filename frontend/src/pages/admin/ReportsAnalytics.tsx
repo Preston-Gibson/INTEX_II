@@ -39,7 +39,7 @@ interface ReintegrationBreakdown {
   breakdown: { type: string; count: number; percentage: number }[];
 }
 
-type ReportYear = '2026' | '2025' | '2024' | '2023' | '2022';
+type ReportYear = '2026' | '2025' | '2024' | '2023';
 
 function reintegrationIcon(type: string): string {
   const t = type.toLowerCase();
@@ -92,7 +92,7 @@ export default function ReportsAnalytics() {
         {/* Standard top bar */}
         <header className="flex items-center gap-3 px-6 py-3 bg-surface-container-lowest border-b border-outline-variant/20 flex-shrink-0">
           <div className="flex bg-surface-container-low rounded-xl p-1 gap-1">
-            {(['2026', '2025', '2024', '2023', '2022'] as ReportYear[]).map((y) => (
+            {(['2026', '2025', '2024', '2023'] as ReportYear[]).map((y) => (
               <button key={y} onClick={() => setYear(y)}
                 className={`text-xs font-bold px-4 py-2 rounded-lg transition-colors ${year === y ? 'aurora-gradient text-white' : 'text-on-surface-variant hover:bg-surface-container'}`}>
                 {y}

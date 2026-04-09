@@ -43,32 +43,32 @@ interface Story {
 
 const STORIES: Story[] = [
   {
-    title: "Mateo's New Chapter",
-    quote: '"Before the Lucera school opened, Mateo walked 4 hours for basic tutoring. Now, he\'s at the top of his science class and dreams of being an engineer."',
-    location: 'Huehuetenango, Guatemala',
-    image: '/mateo-story.jpg',
-    fullStory: 'Mateo is 11 years old and lives in a remote highland village in Huehuetenango, where the nearest school used to be a 4-hour round trip on foot. Before the Lucera education center opened in 2023, Mateo\'s family could rarely afford the travel, and he spent most days helping on the family plot. Today, Mateo attends class five days a week, has completed two science fair projects, and was recently selected for a regional STEM competition. His teacher describes him as "the most curious student I\'ve ever taught." Mateo\'s dream is to study environmental engineering and one day design sustainable water systems for communities like his own.',
+    title: "Ana's First Safe Place",
+    quote: '"She arrived not speaking. Within a year, she was the one sitting with the newly arrived girls, telling them it gets quieter. That is what healing looks like."',
+    location: 'Santa Rosa de Copán, Honduras',
+    image: '/donor-story-ana.png',
+    fullStory: 'Ana was thirteen when she arrived at Lucera, referred by a regional child protection office after being found in circumstances her caseworker described only as "a situation no child should survive." She carried nothing with her except a wariness that filled the room before she did.\n\nFor the first weeks her caseworker, Dolores, did not push for conversation. She sat nearby during meals. She made sure Ana always had a chair near the door. She let the silence take whatever shape it needed.\n\nSlowly, Ana began to take up space. A shared meal. A question about the other girls. An afternoon in the common room where she fell asleep on the couch with the television on — the first time staff had seen her sleep somewhere other than her locked room.\n\nOver the following months, Lucera\'s counseling team worked with her twice a week, using structured trauma-informed sessions alongside art, movement, and — eventually — words. She began to name things. What had happened. What she missed. What she wanted.\n\nWhat she wanted was to go back to her grandmother.\n\nLucera\'s family tracing team spent three months locating and vetting the grandmother, making two site visits before any contact was initiated. When they finally sat across from each other in a supervised meeting room, Ana did not say anything at first. She reached across the table and held the old woman\'s hand.\n\nShe was reintegrated eight months after her arrival. Her grandmother sends updates when she can. The last one said Ana had started school.',
   },
   {
-    title: 'Sustainable Nutrition',
-    quote: 'Through the Family Hub program, the Sanchez family now operates a community greenhouse, providing food for 20 other families in their village.',
-    location: 'Santa Ana, El Salvador',
-    image: '/sanchez-greenhouse.jpg',
-    fullStory: 'When the Sanchez family enrolled in Lucera\'s Family Hub program in 2024, they were struggling with food insecurity after a drought decimated their harvest. Through the program\'s agricultural training and micro-grant initiative, they built a small greenhouse on their property and learned modern growing techniques. Within six months, they were producing more than their family could consume. Rather than sell the surplus, the Sanchezes chose to share — forming a cooperative with 20 neighboring families. Today the greenhouse supplies fresh vegetables to the entire block, and Rosa Sanchez has become a community leader, teaching other families the same methods that transformed her household.',
+    title: "Camila's New Beginning",
+    quote: '"Your gift doesn\'t just shelter a girl — it walks her all the way back to herself. Camila is proof of that."',
+    location: 'Santa Rosa de Copán, Honduras',
+    image: '/donor-story-camila.png',
+    fullStory: 'Camila entered Lucera at sixteen, referred through a law enforcement partnership after being recovered from a labor exploitation situation two provinces away from her home community. She was exhausted in a way that sleep could not fix — the kind of tiredness that comes from years of survival, not rest.\n\nHer first months were quiet. She attended the health and wellbeing sessions, completed her counseling appointments without missing a single one, and began sitting in on the vocational skills workshops Lucera offers in partnership with a regional training institute. She was, her caseworker noted, methodical. "She wasn\'t healing on accident," the caseworker wrote in her file. "She was working at it."\n\nBy her second year, Camila had completed a certified cosmetology course and was teaching basic hair care techniques to other residents as a way of contributing to the house. She had also, with Lucera\'s support, begun the formal process of contacting a maternal aunt who had been searching for her for two years.\n\nThe reintegration took time — careful, documented, verified time. Lucera staff accompanied Camila to the first three family visits. By the fourth, she went on her own.\n\nShe graduated from Lucera\'s program on a Thursday morning. She carried a small bag out the front door and paused at the threshold — not with hesitation, her caseworker said, but with the look of someone measuring a moment they want to remember.\n\nThen she stepped out.',
   },
 ];
 
 const REGIONS = [
-  { num: '01', title: 'Guatemala Highland Sanctuaries', desc: 'Focusing on indigenous community education and agricultural support.', coords: [15.5, -90.3] as [number, number] },
-  { num: '02', title: 'Honduras Urban Outreach', desc: 'Trauma-informed care and vocational training for at-risk youth.', coords: [14.1, -87.2] as [number, number] },
-  { num: '03', title: 'El Salvador Family Hubs', desc: 'Preventative health clinics and maternal nutritional programs.', coords: [13.7, -89.2] as [number, number] },
+  { num: '01', title: 'Honduras — 3 Safehouses', desc: 'Our largest presence. Residential care, trauma counseling, and family reintegration across Santa Rosa de Copán, El Progreso, and Siguatepeque.', coords: [14.6, -87.9] as [number, number] },
+  { num: '02', title: 'Guatemala & El Salvador — 3 Safehouses', desc: 'Long-term safehouse shelter and case management for girls rescued from trafficking and abuse in Quetzaltenango, Santa Ana, and Ilopango.', coords: [14.0, -89.8] as [number, number] },
+  { num: '03', title: 'Nicaragua, Costa Rica & Panama — 3 Safehouses', desc: 'Safe sanctuary, vocational training, and reintegration support for survivors in Bluefields, Heredia, and San Miguelito.', coords: [10.5, -84.5] as [number, number] },
 ];
 
 const JOURNEY_STEPS = [
-  { n: 1, title: 'Initial Pledging', desc: 'Funds are pooled and allocated based on urgent needs identified by field staff.' },
-  { n: 2, title: 'Program Deployment', desc: 'Procurement of supplies and staffing of local clinics and educational centers.' },
-  { n: 3, title: 'Direct Service', desc: 'Children receive care, meals, and instruction. Real-time data is captured on-site.' },
-  { n: 4, title: 'Impact Reporting', desc: 'Metrics are audited and shared with you, ensuring complete transparency.' },
+  { n: 1, title: 'Rescue & Intake', desc: 'A girl is identified — through partner referrals, law enforcement, or community alerts — and safely brought into a Lucera safehouse.' },
+  { n: 2, title: 'Trauma-Informed Care', desc: 'Your gift funds housing, meals, individual counseling, and medical support as each resident begins her healing journey.' },
+  { n: 3, title: 'Reintegration Preparation', desc: 'Residents build life skills, vocational training, and family reconnection plans tailored to each girl\'s goals and circumstances.' },
+  { n: 4, title: 'Impact Reporting', desc: 'Reintegration outcomes are tracked and shared with you — showing exactly how your support changed a life.' },
 ];
 
 export default function ImpactPage({ onNavigate }: { onNavigate?: (tab: string) => void }) {
@@ -336,7 +336,7 @@ export default function ImpactPage({ onNavigate }: { onNavigate?: (tab: string) 
           <span className="text-secondary-fixed">your support.</span>
         </h3>
         <p className="text-white/70 text-sm mb-6 max-w-md mx-auto">
-          Join us in reaching our 2026 milestone of 6,000 children supported. Together, we can build a lasting sanctuary of growth.
+          Every girl deserves a path home. Your support gives her the care, stability, and tools she needs to successfully reintegrate and reclaim her future.
         </p>
         <button
           onClick={() => onNavigate?.('Giving')}
