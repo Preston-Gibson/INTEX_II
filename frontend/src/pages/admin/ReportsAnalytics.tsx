@@ -382,10 +382,9 @@ export default function ReportsAnalytics() {
           </section>
         </>
       )}
+      </div>
     </div>
-        </div>
-      </div>
-      </div>
+  </div>
     </div>
   );
 }
