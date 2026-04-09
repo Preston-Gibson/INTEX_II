@@ -1,7 +1,6 @@
 {
   "accuracy": 0.2857142857142857,
   "weighted_f1": 0.17402597402597403,
-  "cv_f1_mean": 0.15012987012987014,
   "classification_report": {
     "Adoption (Domestic)": {
       "precision": 0.0,

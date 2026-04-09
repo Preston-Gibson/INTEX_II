@@ -20,6 +20,9 @@ export default function Footer() {
             <span className="font-manrope text-xs font-bold text-slate-300 uppercase tracking-widest">
               {t('footer.transparency')}
             </span>
+            <Link to="/donor-shoutout" className="text-slate-400 text-sm hover:text-blue-400 transition-colors">
+              Our Supporters
+            </Link>
             <a className="text-slate-400 text-sm hover:text-blue-400 transition-colors" href="#">
               {t('footer.transparency.report')}
             </a>

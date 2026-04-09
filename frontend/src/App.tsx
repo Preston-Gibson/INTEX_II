@@ -9,6 +9,7 @@ import Register from "./pages/Register.tsx";
 import OAuthCallback from "./pages/OAuthCallback.tsx";
 import PrivacyPolicy from './pages/PrivacyPolicy.tsx';
 import Impact from './pages/Impact.tsx';
+import DonorShoutout from './pages/DonorShoutout.tsx';
 
 // Donor Pages
 import DonorDashboard from './pages/donor/Dashboard.tsx';
@@ -47,6 +48,7 @@ function Layout() {
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/impact" element={<Impact />} />
+          <Route path="/donor-shoutout" element={<DonorShoutout />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           <Route path="/oauth-callback" element={<OAuthCallback />} />
