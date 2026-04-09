@@ -200,12 +200,7 @@ export default function HomeVisitationCaseConference() {
               placeholder="Search visits..."
             />
           </div>
-          <p className="text-sm font-bold text-on-surface font-manrope">Visitations &amp; Conferences</p>
           <div className="flex items-center gap-3">
-            <button className="relative">
-              <span className="material-symbols-outlined text-on-surface-variant text-[22px]">notifications</span>
-              <span className="absolute -top-1 -right-1 w-4 h-4 bg-error rounded-full text-white text-[9px] font-bold flex items-center justify-center">2</span>
-            </button>
             <UserAvatar />
           </div>
         </header>
