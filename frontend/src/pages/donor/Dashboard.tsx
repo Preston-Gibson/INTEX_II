@@ -1,11 +1,20 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { downloadExport } from '../../utils/auth';
+import { downloadExport, authHeaders, getUser } from '../../utils/auth';
 import ImpactPage from './ImpactPage';
 import GivingPage from './GivingPage';
 import SettingsPage from './SettingsPage';
 
 const API = `${import.meta.env.VITE_API_URL ?? 'http://localhost:5229'}/api/donor-dashboard`;
+
+const TO_USD: Record<string, number> = {
+  USD: 1, NIO: 0.027, HNL: 0.040, CRC: 0.0019, GTQ: 0.129, PHP: 0.017,
+};
+
+function toUSD(amount: number, currency: string | null): string {
+  const rate = TO_USD[(currency ?? 'USD').toUpperCase()] ?? 1;
+  return `$${(amount * rate).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+}
 
 const NAV_ITEMS = [
   { label: 'Overview', icon: 'dashboard' },
@@ -31,29 +40,54 @@ interface DonationAllocation {
   percentage: number;
 }
 
+interface MyDonation {
+  donationId: number;
+  donationType: string;
+  donationDate: string | null;
+  amount: number | null;
+  currencyCode: string | null;
+  estimatedValue: number | null;
+  campaignName: string | null;
+  isRecurring: boolean;
+}
+
+interface MyDonationsResponse {
+  lifetimeTotal: number;
+  donations: MyDonation[];
+}
+
 export default function DonorDashboard() {
   const [activeNav, setActiveNav] = useState('Overview');
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [chartRange, setChartRange] = useState<'6 MONTHS' | '12 MONTHS'>('12 MONTHS');
-  const [customAmount, setCustomAmount] = useState('');
-  const [selectedAmount, setSelectedAmount] = useState<number | null>(null);
 
   const [stats, setStats] = useState<Stats | null>(null);
   const [yearlyImpact, setYearlyImpact] = useState<YearlyImpact[]>([]);
   const [allocation, setAllocation] = useState<DonationAllocation[]>([]);
+  const [myDonations, setMyDonations] = useState<MyDonationsResponse | null>(null);
   const [loading, setLoading] = useState(true);
+
+  const user = getUser();
+  const displayName = user?.firstName && user?.lastName
+    ? `${user.firstName} ${user.lastName}`
+    : user?.email ?? 'Donor';
+  const initials = user?.firstName && user?.lastName
+    ? `${user.firstName[0]}${user.lastName[0]}`
+    : (user?.email?.[0] ?? 'D').toUpperCase();
 
   useEffect(() => {
     if (activeNav !== 'Overview') return;
     setLoading(true);
     Promise.all([
-      fetch(`${API}/stats`).then(r => r.json()),
-      fetch(`${API}/yearly-impact`).then(r => r.json()),
-      fetch(`${API}/donation-allocation`).then(r => r.json()),
-    ]).then(([s, y, a]) => {
+      fetch(`${API}/stats`, { headers: authHeaders() }).then(r => r.json()),
+      fetch(`${API}/yearly-impact`, { headers: authHeaders() }).then(r => r.json()),
+      fetch(`${API}/donation-allocation`, { headers: authHeaders() }).then(r => r.json()),
+      fetch(`${API}/my-donations`, { headers: authHeaders() }).then(r => r.json()),
+    ]).then(([s, y, a, m]) => {
       setStats(s);
       setYearlyImpact(y);
       setAllocation(a);
+      setMyDonations(m);
       setLoading(false);
     }).catch(() => setLoading(false));
   }, [activeNav]);
@@ -67,6 +101,16 @@ export default function DonorDashboard() {
       active: i === source.length - 1,
     }));
   })();
+
+  const myDonationCount = myDonations?.donations.length ?? 0;
+  const myLifetimeUSD = myDonations
+    ? myDonations.donations.reduce((sum, d) => {
+        const amt = d.amount ?? d.estimatedValue ?? 0;
+        const rate = TO_USD[(d.currencyCode ?? 'USD').toUpperCase()] ?? 1;
+        return sum + amt * rate;
+      }, 0)
+    : 0;
+  const recentDonations = myDonations?.donations.slice(0, 3) ?? [];
 
   const sidebarContent = (
     <aside className="w-56 flex-shrink-0 flex flex-col bg-surface-container-lowest border-r border-outline-variant/20 py-6 px-4 relative z-10 h-full">
@@ -142,19 +186,12 @@ export default function DonorDashboard() {
           <p className="flex-1 text-center text-sm font-bold text-on-surface">
             {activeNav === 'Overview' ? 'Donor Dashboard' : activeNav === 'Impact' ? 'Impact Report' : activeNav === 'Giving' ? 'Giving Overview' : 'Settings'}
           </p>
-          <div className="flex items-center gap-2 md:gap-3 flex-shrink-0">
-            <button className="relative">
-              <span className="material-symbols-outlined text-on-surface-variant text-[22px]">notifications</span>
-              <span className="absolute -top-1 -right-1 w-4 h-4 bg-error rounded-full text-white text-[9px] font-bold flex items-center justify-center">3</span>
-            </button>
-            <button className="hidden md:block">
-              <span className="material-symbols-outlined text-on-surface-variant text-[22px]">help</span>
-            </button>
+          <div className="flex items-center gap-3">
             <div className="flex items-center gap-2">
-              <div className="w-8 h-8 rounded-full bg-primary-container flex items-center justify-center text-xs font-bold text-on-primary flex-shrink-0">ER</div>
-              <div className="hidden md:block text-right">
-                <p className="text-xs font-bold text-on-surface leading-tight">Elena Rodriguez</p>
-                <p className="text-[10px] text-secondary font-semibold">Gold Guardian</p>
+              <div className="w-8 h-8 rounded-full bg-primary-container flex items-center justify-center text-xs font-bold text-on-primary">{initials}</div>
+              <div className="text-right">
+                <p className="text-xs font-bold text-on-surface leading-tight">{displayName}</p>
+                <p className="text-[10px] text-secondary font-semibold">Donor</p>
               </div>
             </div>
           </div>
@@ -165,28 +202,18 @@ export default function DonorDashboard() {
           {activeNav === 'Giving' && <GivingPage />}
           {activeNav === 'Settings' && <SettingsPage />}
           {activeNav !== 'Overview' ? null : <>
-          <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4 mb-6">
-            <div>
-              <span className="inline-block px-3 py-1 bg-tertiary-fixed text-on-surface text-[10px] font-bold uppercase tracking-widest rounded-full mb-3">
-                Guardian Mission Update
-              </span>
-              <h1 className="font-manrope text-2xl md:text-3xl font-extrabold text-primary tracking-tight">Good morning, Guardian</h1>
-              <p className="text-on-surface-variant text-sm mt-1 max-w-lg leading-relaxed">
-                Your contributions this month have directly enabled the deployment of nutritional kits to three new community centers in the Northern Highlands.
-              </p>
-            </div>
-            <div className="bg-surface-container-low rounded-xl px-4 py-3 flex items-center gap-3 md:flex-shrink-0 self-start">
-              <div className="w-9 h-9 rounded-full bg-tertiary-fixed flex items-center justify-center flex-shrink-0">
-                <span className="material-symbols-outlined text-[20px]" style={{ fontVariationSettings: "'FILL' 1" }}>military_tech</span>
-              </div>
-              <div>
-                <p className="text-[10px] text-on-surface-variant uppercase tracking-widest font-semibold">Status Level</p>
-                <p className="text-sm font-extrabold text-on-surface">Gold Guardian</p>
-              </div>
-            </div>
+
+          <div className="mb-6">
+            <h1 className="font-manrope text-3xl font-extrabold text-primary tracking-tight">
+              Welcome, {user?.firstName ?? 'Guardian'}
+            </h1>
+            <p className="text-on-surface-variant text-sm mt-1">
+              Thank you for your continued support of Lucera's mission.
+            </p>
           </div>
 
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+          {/* Org-wide stats */}
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-4">
             <div className="bg-surface-container-low rounded-xl p-4">
               <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center mb-3">
                 <span className="material-symbols-outlined text-primary text-[18px]">home_pin</span>
@@ -208,13 +235,38 @@ export default function DonorDashboard() {
               <p className="text-[10px] font-bold text-on-surface-variant uppercase tracking-widest mb-1">Education Hours</p>
               <p className="font-manrope text-2xl font-extrabold text-primary">{loading ? '—' : stats ? `${stats.educationHours.toLocaleString()}+` : '—'}</p>
             </div>
+          </div>
+
+          {/* Personal donation stats */}
+          <div className="grid grid-cols-2 gap-4 mb-6">
             <div className="aurora-gradient rounded-xl p-4 text-white">
-              <p className="text-[10px] font-bold text-white/70 uppercase tracking-widest mb-3">Impact Velocity</p>
-              <p className="font-manrope text-2xl font-extrabold mb-2">Strong</p>
-              <div className="w-full bg-white/20 rounded-full h-1.5 mb-1">
-                <div className="bg-secondary-fixed h-full rounded-full" style={{ width: '85%' }}></div>
+              <div className="w-8 h-8 rounded-lg bg-white/20 flex items-center justify-center mb-3">
+                <span className="material-symbols-outlined text-white text-[18px]" style={{ fontVariationSettings: "'FILL' 1" }}>payments</span>
               </div>
-              <p className="text-[10px] text-white/70">85% of annual goal reached</p>
+              <p className="text-[10px] font-bold text-white/70 uppercase tracking-widest mb-1">Your Lifetime Contributions</p>
+              <p className="font-manrope text-2xl font-extrabold">
+                {loading ? '—' : `$${myLifetimeUSD.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
+              </p>
+            </div>
+            <div className="bg-surface-container-low rounded-xl p-4">
+              <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center mb-3">
+                <span className="material-symbols-outlined text-primary text-[18px]">receipt_long</span>
+              </div>
+              <p className="text-[10px] font-bold text-on-surface-variant uppercase tracking-widest mb-1">Your Total Donations</p>
+              <p className="font-manrope text-2xl font-extrabold text-primary">{loading ? '—' : myDonationCount}</p>
+              {recentDonations.length > 0 && (
+                <div className="mt-3 space-y-1">
+                  {recentDonations.map(d => (
+                    <div key={d.donationId} className="flex justify-between text-xs text-on-surface-variant">
+                      <span>{d.donationDate ? new Date(d.donationDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : '—'}</span>
+                      <span className="font-semibold text-on-surface">{d.amount != null ? toUSD(d.amount, d.currencyCode) : d.donationType}</span>
+                    </div>
+                  ))}
+                </div>
+              )}
+              {myDonationCount === 0 && !loading && (
+                <p className="text-xs text-on-surface-variant mt-2">No donations on record yet.</p>
+              )}
             </div>
           </div>
 
@@ -268,40 +320,8 @@ export default function DonorDashboard() {
             </div>
 
             <div className="space-y-4">
-              <div className="aurora-gradient rounded-xl p-5 text-white">
-                <p className="font-manrope font-bold text-lg mb-1">Quick Action</p>
-                <p className="text-white/70 text-xs mb-4">Boost your impact instantly with a recurring or one-time gift.</p>
-                <div className="flex gap-2 mb-3">
-                  {[25, 50, 100].map((amt) => (
-                    <button key={amt} onClick={() => { setSelectedAmount(amt); setCustomAmount(''); }}
-                      className={`flex-1 py-2 rounded-xl text-sm font-bold border transition-colors ${selectedAmount === amt ? 'bg-white text-primary border-white' : 'bg-white/10 border-white/30 hover:bg-white/20'}`}>
-                      ${amt}
-                    </button>
-                  ))}
-                </div>
-                <input type="number" placeholder="Custom amount" value={customAmount}
-                  onChange={(e) => { setCustomAmount(e.target.value); setSelectedAmount(null); }}
-                  className="w-full bg-white/10 border border-white/20 rounded-xl px-3 py-2 text-sm text-white placeholder:text-white/50 outline-none mb-3 focus:border-white/50"
-                />
-                <button className="w-full bg-secondary-fixed text-on-surface font-bold py-3 rounded-xl text-sm hover:opacity-90 transition-opacity">
-                  Send Contribution
-                </button>
-              </div>
-
-              <div className="relative rounded-xl overflow-hidden h-48">
-                <div className="absolute inset-0 bg-gradient-to-b from-primary/60 to-primary aurora-gradient opacity-90"></div>
-                <div className="absolute inset-0 flex flex-col justify-end p-4">
-                  <span className="inline-block px-2 py-0.5 bg-tertiary-fixed text-on-surface text-[9px] font-bold uppercase tracking-widest rounded-full mb-2 self-start">Field Report</span>
-                  <p className="font-manrope font-bold text-white text-sm leading-snug mb-2">The difference your support made in Antigua.</p>
-                  <div className="glass-panel rounded-lg p-2">
-                    <p className="text-[10px] text-on-surface italic leading-relaxed">"Because of the support from guardians like you, we were able to sustain the clean water initiative through the dry season."</p>
-                    <p className="text-[9px] font-bold text-secondary mt-1">— Maria V., Field Coordinator</p>
-                  </div>
-                </div>
-              </div>
-
               <div className="bg-surface-container-low rounded-xl p-4">
-                <p className="text-[10px] font-bold text-on-surface-variant uppercase tracking-widest mb-3">Command Resources</p>
+                <p className="text-[10px] font-bold text-on-surface-variant uppercase tracking-widest mb-3">Resources</p>
                 <div className="space-y-2">
                   <button
                     onClick={() => downloadExport('/api/export/my-tax-receipt', 'xlsx')}
@@ -317,7 +337,7 @@ export default function DonorDashboard() {
                   </button>
                   <button className="w-full flex items-center gap-2 text-sm text-primary font-medium hover:underline">
                     <span className="material-symbols-outlined text-[16px]">mail</span>
-                    Contact Guardian Support
+                    Contact Support
                   </button>
                 </div>
               </div>

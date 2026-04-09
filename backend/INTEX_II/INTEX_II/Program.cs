@@ -67,28 +67,51 @@ builder.Services.AddAuthentication(options =>
 })
 
 // Google OAuth
-.AddGoogle(options =>
-{
-    options.SignInScheme = "Identity.External";
-    options.ClientId = builder.Configuration["Authentication:Google:ClientId"]!;
-    options.ClientSecret = builder.Configuration["Authentication:Google:ClientSecret"]!;
-    options.CorrelationCookie.SameSite = SameSiteMode.Lax;
-    options.CorrelationCookie.SecurePolicy = CookieSecurePolicy.SameAsRequest;
-    options.CorrelationCookie.HttpOnly = true;
-})
+;
 
-// Microsoft OAuth
-.AddMicrosoftAccount(options =>
+var googleClientId = builder.Configuration["Authentication:Google:ClientId"];
+var googleClientSecret = builder.Configuration["Authentication:Google:ClientSecret"];
+if (!string.IsNullOrWhiteSpace(googleClientId) && !string.IsNullOrWhiteSpace(googleClientSecret))
 {
-    options.SignInScheme = "Identity.External";
-    options.ClientId = builder.Configuration["Authentication:Microsoft:ClientId"]!;
-    options.ClientSecret = builder.Configuration["Authentication:Microsoft:ClientSecret"]!;
-    options.CorrelationCookie.SameSite = SameSiteMode.Lax;
-    options.CorrelationCookie.SecurePolicy = CookieSecurePolicy.SameAsRequest;
-    options.CorrelationCookie.HttpOnly = true;
-});
+    builder.Services.AddAuthentication()
+        .AddGoogle(options =>
+        {
+            options.SignInScheme = "Identity.External";
+            options.ClientId = googleClientId;
+            options.ClientSecret = googleClientSecret;
+            options.CorrelationCookie.SameSite = SameSiteMode.Lax;
+            options.CorrelationCookie.SecurePolicy = CookieSecurePolicy.SameAsRequest;
+            options.CorrelationCookie.HttpOnly = true;
+        });
+}
+
+var msClientId = builder.Configuration["Authentication:Microsoft:ClientId"];
+var msClientSecret = builder.Configuration["Authentication:Microsoft:ClientSecret"];
+if (!string.IsNullOrWhiteSpace(msClientId) && !string.IsNullOrWhiteSpace(msClientSecret))
+{
+    builder.Services.AddAuthentication()
+        .AddMicrosoftAccount(options =>
+        {
+            options.SignInScheme = "Identity.External";
+            options.ClientId = msClientId;
+            options.ClientSecret = msClientSecret;
+            options.CorrelationCookie.SameSite = SameSiteMode.Lax;
+            options.CorrelationCookie.SecurePolicy = CookieSecurePolicy.SameAsRequest;
+            options.CorrelationCookie.HttpOnly = true;
+        });
+}
 
 var app = builder.Build();
+
+// TO DO: Once everyone runs this, delete it. Just to populate profile picture. 
+using (var scope = app.Services.CreateScope())
+{
+    var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+    await db.Database.ExecuteSqlRawAsync(@"
+        ALTER TABLE ""AspNetUsers""
+        ADD COLUMN IF NOT EXISTS profile_picture_url text NULL;
+    ");
+}
 
 // Seed roles and default admin account
 using (var scope = app.Services.CreateScope())
@@ -109,7 +132,8 @@ using (var scope = app.Services.CreateScope())
             UserName = adminEmail,
             Email = adminEmail,
             FirstName = "Admin",
-            LastName = "User"
+            LastName = "User",
+            EmailConfirmed = true
         };
         var result = await userManager.CreateAsync(admin, "adminadminadmin");
         if (result.Succeeded)
@@ -127,6 +151,13 @@ if (builder.Configuration.GetValue<bool>("DataSeeding:SeedOnStartup"))
 
     var userManager = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
     await DbSeeder.SeedUsersAsync(userManager);
+}
+
+// Always reset sequences on startup to keep them in sync with seeded data.
+using (var scope = app.Services.CreateScope())
+{
+    var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+    await DbSeeder.ResetSequencesAsync(db);
 }
 
 if (app.Environment.IsDevelopment())

@@ -7,17 +7,17 @@ interface Allocation {
 
 const AREA_COLORS: Record<string, string> = {
   'Direct Care': 'bg-primary',
-  'Education': 'bg-[#2196F3]',
-  'Medical': 'bg-[#9C27B0]',
-  'Operations': 'bg-[#FF9800]',
-  'Nutrition': 'bg-[#4CAF50]',
-  'Mental Health': 'bg-[#E91E63]',
-  'Vocational': 'bg-[#00BCD4]',
-  'Administration': 'bg-[#795548]',
-  'Wellbeing': 'bg-[#2196F3]',
-  'Transport': 'bg-[#9C27B0]',
-  'Maintenance': 'bg-[#E91E63]',
-  'Outreach': 'bg-[#4CAF50]',
+  'Education':   'bg-[#2196F3]', // blue
+  'Medical':     'bg-[#9C27B0]', // purple
+  'Operations':  'bg-[#FF9800]', // orange
+  'Nutrition':   'bg-[#4CAF50]', // green
+  'Mental Health':'bg-[#E91E63]',// pink
+  'Vocational':  'bg-[#00BCD4]', // cyan
+  'Administration':'bg-[#795548]',// brown
+  'Wellbeing':   'bg-[#009688]', // teal
+  'Transport':   'bg-[#9C27B0]', // purple
+  'Maintenance': 'bg-[#FF5722]', // deep orange
+  'Outreach':    'bg-[#4CAF50]', // green
 }
 
 function colorForArea(area: string): string {

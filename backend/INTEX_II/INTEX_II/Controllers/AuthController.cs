@@ -78,7 +78,9 @@ public class AuthController : ControllerBase
         {
             new Claim(JwtRegisteredClaimNames.Sub, user.Id),
             new Claim(JwtRegisteredClaimNames.Email, user.Email!),
-            new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
+            new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
+            new Claim("firstName", user.FirstName),
+            new Claim("lastName", user.LastName),
         };
         foreach (var role in roles)
             claims.Add(new Claim(ClaimTypes.Role, role));
@@ -96,6 +98,69 @@ public class AuthController : ControllerBase
         );
 
         return new JwtSecurityTokenHandler().WriteToken(token);
+    }
+
+    // GET /api/auth/me — returns the current user's profile
+    [Authorize]
+    [HttpGet("me")]
+    public async Task<IActionResult> GetMe()
+    {
+        var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value
+                  ?? User.FindFirst("sub")?.Value;
+        if (userId == null) return Unauthorized();
+
+        var user = await _userManager.FindByIdAsync(userId);
+        if (user == null) return NotFound();
+
+        return Ok(new
+        {
+            user.Id,
+            user.Email,
+            user.FirstName,
+            user.LastName,
+            user.UserName,
+            user.ProfilePictureUrl,
+        });
+    }
+
+    // PUT /api/auth/me — update name and profile picture
+    [Authorize]
+    [HttpPut("me")]
+    public async Task<IActionResult> UpdateMe([FromBody] UpdateMeDto dto)
+    {
+        var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value
+                  ?? User.FindFirst("sub")?.Value;
+        if (userId == null) return Unauthorized();
+
+        var user = await _userManager.FindByIdAsync(userId);
+        if (user == null) return NotFound();
+
+        user.FirstName = dto.FirstName;
+        user.LastName = dto.LastName;
+        user.ProfilePictureUrl = dto.ProfilePictureUrl;
+
+        var result = await _userManager.UpdateAsync(user);
+        if (!result.Succeeded) return BadRequest(result.Errors);
+
+        return Ok(new { user.FirstName, user.LastName, user.ProfilePictureUrl });
+    }
+
+    // POST /api/auth/me/change-password — self-service password change
+    [Authorize]
+    [HttpPost("me/change-password")]
+    public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordDto dto)
+    {
+        var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value
+                  ?? User.FindFirst("sub")?.Value;
+        if (userId == null) return Unauthorized();
+
+        var user = await _userManager.FindByIdAsync(userId);
+        if (user == null) return NotFound();
+
+        var result = await _userManager.ChangePasswordAsync(user, dto.CurrentPassword, dto.NewPassword);
+        if (!result.Succeeded) return BadRequest(result.Errors);
+
+        return Ok(new { message = "Password changed successfully." });
     }
 
     [HttpGet("external-login")]
@@ -128,6 +193,7 @@ public async Task<IActionResult> ExternalCallback()
             LastName  = info.Principal.FindFirstValue(ClaimTypes.Surname)  ?? "",
         };
         await _userManager.CreateAsync(user);
+        await _userManager.AddToRoleAsync(user, "Donor");
     }
 
     // Link the provider login to the user (idempotent)
@@ -175,3 +241,5 @@ private async Task EnsureSupporterExists(string email, string firstName, string 
 
 public record RegisterDto(string Email, string Password, string FirstName, string LastName);
 public record LoginDto(string Email, string Password);
+public record UpdateMeDto(string FirstName, string LastName, string? ProfilePictureUrl);
+public record ChangePasswordDto(string CurrentPassword, string NewPassword);

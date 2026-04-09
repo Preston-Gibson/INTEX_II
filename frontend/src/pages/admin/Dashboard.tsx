@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import AdminSidebar from '../../components/AdminSidebar';
+import UserAvatar from '../../components/UserAvatar';
 import { authHeaders } from '../../utils/auth';
 
 // ─── Config ───────────────────────────────────────────────────────────────────
@@ -139,21 +140,10 @@ export default function AdminCommandCenter() {
           <p className="flex-1 text-center text-sm font-bold text-on-surface">Admin Dashboard — Operational Oversight</p>
 
           <div className="flex items-center gap-3">
-            <button className="relative" aria-label="Notifications">
-              <span className="material-symbols-outlined text-on-surface-variant text-[22px]">notifications</span>
-            </button>
             <button aria-label="Help">
               <span className="material-symbols-outlined text-on-surface-variant text-[22px]">help</span>
             </button>
-            <div className="flex items-center gap-2">
-              <div className="w-8 h-8 rounded-full bg-primary-container flex items-center justify-center text-xs font-bold text-white">
-                AS
-              </div>
-              <div className="text-right">
-                <p className="text-xs font-bold text-on-surface leading-tight">Admin Staff</p>
-                <p className="text-[10px] text-secondary font-semibold">Lucera Portal</p>
-              </div>
-            </div>
+            <UserAvatar />
           </div>
         </header>
 

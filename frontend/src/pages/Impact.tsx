@@ -14,7 +14,7 @@ export default function Impact() {
           </h1>
           <p className="text-base md:text-xl text-on-surface-variant max-w-2xl leading-relaxed">
             Through your support, we provide sanctuary and hope to children across Central
-            America. Here is the real-world difference we've made together in 2024.
+            America. Here is the real-world difference we've made together in 2026.
           </p>
         </header>
 

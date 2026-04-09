@@ -1,15 +1,4 @@
-import { useState } from 'react';
-
 export default function SettingsPage() {
-  const [notifications, setNotifications] = useState({
-    impactReports: true,
-    taxDocuments: true,
-    emergencyAppeals: false,
-  });
-
-  const toggle = (key: keyof typeof notifications) =>
-    setNotifications((prev) => ({ ...prev, [key]: !prev[key] }));
-
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -69,76 +58,10 @@ export default function SettingsPage() {
             </div>
           </div>
 
-          {/* Payment Methods */}
-          <div className="bg-surface-container-low rounded-xl p-6">
-            <div className="flex items-center justify-between mb-5">
-              <div className="flex items-center gap-2">
-                <span className="material-symbols-outlined text-secondary text-[20px]">credit_card</span>
-                <p className="font-manrope font-bold text-on-surface">Payment Methods</p>
-              </div>
-              <button className="flex items-center gap-1 aurora-gradient text-white text-xs font-bold px-3 py-2 rounded-xl hover:opacity-90 transition-opacity">
-                <span className="material-symbols-outlined text-[14px]">add</span>
-                Add Card
-              </button>
-            </div>
-            <div className="space-y-3">
-              {[
-                { label: 'VISA', name: 'Visa ending in 4421', sub: 'Expires 09/26 • Primary Method', primary: true },
-                { label: 'MC', name: 'Mastercard ending in 8802', sub: 'Expires 02/25', primary: false },
-              ].map(({ label, name, sub, primary }) => (
-                <div key={name} className={`flex items-center gap-3 p-4 rounded-xl ${primary ? 'bg-surface-container' : 'bg-surface-container-low'}`}>
-                  <div className="w-10 h-7 rounded bg-surface-container-high flex items-center justify-center text-[10px] font-extrabold text-on-surface-variant">
-                    {label}
-                  </div>
-                  <div className="flex-1">
-                    <p className="text-sm font-semibold text-on-surface">{name}</p>
-                    <p className="text-xs text-on-surface-variant">{sub}</p>
-                  </div>
-                  <button>
-                    <span className="material-symbols-outlined text-on-surface-variant text-[20px]">more_vert</span>
-                  </button>
-                </div>
-              ))}
-            </div>
-          </div>
         </div>
 
         {/* Right column */}
         <div className="space-y-4">
-          {/* Notifications */}
-          <div className="aurora-gradient rounded-xl p-5 text-white">
-            <div className="flex items-center gap-2 mb-5">
-              <span className="material-symbols-outlined text-[20px]">mail</span>
-              <p className="font-manrope font-bold">Notifications</p>
-            </div>
-            <div className="space-y-4 mb-5">
-              {[
-                { key: 'impactReports' as const, label: 'Impact Reports', desc: 'Monthly updates on the children\'s progress.' },
-                { key: 'taxDocuments' as const, label: 'Tax Documents', desc: 'Annual summaries for your records.' },
-                { key: 'emergencyAppeals' as const, label: 'Emergency Appeals', desc: 'Urgent needs for disaster relief.' },
-              ].map(({ key, label, desc }) => (
-                <div key={key} className="flex items-start justify-between gap-3">
-                  <div>
-                    <p className="text-sm font-bold">{label}</p>
-                    <p className="text-white/60 text-[11px]">{desc}</p>
-                  </div>
-                  <button
-                    onClick={() => toggle(key)}
-                    className={`relative w-11 h-6 rounded-full transition-colors flex-shrink-0 mt-0.5 ${
-                      notifications[key] ? 'bg-secondary-fixed' : 'bg-white/20'
-                    }`}
-                  >
-                    <span className={`absolute top-0.5 w-5 h-5 rounded-full bg-white shadow transition-transform ${
-                      notifications[key] ? 'translate-x-5' : 'translate-x-0.5'
-                    }`}></span>
-                  </button>
-                </div>
-              ))}
-            </div>
-            <button className="w-full bg-white text-primary font-bold py-2.5 rounded-xl text-sm hover:opacity-90 transition-opacity">
-              Update Preferences
-            </button>
-          </div>
 
           {/* Quote card */}
           <div className="relative rounded-xl overflow-hidden bg-on-surface h-44">
