@@ -395,14 +395,15 @@ export default function HomeVisitationCaseConference() {
               </div>
             </div>
 
+            {/* Log a Visit form */}
+            <div className="bg-surface-container-lowest border border-outline-variant/20 rounded-2xl p-5">
                 <button
                   onClick={() => { setShowScheduleForm(true); setScheduleError(null); }}
-                  className="w-full mt-6 py-3 border-2 border-dashed border-outline-variant rounded-xl text-on-surface-variant text-sm font-semibold hover:bg-surface-container transition-colors"
+                  className="w-full mb-4 py-3 border-2 border-dashed border-outline-variant rounded-xl text-on-surface-variant text-sm font-semibold hover:bg-surface-container transition-colors"
                 >
                   + Schedule New Visit
                 </button>
-              </section>
-
+              <form onSubmit={handleSubmit} className="space-y-4">
                 <div className="grid grid-cols-2 gap-3">
                   <div>
                     <label className={labelCls}>Resident</label>
