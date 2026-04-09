@@ -344,11 +344,9 @@ export default function CaseloadInventory() {
             {CASE_CATEGORY_OPTIONS.map(c => <option key={c} value={c}>{c}</option>)}
           </select>
 
-          <p className="flex-1 text-center text-sm font-bold text-on-surface">Caseload Inventory</p>
-
           <button
             onClick={openAdd}
-            className="aurora-gradient text-white text-sm font-bold px-4 py-2 rounded-xl hover:opacity-90 transition-opacity flex items-center gap-2 flex-shrink-0"
+            className="aurora-gradient text-white text-sm font-bold px-4 py-2 rounded-xl hover:opacity-90 transition-opacity flex items-center gap-2 flex-shrink-0 ml-auto"
           >
             <span className="material-symbols-outlined text-[18px]">add</span>
             Add Resident
