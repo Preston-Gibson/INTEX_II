@@ -180,7 +180,7 @@ export default function HomeVisitationCaseConference() {
 
   function loadLogs(page: number) {
     setLogsLoading(true);
-    fetch(`${API}/logs?page=${page}&pageSize=${PAGE_SIZE}`, { headers: authHeaders() })
+    fetch(`${API}/historical-logs?page=${page}&pageSize=${PAGE_SIZE}`, { headers: authHeaders() })
       .then(r => r.json())
       .then((data: PagedLogs) => {
         setLogs(data.data ?? []);
