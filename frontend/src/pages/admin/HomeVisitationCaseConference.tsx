@@ -205,7 +205,7 @@ export default function HomeVisitationCaseConference() {
               Visitations &amp; Conferences
             </h1>
             <p className="text-on-surface-variant font-body">
-              Managing social work interventions and advocacy for residents in Santa Rosa de Copán.
+              Track and manage home visitations for residents.
             </p>
           </header>
 

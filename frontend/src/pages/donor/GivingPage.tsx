@@ -245,22 +245,13 @@ export default function GivingPage() {
       </div>
 
       {/* Quote banner */}
-      <div className="relative rounded-2xl overflow-hidden h-40 bg-surface-container-high">
-        <div className="absolute inset-0 bg-gradient-to-r from-surface-container-highest/80 to-transparent"></div>
-        <div className="relative z-10 p-8 flex items-center h-full">
-          <div className="max-w-md">
-            <p className="text-[10px] font-bold text-secondary mb-1">"</p>
-            <p className="text-sm font-semibold text-on-surface italic leading-relaxed mb-3">
-              "Radiant Guardian has changed the trajectory of our community. The support from donors isn't just money—it's a promise of a better future for our children."
-            </p>
-            <div className="flex items-center gap-2">
-              <div className="w-7 h-7 rounded-full bg-tertiary flex items-center justify-center text-white text-[10px] font-bold">MG</div>
-              <div>
-                <p className="text-xs font-bold text-on-surface">Maria Gonzalez</p>
-                <p className="text-[10px] text-on-surface-variant">Regional Director, Guatemala</p>
-              </div>
-            </div>
-          </div>
+      <div className="rounded-2xl bg-surface-container-high px-6 py-5 flex items-center gap-4">
+        <div className="w-8 h-8 rounded-full bg-tertiary flex-shrink-0 flex items-center justify-center text-white text-[10px] font-bold">MG</div>
+        <div>
+          <p className="text-sm text-on-surface italic leading-relaxed">
+            "Donor support isn't just money — it's a real promise of hope for the families we serve."
+          </p>
+          <p className="text-[10px] text-on-surface-variant mt-1">Maria Gonzalez · Regional Director, Guatemala</p>
         </div>
       </div>
     </div>

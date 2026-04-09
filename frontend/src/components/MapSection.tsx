@@ -73,7 +73,7 @@ export default function MapSection() {
           </h2>
           <p className="text-[1.02rem] leading-[1.75] text-on-surface-variant max-w-[560px]">
             Operating across Central America, Lucera maintains safe houses, legal
-            offices, and partner networks to reach the most vulnerable children.
+            offices, and partner networks to serve those most in need.
           </p>
         </div>
 

@@ -69,6 +69,13 @@ function Skeleton({ className = '', style }: { className?: string; style?: React
 
 // ─── Component ────────────────────────────────────────────────────────────────
 
+function getGreeting() {
+  const hour = new Date().getHours();
+  if (hour < 12) return 'Good morning';
+  if (hour < 18) return 'Good afternoon';
+  return 'Good evening';
+}
+
 export default function AdminCommandCenter() {
   const navigate = useNavigate();
 
@@ -148,10 +155,10 @@ export default function AdminCommandCenter() {
           <section className="flex flex-col md:flex-row items-end justify-between gap-4">
             <div>
               <h2 className="text-3xl font-extrabold text-primary tracking-tight font-headline">
-                Good morning, Guardian
+                {getGreeting()}
               </h2>
               <p className="text-on-surface-variant max-w-md mt-1 leading-relaxed text-sm">
-                Your overview for Santa Rosa de Copán is ready. Here are the core metrics for today's operations.
+                Here are the core metrics for today's operations across all locations.
               </p>
             </div>
             <div className="flex gap-3 flex-shrink-0">
