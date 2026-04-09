@@ -10,9 +10,9 @@ export default function SettingsPage() {
         </p>
       </div>
 
-      <div className="grid grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         {/* Left: Personal Info + Payment Methods */}
-        <div className="col-span-2 space-y-4">
+        <div className="md:col-span-2 space-y-4">
           {/* Personal Information */}
           <div className="bg-surface-container-low rounded-xl p-6">
             <div className="flex items-center justify-between mb-5">
@@ -81,7 +81,7 @@ export default function SettingsPage() {
       </div>
 
       {/* Privacy & Security */}
-      <div className="flex items-center justify-between p-5 bg-surface-container-low rounded-xl">
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 p-5 bg-surface-container-low rounded-xl">
         <div>
           <p className="text-sm font-bold text-on-surface">Privacy &amp; Security</p>
           <p className="text-xs text-on-surface-variant">Your data is encrypted and protected by Guardian Shield Protocols.</p>

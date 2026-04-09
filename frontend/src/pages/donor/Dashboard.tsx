@@ -58,6 +58,7 @@ interface MyDonationsResponse {
 
 export default function DonorDashboard() {
   const [activeNav, setActiveNav] = useState('Overview');
+  const [sidebarOpen, setSidebarOpen] = useState(false);
   const [chartRange, setChartRange] = useState<'6 MONTHS' | '12 MONTHS'>('12 MONTHS');
 
   const [stats, setStats] = useState<Stats | null>(null);
@@ -111,38 +112,71 @@ export default function DonorDashboard() {
     : 0;
   const recentDonations = myDonations?.donations.slice(0, 3) ?? [];
 
-  return (
-    <div className="flex h-screen bg-surface overflow-hidden font-body">
-      <aside className="w-56 flex-shrink-0 flex flex-col bg-surface-container-lowest border-r border-outline-variant/20 py-6 px-4 relative z-10">
-        <div className="mb-8 px-2">
+  const sidebarContent = (
+    <aside className="w-56 flex-shrink-0 flex flex-col bg-surface-container-lowest border-r border-outline-variant/20 py-6 px-4 relative z-10 h-full">
+      <div className="mb-8 px-2 flex items-center justify-between">
+        <div>
           <p className="text-primary font-manrope font-extrabold text-lg leading-tight">Guardian Portal</p>
           <p className="text-on-surface-variant text-[10px] font-bold uppercase tracking-widest mt-0.5">Donor Command Center</p>
         </div>
-        <nav className="flex-1 space-y-1">
-          {NAV_ITEMS.map(({ label, icon }) => (
-            <button
-              key={label}
-              onClick={() => setActiveNav(label)}
-              className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold transition-colors ${
-                activeNav === label
-                  ? 'bg-primary/10 text-primary border-l-2 border-primary'
-                  : 'text-on-surface-variant hover:bg-surface-container-low'
-              }`}
-            >
-              <span className="material-symbols-outlined text-[20px]">{icon}</span>
-              {label}
-            </button>
-          ))}
-        </nav>
-        <Link to="/" className="w-full flex items-center justify-center gap-2 text-on-surface-variant text-xs font-semibold py-2 rounded-xl hover:bg-surface-container-low transition-colors">
-          <span className="material-symbols-outlined text-[16px]">arrow_back</span>
-          Back to Home
-        </Link>
-      </aside>
+        <button onClick={() => setSidebarOpen(false)} className="lg:hidden text-on-surface-variant hover:text-on-surface transition-colors">
+          <span className="material-symbols-outlined text-[20px]">close</span>
+        </button>
+      </div>
+      <nav className="flex-1 space-y-1">
+        {NAV_ITEMS.map(({ label, icon }) => (
+          <button
+            key={label}
+            onClick={() => { setActiveNav(label); setSidebarOpen(false); }}
+            className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold transition-colors ${
+              activeNav === label
+                ? 'bg-primary/10 text-primary border-l-2 border-primary'
+                : 'text-on-surface-variant hover:bg-surface-container-low'
+            }`}
+          >
+            <span className="material-symbols-outlined text-[20px]">{icon}</span>
+            {label}
+          </button>
+        ))}
+      </nav>
+      <button className="w-full aurora-gradient text-white text-sm font-bold py-3 rounded-xl hover:opacity-90 transition-opacity mb-2">
+        Donate Now
+      </button>
+      <Link to="/" className="w-full flex items-center justify-center gap-2 text-on-surface-variant text-xs font-semibold py-2 rounded-xl hover:bg-surface-container-low transition-colors">
+        <span className="material-symbols-outlined text-[16px]">arrow_back</span>
+        Back to Home
+      </Link>
+    </aside>
+  );
+
+  return (
+    <div className="flex h-screen bg-surface overflow-hidden font-body">
+      {/* Desktop sidebar */}
+      <div className="hidden lg:flex h-full">
+        {sidebarContent}
+      </div>
+
+      {/* Mobile hamburger */}
+      <button
+        onClick={() => setSidebarOpen(true)}
+        className="lg:hidden fixed top-3 left-3 z-50 w-10 h-10 flex items-center justify-center bg-surface-container-lowest border border-outline-variant/20 rounded-xl shadow-sm"
+      >
+        <span className="material-symbols-outlined text-on-surface-variant text-[22px]">menu</span>
+      </button>
+
+      {/* Mobile drawer */}
+      {sidebarOpen && (
+        <>
+          <div className="lg:hidden fixed inset-0 z-40 bg-black/40 backdrop-blur-sm" onClick={() => setSidebarOpen(false)} />
+          <div className="lg:hidden fixed inset-y-0 left-0 z-50 flex">
+            {sidebarContent}
+          </div>
+        </>
+      )}
 
       <div className="flex-1 flex flex-col overflow-hidden">
-        <header className="flex items-center gap-4 px-6 py-3 bg-surface-container-lowest border-b border-outline-variant/20 flex-shrink-0">
-          <div className="flex items-center gap-2 bg-surface-container-low rounded-xl px-3 py-2 flex-1 max-w-xs">
+        <header className="flex items-center gap-3 pl-14 lg:pl-6 pr-4 md:pr-6 py-3 bg-surface-container-lowest border-b border-outline-variant/20 flex-shrink-0">
+          <div className="hidden md:flex items-center gap-2 bg-surface-container-low rounded-xl px-3 py-2 flex-1 max-w-xs">
             <span className="material-symbols-outlined text-on-surface-variant text-[18px]">search</span>
             <input
               className="bg-transparent text-sm text-on-surface placeholder:text-on-surface-variant outline-none w-full"
@@ -163,7 +197,7 @@ export default function DonorDashboard() {
           </div>
         </header>
 
-        <main className="flex-1 overflow-y-auto p-6">
+        <main className="flex-1 overflow-y-auto p-4 md:p-6">
           {activeNav === 'Impact' && <ImpactPage />}
           {activeNav === 'Giving' && <GivingPage />}
           {activeNav === 'Settings' && <SettingsPage />}
@@ -179,7 +213,7 @@ export default function DonorDashboard() {
           </div>
 
           {/* Org-wide stats */}
-          <div className="grid grid-cols-3 gap-4 mb-4">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-4">
             <div className="bg-surface-container-low rounded-xl p-4">
               <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center mb-3">
                 <span className="material-symbols-outlined text-primary text-[18px]">home_pin</span>
@@ -236,8 +270,8 @@ export default function DonorDashboard() {
             </div>
           </div>
 
-          <div className="grid grid-cols-3 gap-4">
-            <div className="col-span-2 space-y-4">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+            <div className="lg:col-span-2 space-y-4">
               <div className="bg-surface-container-low rounded-xl p-5">
                 <div className="flex items-center justify-between mb-4">
                   <div>

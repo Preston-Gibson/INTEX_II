@@ -77,7 +77,7 @@ export default function MapSection() {
           </p>
         </div>
 
-        <div className="grid grid-cols-[1fr_320px] gap-10 items-stretch">
+        <div className="grid grid-cols-1 lg:grid-cols-[1fr_320px] gap-10 items-stretch">
           <div className="h-full rounded-[2rem] overflow-hidden shadow-[0_4px_24px_rgba(0,0,0,0.08)]" style={{ minHeight: 420 }}>
             <MapContainer
               center={[11.5, -85.5]}

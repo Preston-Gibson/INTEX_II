@@ -85,8 +85,8 @@ export default function ImpactPage() {
   return (
     <div className="space-y-8">
       {/* Hero stats row */}
-      <div className="grid grid-cols-3 gap-4 items-start">
-        <div className="col-span-2">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-start">
+        <div className="md:col-span-2">
           <p className="text-[10px] font-bold text-secondary uppercase tracking-widest mb-2">Ecosystem of Hope</p>
           <h2 className="font-manrope text-3xl font-extrabold text-primary leading-tight mb-3">
             Your legacy is measured in{' '}
@@ -95,7 +95,7 @@ export default function ImpactPage() {
           <p className="text-on-surface-variant text-sm leading-relaxed mb-5 max-w-lg">
             Through your steadfast support, Lucera has provided sanctuary and hope to thousands of children across Central America. Witness the tangible ripple effect of your generosity.
           </p>
-          <div className="flex gap-3">
+          <div className="flex flex-wrap gap-3">
             <button className="aurora-gradient text-white text-sm font-bold px-4 py-2.5 rounded-xl hover:opacity-90 transition-opacity">
               Download 2026 Audit
             </button>
@@ -168,7 +168,7 @@ export default function ImpactPage() {
       </div>
 
       {/* Regional Footprint */}
-      <div className="grid grid-cols-2 gap-6 bg-surface-container-low rounded-xl p-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 bg-surface-container-low rounded-xl p-6">
         <div>
           <p className="text-[10px] font-bold text-secondary uppercase tracking-widest mb-2">Regional Footprint</p>
           <h3 className="font-manrope text-xl font-extrabold text-primary mb-5">
@@ -195,8 +195,8 @@ export default function ImpactPage() {
       <div>
         <h3 className="font-manrope text-xl font-bold text-on-surface text-center mb-1">Transparent Stewardship</h3>
         <p className="text-xs text-on-surface-variant text-center mb-5">Every dollar is optimized for maximum frontline impact.</p>
-        <div className="grid grid-cols-3 gap-4">
-          <div className="col-span-2 bg-surface-container-low rounded-xl p-5">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="md:col-span-2 bg-surface-container-low rounded-xl p-5">
             <p className="text-sm font-bold text-on-surface mb-3">Programmatic Allocation</p>
             {loading ? (
               <p className="text-xs text-on-surface-variant">Loading...</p>
@@ -235,7 +235,7 @@ export default function ImpactPage() {
         <div className="flex items-center justify-between mb-4">
           <h3 className="font-manrope text-xl font-bold text-on-surface">The Faces of Impact</h3>
         </div>
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           {[
             {
               title: "Mateo's New Chapter",
@@ -270,7 +270,7 @@ export default function ImpactPage() {
       <div className="bg-surface-container-low rounded-xl p-6">
         <h3 className="font-manrope text-lg font-bold text-on-surface text-center mb-1">The Journey of Your Gift</h3>
         <p className="text-xs text-on-surface-variant text-center mb-6">From the moment you click donate, your contribution goes through a rigorous process of deployment and verification.</p>
-        <div className="grid grid-cols-4 gap-4">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           {JOURNEY_STEPS.map(({ n, title, desc }) => (
             <div key={n} className="text-center">
               <div className="w-10 h-10 rounded-full aurora-gradient text-white font-extrabold text-lg flex items-center justify-center mx-auto mb-3">{n}</div>
@@ -290,7 +290,7 @@ export default function ImpactPage() {
         <p className="text-white/70 text-sm mb-6 max-w-md mx-auto">
           Join us in reaching our 2026 milestone of 6,000 children supported. Together, we can build a lasting sanctuary of growth.
         </p>
-        <div className="flex gap-3 justify-center">
+        <div className="flex flex-wrap gap-3 justify-center">
           <button className="bg-white text-primary font-bold px-5 py-2.5 rounded-xl text-sm hover:opacity-90 transition-opacity">
             Increase Your Impact
           </button>
