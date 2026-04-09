@@ -184,10 +184,7 @@ export default function DonorDashboard() {
               placeholder="Search mission reports..."
             />
           </div>
-          <p className="flex-1 text-center text-sm font-bold text-on-surface">
-            {activeNav === 'Overview' ? 'Donor Dashboard' : activeNav === 'Impact' ? 'Impact Report' : activeNav === 'Giving' ? 'Giving Overview' : 'Settings'}
-          </p>
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-3 ml-auto">
             <div className="flex items-center gap-2">
               <div className="w-8 h-8 rounded-full bg-primary-container flex items-center justify-center text-xs font-bold text-on-primary">{initials}</div>
               <div className="text-right">
