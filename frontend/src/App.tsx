@@ -50,7 +50,7 @@ function Layout() {
           <Route path="/register" element={<Register />} />
           <Route path="/oauth-callback" element={<OAuthCallback />} />
           <Route path="/privacy-policy" element={<PrivacyPolicy />} />
-          <Route path="/donor-dashboard" element={<ProtectedRoute requiredRole="Donor"><DonorDashboard /></ProtectedRoute>} />
+          <Route path="/donor-dashboard" element={<ProtectedRoute requiredRole={['Admin', 'Donor']}><DonorDashboard /></ProtectedRoute>} />
           <Route path="/admin-dashboard" element={<ProtectedRoute requiredRole="Admin"><AdminDashboard /></ProtectedRoute>} />
           <Route path="/admin-donors-contributions" element={<ProtectedRoute requiredRole="Admin"><AdminDonorsContributions /></ProtectedRoute>} />
           <Route path="/admin-caseload-inventory" element={<ProtectedRoute requiredRole="Admin"><AdminCaseloadInventory /></ProtectedRoute>} />

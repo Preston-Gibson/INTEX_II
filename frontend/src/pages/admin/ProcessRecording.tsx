@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import AdminSidebar from '../../components/AdminSidebar';
+import UserAvatar from '../../components/UserAvatar';
 import { authHeaders } from '../../utils/auth';
 
 const API = `${import.meta.env.VITE_API_URL ?? 'http://localhost:5229'}/api/process-recordings`;
@@ -47,9 +48,39 @@ const EMPTY_FORM = {
   referralMade: false,
 };
 
+const RESIDENTS_PER_PAGE = 12;
+
 const inputCls = 'w-full bg-surface-container-low rounded-xl px-3 py-2 text-sm text-on-surface outline-none focus:ring-2 focus:ring-primary/20';
 const textareaCls = `${inputCls} resize-none`;
 const labelCls = 'text-[10px] font-bold text-on-surface-variant uppercase tracking-widest mb-1 block';
+
+function Pagination({ page, total, pageSize, onChange }: {
+  page: number; total: number; pageSize: number; onChange: (p: number) => void;
+}) {
+  const totalPages = Math.ceil(total / pageSize);
+  if (totalPages <= 1) return null;
+  return (
+    <div className="flex items-center justify-between px-4 py-2 border-t border-outline-variant/20 flex-shrink-0">
+      <button
+        onClick={() => onChange(page - 1)}
+        disabled={page === 1}
+        className="p-1 rounded-lg text-on-surface-variant hover:bg-surface-container-low disabled:opacity-30 transition-colors"
+      >
+        <span className="material-symbols-outlined text-[18px]">chevron_left</span>
+      </button>
+      <p className="text-[10px] font-bold text-on-surface-variant">
+        {page} / {totalPages}
+      </p>
+      <button
+        onClick={() => onChange(page + 1)}
+        disabled={page === totalPages}
+        className="p-1 rounded-lg text-on-surface-variant hover:bg-surface-container-low disabled:opacity-30 transition-colors"
+      >
+        <span className="material-symbols-outlined text-[18px]">chevron_right</span>
+      </button>
+    </div>
+  );
+}
 
 const STATUS_BADGE: Record<string, string> = {
   Active:      'bg-secondary/10 text-secondary',
@@ -85,11 +116,13 @@ export default function ProcessRecording() {
   const [recordingToDelete, setRecordingToDelete] = useState<number | null>(null);
   const [deleting, setDeleting] = useState(false);
 
+  const [residentPage, setResidentPage] = useState(1);
+
   // Load residents
   useEffect(() => {
     fetch(`${API}/residents?search=${encodeURIComponent(search)}`, { headers: authHeaders() })
       .then(r => r.json())
-      .then(setResidents)
+      .then(data => { setResidents(data); setResidentPage(1); })
       .catch(() => {});
   }, [search]);
 
@@ -177,6 +210,7 @@ export default function ProcessRecording() {
                 New Recording
               </button>
             )}
+            <UserAvatar />
           </div>
         </header>
 
@@ -192,7 +226,7 @@ export default function ProcessRecording() {
             <div className="flex-1 overflow-y-auto">
               {residents.length === 0 ? (
                 <p className="text-xs text-on-surface-variant text-center py-8">No residents found</p>
-              ) : residents.map(r => (
+              ) : residents.slice((residentPage - 1) * RESIDENTS_PER_PAGE, residentPage * RESIDENTS_PER_PAGE).map(r => (
                 <button
                   key={r.residentId}
                   onClick={() => handleSelect(r)}
@@ -213,6 +247,12 @@ export default function ProcessRecording() {
                 </button>
               ))}
             </div>
+            <Pagination
+              page={residentPage}
+              total={residents.length}
+              pageSize={RESIDENTS_PER_PAGE}
+              onChange={setResidentPage}
+            />
           </div>
 
           {/* ── Right Panel ── */}
@@ -354,6 +394,7 @@ export default function ProcessRecording() {
                       </div>
                     )}
                   </div>
+
                 </div>
 
                 {/* ── New Recording Form (slide-in panel) ── */}

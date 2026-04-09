@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import AdminSidebar from '../../components/AdminSidebar';
+import UserAvatar from '../../components/UserAvatar';
 import { authHeaders, downloadExport } from '../../utils/auth';
 
 const API = `${import.meta.env.VITE_API_URL ?? 'http://localhost:5229'}/api/supporters`;
@@ -258,6 +259,7 @@ export default function DonorsContributions() {
   const [donModalMode, setDonModalMode]       = useState<'add' | 'view' | null>(null);
   const [selectedDonation, setSelectedDonation] = useState<DonationRow | null>(null);
   const [donTargetSuppId, setDonTargetSuppId] = useState<number | null>(null);
+  const [donShowSuppSelector, setDonShowSuppSelector] = useState(false);
   const [donForm, setDonForm]                 = useState<DonationFormData>(EMPTY_DONATION);
   const [donFormError, setDonFormError]       = useState<string | null>(null);
 
@@ -364,6 +366,15 @@ export default function DonorsContributions() {
   // ── Donation modal helpers ────────────────────────────────────────────────
   function openRecordDonation(suppId: number) {
     setDonTargetSuppId(suppId);
+    setDonShowSuppSelector(false);
+    setDonForm(EMPTY_DONATION);
+    setDonFormError(null);
+    setDonModalMode('add');
+  }
+
+  function openAddDonationFromTab() {
+    setDonTargetSuppId(null);
+    setDonShowSuppSelector(true);
     setDonForm(EMPTY_DONATION);
     setDonFormError(null);
     setDonModalMode('add');
@@ -380,6 +391,7 @@ export default function DonorsContributions() {
 
   async function handleDonationSubmit() {
     setDonFormError(null);
+    if (donShowSuppSelector && !donTargetSuppId) { setDonFormError('Please select a supporter.'); return; }
     if (!donForm.donationType)         { setDonFormError('Donation Type is required.'); return; }
     if (!donForm.estimatedValue)       { setDonFormError('Estimated Value is required.'); return; }
 
@@ -511,6 +523,14 @@ export default function DonorsContributions() {
               Add Supporter
             </button>
           )}
+          {activeTab === 'donations' && (
+            <button onClick={openAddDonationFromTab}
+              className="aurora-gradient text-white text-sm font-bold px-4 py-2 rounded-xl hover:opacity-90 transition-opacity flex items-center gap-2 flex-shrink-0">
+              <span className="material-symbols-outlined text-[18px]">add_card</span>
+              Add Donation
+            </button>
+          )}
+          <UserAvatar />
         </header>
 
         {/* ── Main content ── */}
@@ -842,6 +862,23 @@ export default function DonorsContributions() {
               </button>
             </div>
             <div className="flex-1 overflow-y-auto px-6 py-4 space-y-5">
+              {donShowSuppSelector && (
+                <div>
+                  <p className="text-[10px] font-bold text-on-surface-variant uppercase tracking-widest mb-3 border-b border-outline-variant/20 pb-1">Supporter</p>
+                  <Field label="Supporter *">
+                    <select
+                      className={selectCls}
+                      value={donTargetSuppId ?? ''}
+                      onChange={e => setDonTargetSuppId(e.target.value ? Number(e.target.value) : null)}
+                    >
+                      <option value="">Select supporter…</option>
+                      {supporters.map(s => (
+                        <option key={s.supporterId} value={s.supporterId}>{s.displayName}</option>
+                      ))}
+                    </select>
+                  </Field>
+                </div>
+              )}
               <div>
                 <p className="text-[10px] font-bold text-on-surface-variant uppercase tracking-widest mb-3 border-b border-outline-variant/20 pb-1">Contribution Details</p>
                 <div className="grid grid-cols-2 gap-4">
