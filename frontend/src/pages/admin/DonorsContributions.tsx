@@ -116,6 +116,7 @@ interface DonationRow {
   estimatedValue: number;
   impactUnit: string;
   notes: string | null;
+  isReviewed: boolean;
   allocationCount: number;
   allocations: DonationAllocation[];
 }
@@ -263,6 +264,16 @@ export default function DonorsContributions() {
   const [donForm, setDonForm]                 = useState<DonationFormData>(EMPTY_DONATION);
   const [donFormError, setDonFormError]       = useState<string | null>(null);
 
+  // ── Expanded details tracking ───────────────────────────────────────────────
+  const [expandedDetails, setExpandedDetails] = useState<Set<number>>(new Set());
+  function toggleDetail(id: number) {
+    setExpandedDetails(prev => {
+      const next = new Set(prev);
+      next.has(id) ? next.delete(id) : next.add(id);
+      return next;
+    });
+  }
+
   // ── Supporter donations panel (within edit modal) ─────────────────────────
   const [suppDonations, setSuppDonations]     = useState<DonationRow[]>([]);
   const [suppDonLoading, setSuppDonLoading]   = useState(false);
@@ -385,6 +396,16 @@ export default function DonorsContributions() {
     setDonModalMode('view');
   }
 
+  async function toggleReview(donationId: number, isReviewed: boolean) {
+    await fetch(`${API}/donations/${donationId}/review`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json', ...authHeaders() },
+      body: JSON.stringify({ isReviewed }),
+    });
+    setSuppDonations(prev => prev.map(d => d.donationId === donationId ? { ...d, isReviewed } : d));
+    setDonations(prev => prev.map(d => d.donationId === donationId ? { ...d, isReviewed } : d));
+  }
+
   function patchDon(updates: Partial<DonationFormData>) {
     setDonForm(prev => ({ ...prev, ...updates }));
   }
@@ -434,7 +455,13 @@ export default function DonorsContributions() {
   // ── Paginated slices ──────────────────────────────────────────────────────
   const suppPageRows = supporters.slice((suppPage - 1) * PAGE_SIZE, suppPage * PAGE_SIZE);
   const donPageRows  = donations.slice((donPage  - 1) * PAGE_SIZE, donPage  * PAGE_SIZE);
-  const suppDonPageRows = suppDonations.slice((suppDonPage - 1) * PAGE_SIZE, suppDonPage * PAGE_SIZE);
+  const sortedSuppDonations = [...suppDonations].sort((a, b) => {
+    const needsReview = (d: DonationRow) => (d.donationType === 'InKind' || d.donationType === 'Time') && !d.isReviewed;
+    const aNeeds = needsReview(a) ? 0 : (a.donationType === 'InKind' || a.donationType === 'Time') ? 1 : 2;
+    const bNeeds = needsReview(b) ? 0 : (b.donationType === 'InKind' || b.donationType === 'Time') ? 1 : 2;
+    return aNeeds - bNeeds;
+  });
+  const suppDonPageRows = sortedSuppDonations.slice((suppDonPage - 1) * PAGE_SIZE, suppDonPage * PAGE_SIZE);
 
   return (
     <div className="flex h-screen bg-surface overflow-hidden font-body">
@@ -613,10 +640,10 @@ export default function DonorsContributions() {
             ) : (
               <div className="flex flex-col gap-4">
                 <div className="bg-surface-container-lowest rounded-xl border border-outline-variant/20 overflow-x-auto">
-                  <table className="w-full text-sm min-w-[960px]">
+                  <table className="w-full text-sm min-w-[1100px]">
                     <thead>
                       <tr className="border-b border-outline-variant/20 bg-surface-container-low">
-                        {['Supporter', 'Type', 'Date', 'Amount', 'Est. Value', 'Campaign', 'Channel', 'Recurring', 'Allocations', ''].map(h => (
+                        {['Supporter', 'Type', 'Date', 'Amount', 'Est. Value', 'Campaign', 'Details', 'Channel', 'Recurring', 'Allocations', ''].map(h => (
                           <th key={h} className="text-left px-4 py-3 text-[10px] font-bold text-on-surface-variant uppercase tracking-widest whitespace-nowrap">
                             {h}
                           </th>
@@ -638,6 +665,16 @@ export default function DonorsContributions() {
                           </td>
                           <td className="px-4 py-3 text-xs whitespace-nowrap">{toUSD(d.estimatedValue, d.currencyCode ?? 'USD')}</td>
                           <td className="px-4 py-3 text-xs text-on-surface-variant whitespace-nowrap">{d.campaignName || '—'}</td>
+                          <td className="px-4 py-3 text-xs text-on-surface-variant max-w-[260px]">
+                            {d.notes ? (
+                              <div>
+                                <span className={expandedDetails.has(d.donationId) ? 'whitespace-pre-wrap break-words' : 'block truncate'}>{d.notes}</span>
+                                <button onClick={() => toggleDetail(d.donationId)} className="text-primary text-[10px] font-bold mt-0.5 hover:underline">
+                                  {expandedDetails.has(d.donationId) ? 'Show less' : 'Show more'}
+                                </button>
+                              </div>
+                            ) : '—'}
+                          </td>
                           <td className="px-4 py-3 text-xs text-on-surface-variant whitespace-nowrap">{d.channelSource || '—'}</td>
                           <td className="px-4 py-3 text-xs whitespace-nowrap">
                             <span className={`inline-block px-2 py-0.5 rounded-full text-[10px] font-bold ${d.isRecurring ? 'bg-secondary/10 text-secondary' : 'bg-surface-container text-on-surface-variant'}`}>
@@ -790,10 +827,10 @@ export default function DonorsContributions() {
                 ) : (
                   <>
                     <div className="bg-surface-container-low rounded-xl border border-outline-variant/20 overflow-x-auto">
-                      <table className="w-full text-sm min-w-[640px]">
+                      <table className="w-full text-sm min-w-[860px]">
                         <thead>
                           <tr className="border-b border-outline-variant/20">
-                            {['Type', 'Date', 'Amount', 'Est. Value', 'Campaign', 'Recurring', 'Allocations'].map(h => (
+                            {['Type', 'Date', 'Amount', 'Est. Value', 'Campaign', 'Details', 'Recurring', 'Alloc.', 'Reviewed'].map(h => (
                               <th key={h} className="text-left px-4 py-2.5 text-[10px] font-bold text-on-surface-variant uppercase tracking-widest whitespace-nowrap">
                                 {h}
                               </th>
@@ -801,8 +838,10 @@ export default function DonorsContributions() {
                           </tr>
                         </thead>
                         <tbody>
-                          {suppDonPageRows.map(d => (
-                            <tr key={d.donationId} className="border-b border-outline-variant/10 hover:bg-surface-container transition-colors">
+                          {suppDonPageRows.map(d => {
+                            const needsReview = (d.donationType === 'InKind' || d.donationType === 'Time') && !d.isReviewed;
+                            return (
+                            <tr key={d.donationId} className={`border-b border-outline-variant/10 hover:bg-surface-container transition-colors ${needsReview ? 'bg-tertiary-fixed/20' : ''}`}>
                               <td className="px-4 py-2.5">
                                 <span className={`inline-block px-2 py-0.5 rounded-full text-[10px] font-bold ${DONATION_TYPE_BADGE[d.donationType] ?? 'bg-surface-container text-on-surface-variant'}`}>
                                   {DONATION_TYPE_LABEL[d.donationType] ?? d.donationType}
@@ -814,19 +853,49 @@ export default function DonorsContributions() {
                               </td>
                               <td className="px-4 py-2.5 text-xs whitespace-nowrap">{toUSD(d.estimatedValue, d.currencyCode ?? 'USD')}</td>
                               <td className="px-4 py-2.5 text-xs text-on-surface-variant whitespace-nowrap">{d.campaignName || '—'}</td>
+                              <td className="px-4 py-2.5 text-xs text-on-surface-variant max-w-[260px]">
+                                {d.notes ? (
+                                  <div>
+                                    <span className={expandedDetails.has(d.donationId) ? 'whitespace-pre-wrap break-words' : 'block truncate'}>{d.notes}</span>
+                                    <button onClick={() => toggleDetail(d.donationId)} className="text-primary text-[10px] font-bold mt-0.5 hover:underline">
+                                      {expandedDetails.has(d.donationId) ? 'Show less' : 'Show more'}
+                                    </button>
+                                  </div>
+                                ) : '—'}
+                              </td>
                               <td className="px-4 py-2.5 text-xs whitespace-nowrap">
                                 <span className={`inline-block px-2 py-0.5 rounded-full text-[10px] font-bold ${d.isRecurring ? 'bg-secondary/10 text-secondary' : 'bg-surface-container text-on-surface-variant'}`}>
                                   {d.isRecurring ? 'Yes' : 'No'}
                                 </span>
                               </td>
                               <td className="px-4 py-2.5 text-xs text-center">{d.allocations.length}</td>
+                              <td className="px-4 py-2.5 text-center">
+                                {(d.donationType === 'InKind' || d.donationType === 'Time') ? (
+                                  <button
+                                    onClick={() => toggleReview(d.donationId, !d.isReviewed)}
+                                    className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[10px] font-bold transition-colors ${
+                                      d.isReviewed
+                                        ? 'bg-secondary/10 text-secondary'
+                                        : 'bg-error/10 text-error hover:bg-error/20'
+                                    }`}
+                                  >
+                                    <span className="material-symbols-outlined text-[14px]" style={d.isReviewed ? { fontVariationSettings: "'FILL' 1" } : undefined}>
+                                      {d.isReviewed ? 'check_circle' : 'pending'}
+                                    </span>
+                                    {d.isReviewed ? 'Reviewed' : 'Pending'}
+                                  </button>
+                                ) : (
+                                  <span className="text-[10px] text-on-surface-variant">—</span>
+                                )}
+                              </td>
                             </tr>
-                          ))}
+                            );
+                          })}
                         </tbody>
                       </table>
                     </div>
-                    {suppDonations.length > PAGE_SIZE && (
-                      <PaginationBar total={suppDonations.length} currentPage={suppDonPage} pageSize={PAGE_SIZE}
+                    {sortedSuppDonations.length > PAGE_SIZE && (
+                      <PaginationBar total={sortedSuppDonations.length} currentPage={suppDonPage} pageSize={PAGE_SIZE}
                         onPageChange={setSuppDonPage} noun="donations" />
                     )}
                   </>

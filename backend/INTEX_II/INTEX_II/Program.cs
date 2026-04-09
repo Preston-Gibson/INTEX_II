@@ -111,6 +111,10 @@ using (var scope = app.Services.CreateScope())
         ALTER TABLE ""AspNetUsers""
         ADD COLUMN IF NOT EXISTS profile_picture_url text NULL;
     ");
+    await db.Database.ExecuteSqlRawAsync(@"
+        ALTER TABLE donations
+        ADD COLUMN IF NOT EXISTS is_reviewed boolean NOT NULL DEFAULT false;
+    ");
 }
 
 // Seed roles and default admin account
