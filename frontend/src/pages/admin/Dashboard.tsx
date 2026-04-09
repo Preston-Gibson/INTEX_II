@@ -44,6 +44,12 @@ interface ActivityItem {
   timeAgo: string;
 }
 
+interface ReintegrationRate {
+  total: number;
+  successful: number;
+  rate: number;
+}
+
 // ─── API helpers ──────────────────────────────────────────────────────────────
 
 async function apiFetch<T>(path: string): Promise<T> {
@@ -79,24 +85,26 @@ function getGreeting() {
 export default function AdminCommandCenter() {
   const navigate = useNavigate();
 
-  const [stats, setStats]                 = useState<CommandCenterStats | null>(null);
-  const [weeklyData, setWeeklyData]       = useState<WeeklyActivity[]>([]);
-  const [visits, setVisits]               = useState<ScheduledVisit[]>([]);
-  const [activity, setActivity]           = useState<ActivityItem[]>([]);
-  const [loading, setLoading]             = useState(true);
-  const [error, setError]                 = useState<string | null>(null);
+  const [stats, setStats]                         = useState<CommandCenterStats | null>(null);
+  const [weeklyData, setWeeklyData]               = useState<WeeklyActivity[]>([]);
+  const [visits, setVisits]                       = useState<ScheduledVisit[]>([]);
+  const [activity, setActivity]                   = useState<ActivityItem[]>([]);
+  const [reintegrationRate, setReintegrationRate] = useState<ReintegrationRate | null>(null);
+  const [loading, setLoading]                     = useState(true);
+  const [error, setError]                         = useState<string | null>(null);
 
   useEffect(() => {
     let cancelled = false;
     async function load() {
       try {
-        const [s, w, v, a] = await Promise.all([
+        const [s, w, v, a, rr] = await Promise.all([
           apiFetch<CommandCenterStats>('/api/admin-dashboard/stats'),
           apiFetch<WeeklyActivity[]>('/api/admin-dashboard/weekly-activity'),
           apiFetch<ScheduledVisit[]>('/api/admin-dashboard/upcoming-visits'),
           apiFetch<ActivityItem[]>('/api/admin-dashboard/recent-activity'),
+          apiFetch<ReintegrationRate>('/api/admin-dashboard/reintegration-rate'),
         ]);
-        if (!cancelled) { setStats(s); setWeeklyData(w); setVisits(v); setActivity(a); }
+        if (!cancelled) { setStats(s); setWeeklyData(w); setVisits(v); setActivity(a); setReintegrationRate(rr); }
       } catch {
         if (!cancelled) setError('Unable to load dashboard data.');
       } finally {
@@ -257,6 +265,67 @@ export default function AdminCommandCenter() {
                   </div>
                 )}
               </div>
+            </div>
+          </section>
+
+          {/* OKR Spotlight — Reintegration Rate */}
+          <section className="bg-surface-container-lowest rounded-xl shadow-sm border-l-4 border-[#006a6a] p-5 flex flex-col md:flex-row md:items-center gap-5">
+            <div className="flex-shrink-0 flex items-center justify-center">
+              {loading ? (
+                <Skeleton className="w-24 h-24 rounded-full" />
+              ) : (
+                <div
+                  className="w-24 h-24 rounded-full flex items-center justify-center"
+                  style={{
+                    background: `conic-gradient(#006a6a ${(reintegrationRate?.rate ?? 0) * 3.6}deg, #e0f2f1 0deg)`,
+                  }}
+                >
+                  <div className="w-16 h-16 rounded-full bg-surface-container-lowest flex items-center justify-center">
+                    <span className="text-base font-extrabold text-[#006a6a] font-headline leading-none">
+                      {reintegrationRate?.rate ?? 0}%
+                    </span>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            <div className="flex-1 min-w-0">
+              <p className="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant mb-0.5">OKR Metric</p>
+              <h3 className="text-xl font-extrabold text-primary font-headline mb-1">Reintegration Rate</h3>
+              {loading ? (
+                <Skeleton className="h-4 w-64 mb-3" />
+              ) : (
+                <p className="text-sm text-on-surface-variant mb-3">
+                  <span className="font-bold text-on-surface">{reintegrationRate?.successful ?? 0}</span> of{' '}
+                  <span className="font-bold text-on-surface">{reintegrationRate?.total ?? 0}</span> residents successfully reintegrated
+                </p>
+              )}
+
+              <div className="w-full bg-surface-container-high rounded-full h-2.5 overflow-hidden">
+                {loading ? (
+                  <div className="animate-pulse bg-surface-container-high h-full w-full" />
+                ) : (
+                  <div
+                    className="h-full rounded-full transition-all duration-700"
+                    style={{ width: `${reintegrationRate?.rate ?? 0}%`, backgroundColor: '#006a6a' }}
+                  />
+                )}
+              </div>
+            </div>
+
+            <div className="flex-shrink-0 text-right hidden md:block">
+              {loading ? (
+                <Skeleton className="h-12 w-28" />
+              ) : (
+                <>
+                  <p className="text-5xl font-extrabold text-[#006a6a] font-headline leading-none">
+                    {reintegrationRate?.rate ?? 0}%
+                  </p>
+                  <p className="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant mt-1">
+                    Success Rate
+                  </p>
+                </>
+              )}
             </div>
           </section>
 
