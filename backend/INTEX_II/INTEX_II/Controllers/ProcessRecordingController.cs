@@ -109,6 +109,30 @@ public class ProcessRecordingController : ControllerBase
         return Ok(new { recording.RecordingId });
     }
 
+    // PUT /api/process-recordings/{id}
+    [HttpPut("{id}")]
+    public async Task<IActionResult> UpdateRecording(int id, [FromBody] ProcessRecordingDto dto)
+    {
+        var recording = await _db.ProcessRecordings.FindAsync(id);
+        if (recording == null) return NotFound();
+
+        recording.SessionDate = DateOnly.Parse(dto.SessionDate);
+        recording.SocialWorker = dto.SocialWorker;
+        recording.SessionType = dto.SessionType;
+        recording.SessionDurationMinutes = dto.SessionDurationMinutes;
+        recording.EmotionalStateObserved = dto.EmotionalStateObserved;
+        recording.EmotionalStateEnd = dto.EmotionalStateEnd;
+        recording.SessionNarrative = dto.SessionNarrative;
+        recording.InterventionsApplied = dto.InterventionsApplied;
+        recording.FollowUpActions = dto.FollowUpActions;
+        recording.ProgressNoted = dto.ProgressNoted;
+        recording.ConcernsFlagged = dto.ConcernsFlagged;
+        recording.ReferralMade = dto.ReferralMade;
+
+        await _db.SaveChangesAsync();
+        return NoContent();
+    }
+
     // DELETE /api/process-recordings/{id}
     [HttpDelete("{id}")]
     public async Task<IActionResult> DeleteRecording(int id)
