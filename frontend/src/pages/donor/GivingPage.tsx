@@ -87,11 +87,11 @@ export default function GivingPage() {
   const [inkindNotes, setInkindNotes] = useState('');
   const [inkindMsg, setInkindMsg] = useState<{ ok: boolean; text: string } | null>(null);
   const [newItem, setNewItem] = useState<Omit<InKindItem, 'id'>>({
-    itemName: INKIND_ITEMS[0],
+    itemName: '',
     customItemName: '',
-    category: INKIND_CATEGORIES[0],
-    quantity: '1',
-    unit: INKIND_UNITS[0],
+    category: '',
+    quantity: '',
+    unit: '',
   });
 
   // Time / volunteer state
@@ -171,9 +171,9 @@ export default function GivingPage() {
 
   // In-kind flow
   const addInkindItem = () => {
-    if (!newItem.quantity || parseInt(newItem.quantity) <= 0) return;
+    if (!newItem.category || !newItem.itemName || !newItem.quantity || parseInt(newItem.quantity) <= 0 || !newItem.unit) return;
     setInkindItems(prev => [...prev, { ...newItem, id: Date.now() }]);
-    setNewItem({ itemName: INKIND_ITEMS[0], customItemName: '', category: INKIND_CATEGORIES[0], quantity: '1', unit: INKIND_UNITS[0] });
+    setNewItem({ itemName: '', customItemName: '', category: '', quantity: '', unit: '' });
   };
 
   const removeInkindItem = (id: number) => {
@@ -446,6 +446,7 @@ export default function GivingPage() {
                       onChange={e => setNewItem(p => ({ ...p, category: e.target.value }))}
                       className={selectClass}
                     >
+                      <option value="" disabled>Select type…</option>
                       {INKIND_CATEGORIES.map(c => <option key={c}>{c}</option>)}
                     </select>
                   </div>
@@ -456,6 +457,7 @@ export default function GivingPage() {
                       onChange={e => setNewItem(p => ({ ...p, itemName: e.target.value, customItemName: '' }))}
                       className={selectClass}
                     >
+                      <option value="" disabled>Select item…</option>
                       {INKIND_ITEMS.map(i => <option key={i}>{i}</option>)}
                       <option value="Other">Other</option>
                     </select>
@@ -494,6 +496,7 @@ export default function GivingPage() {
                       onChange={e => setNewItem(p => ({ ...p, unit: e.target.value }))}
                       className={selectClass}
                     >
+                      <option value="" disabled>Select unit…</option>
                       {INKIND_UNITS.map(u => <option key={u}>{u}</option>)}
                     </select>
                   </div>

@@ -218,6 +218,12 @@ public class DonorDashboardController : ControllerBase
         if (dto.Items is null || dto.Items.Count == 0)
             return BadRequest("At least one item is required.");
 
+        var itemSummary = string.Join("; ",
+            dto.Items.Select(i => $"{i.Quantity} {i.UnitOfMeasure} {i.ItemName} ({i.ItemCategory})"));
+        var notes = $"[In-Kind Items] {itemSummary}";
+        if (!string.IsNullOrWhiteSpace(dto.Notes))
+            notes += $"\n{dto.Notes}";
+
         var donation = new Donation
         {
             SupporterId    = supporter.SupporterId,
@@ -229,7 +235,7 @@ public class DonorDashboardController : ControllerBase
             Amount         = null,
             EstimatedValue = 0,
             ImpactUnit     = "items",
-            Notes          = dto.Notes
+            Notes          = notes
         };
 
         foreach (var item in dto.Items)
