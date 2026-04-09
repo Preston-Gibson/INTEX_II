@@ -3,8 +3,8 @@ import StoryCard from './StoryCard'
 
 const stories = [
   {
-    imageSrc: 'https://lh3.googleusercontent.com/aida-public/AB6AXuAfjKjAN4tA4fl-SHjbfAQJAE3IiAvVSQyhEKumwszQL2DvfG7QLUkS8Uv0afLVXDPJJN2HHPZ_ZFDlCKLzUaP4SyUpE-Z3H3wMaMsTyTm3O42tVlLCxh_4qqofrPzoC2RMRuJ-w6dakUnaF9-doISnCSDbRfYNY-SO8No-NuySWXvbRXVbCiFhnrx8E8m7e-ilZKD0C9h3CWsHFHn-QsaKsLXJZlAQGgWm0ND-YXle6I12kVdjNt-amee6CzZSmXWj_yKTCqMemA',
-    imageAlt: 'Anonymized success story avatar',
+    imageSrc: '/elena-story-cover.png',
+    imageAlt: 'Illustration for Elena\'s story',
     imageBorderColor: 'border-primary-fixed',
     tagBg: 'bg-secondary-container text-on-secondary-container',
     tagText: 'Case Highlight: Reintegration',
@@ -26,29 +26,29 @@ After three and a half years, Elena passed her certification exam on the first a
 She sends a message to the house on holidays. Last December, she wrote that she had gotten her first hospital placement. She signed it: grateful.`,
   },
   {
-    imageSrc: 'https://lh3.googleusercontent.com/aida-public/AB6AXuDSXMkLp9xmDpTWkTHKG0dJh5zhA7Eb6fuefBAEG-Y0VlpgO-o6xJ4Jf9Paa_lzmX70sfRPI2pJSCcbZbUV8ZozhRg64plNwMc8vB86obIwTMaLIgrwGKQSAWFRJlHm_lQ27ArTa96kjlZ8tQHO4WwAV17HYG39dLqnKsFfUfEW4S1r69WHSXJc0_47A8zkHyVnTan1BmSwJLjPOd13qY9DmcECoheN0Kcefmsm-5d7_GHaSUReP1L6dHseUXFz6iFKZEGNb3sumA',
-    imageAlt: 'Anonymized success story avatar',
+    imageSrc: '/sofia-story-cover.png',
+    imageAlt: 'Illustration for Sofia\'s story',
     imageBorderColor: 'border-tertiary-fixed',
     tagBg: 'bg-tertiary-fixed text-on-tertiary-fixed',
-    tagText: 'Case Highlight: Literacy',
-    title: "Mateo's First Chapter",
-    quote: 'Mateo arrived at Lucera with no formal schooling. In just 18 months, he is reading at grade level and leading our weekly youth council meetings.',
-    programValue: 'Accelerated Literacy',
-    metaLabel: 'Age',
-    metaValue: '9 Years Old',
-    fullStory: `Mateo was nine when he came to Lucera. He had never held a pencil to write his own name.
+    tagText: 'Case Highlight: Safe Return',
+    title: "Sofia's Road Home",
+    quote: 'When Sofia arrived at Lucera, she hadn\'t spoken in weeks. Two years later, she walked back to her grandmother\'s village — on her own terms, ready.',
+    programValue: 'Family Reintegration',
+    metaLabel: 'Duration',
+    metaValue: '2 Years',
+    fullStory: `Sofia was twelve when the authorities brought her to Lucera. She arrived with a plastic bag, a borrowed jacket two sizes too large, and nothing else.
 
-He had spent his earliest years moving — harvesting seasons, border crossings, adults who came and went. School was something that happened to other children. When the intake coordinator asked him to sign his name on the welcome form, he pressed his thumb to the page instead and looked away.
+For the first month she communicated almost entirely through nods. Her caseworker, Rosa, did not push. She sat with her during meals, walked beside her in the garden, and let the silence be. "She needed to learn the house was safe," Rosa said later. "That takes time. There's no shortcut."
 
-His first educator, a volunteer named Carlos, started with sounds. Just sounds. Letters on cards, spoken aloud over and over in the courtyard while the other boys played. Mateo was stubborn about it — in the best way. He memorized faster than anyone expected and grew frustrated when the next lesson wasn't ready.
+The breakthrough came quietly. One afternoon in the craft room, Sofia picked up a needle and thread from the supply table and began to embroider a small bird onto a scrap of fabric — precise, deliberate stitches. A staff member noticed and sat beside her without comment. Within an hour, three other girls had joined them at the table.
 
-Within six months he was sounding out words in the picture books kept in the common room. By month ten he was reading simple chapter books on his own, whispering the words under his breath at the dinner table.
+Needlework became Sofia's language when words still felt unreliable. She made small things — flowers, birds, a tiny house with a red door. When she finally started speaking in sessions, her words came out the same way: careful and exact.
 
-At eighteen months, the house started a youth council — a weekly meeting where residents could raise concerns, suggest activities, and practice speaking in front of a group. Mateo nominated himself to lead it.
+By her second year she was attending the community education program and helping younger girls settle into the safehouse routine. She had identified an aunt in her home region — a woman the Lucera family tracing team spent four months verifying, visiting twice before any contact was made.
 
-He ran it with unexpected seriousness: wrote agendas by hand, kept time with a borrowed watch, reminded louder kids to let others finish. The staff started quietly calling him "the little director."
+The reintegration visit happened on a Tuesday morning. Sofia carried a small embroidered pouch she had made for her aunt. They sat across from each other at a table in the community center, a social worker nearby. After twenty minutes, Sofia reached across and took her aunt's hand.
 
-He is still at Lucera. He is still reading — everything he can get his hands on. His current favorite is a worn paperback atlas. He traces the coastlines with his finger and names the countries out loud.`,
+Six months later, she is enrolled in school. She sends a photograph once a month — never of her face, always of something she has made. Last month it was a tablecloth with a pattern of birds in flight along the border.`,
   },
 ]
 
