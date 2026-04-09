@@ -4,6 +4,7 @@ using System.Text;
 using ClosedXML.Excel;
 using CsvHelper;
 using INTEX_II.Data;
+using INTEX_II.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -31,38 +32,40 @@ public class ExportController : ControllerBase
     {
         var query = _db.Donations
             .Include(d => d.Supporter)
+            .Include(d => d.InKindItems)
             .AsQueryable();
 
         if (year.HasValue)
             query = query.Where(d => d.DonationDate != null && d.DonationDate.Value.Year == year.Value);
 
-        var rows = await query
+        var donations = await query
             .OrderByDescending(d => d.DonationDate)
-            .Select(d => new object[]
-            {
-                d.DonationId,
-                d.Supporter != null ? d.Supporter.DisplayName : string.Empty,
-                d.Supporter != null ? d.Supporter.Email : string.Empty,
-                d.Supporter != null ? d.Supporter.RelationshipType : string.Empty,
-                d.DonationType,
-                d.DonationDate.HasValue ? d.DonationDate.Value.ToString("yyyy-MM-dd") : string.Empty,
-                d.Amount.HasValue ? (object)d.Amount.Value : string.Empty,
-                d.CurrencyCode ?? string.Empty,
-                d.EstimatedValue,
-                d.ImpactUnit,
-                d.IsRecurring ? "Yes" : "No",
-                d.CampaignName ?? string.Empty,
-                d.ChannelSource ?? string.Empty,
-                d.Notes ?? string.Empty
-            })
             .ToListAsync();
+
+        var rows = donations.Select(d => new object[]
+        {
+            d.DonationId,
+            d.Supporter != null ? d.Supporter.DisplayName : string.Empty,
+            d.Supporter != null ? d.Supporter.Email : string.Empty,
+            d.Supporter != null ? d.Supporter.RelationshipType : string.Empty,
+            d.DonationType,
+            d.DonationDate.HasValue ? d.DonationDate.Value.ToString("yyyy-MM-dd") : string.Empty,
+            d.Amount.HasValue ? (object)d.Amount.Value : string.Empty,
+            d.CurrencyCode ?? string.Empty,
+            d.EstimatedValue,
+            d.ImpactUnit,
+            d.IsRecurring ? "Yes" : "No",
+            d.CampaignName ?? string.Empty,
+            d.ChannelSource ?? string.Empty,
+            BuildDetails(d)
+        }).ToList();
 
         string[] headers =
         [
             "Donation ID", "Donor Name", "Donor Email", "Relationship Type",
             "Donation Type", "Donation Date", "Amount", "Currency",
             "Estimated Value", "Impact Unit", "Recurring", "Campaign Name",
-            "Channel Source", "Notes"
+            "Channel Source", "Details"
         ];
 
         string fileName = year.HasValue ? $"donations_{year}.{format}" : $"donations_all.{format}";
@@ -76,36 +79,40 @@ public class ExportController : ControllerBase
     {
         var query = _db.Donations
             .Include(d => d.Supporter)
+            .Include(d => d.InKindItems)
             .AsQueryable();
 
         if (year.HasValue)
             query = query.Where(d => d.DonationDate != null && d.DonationDate.Value.Year == year.Value);
 
-        var rows = await query
+        var donations = await query
             .OrderBy(d => d.Supporter != null ? d.Supporter.DisplayName : string.Empty)
             .ThenByDescending(d => d.DonationDate)
-            .Select(d => new object[]
-            {
-                d.DonationDate.HasValue ? d.DonationDate.Value.ToString("yyyy-MM-dd") : string.Empty,
-                d.Supporter != null ? d.Supporter.DisplayName : string.Empty,
-                d.Supporter != null ? d.Supporter.Email : string.Empty,
-                d.Supporter != null ? d.Supporter.OrganizationName : string.Empty,
-                d.Supporter != null ? d.Supporter.RelationshipType : string.Empty,
-                d.DonationType,
-                d.DonationType == "Monetary" && d.Amount.HasValue ? (object)d.Amount.Value : "N/A",
-                d.CurrencyCode ?? string.Empty,
-                d.EstimatedValue,
-                d.IsRecurring ? "Yes" : "No",
-                d.CampaignName ?? string.Empty,
-                d.DonationType == "Monetary" ? TaxAcknowledgment : "N/A"
-            })
             .ToListAsync();
+
+        var rows = donations.Select(d => new object[]
+        {
+            d.DonationDate.HasValue ? d.DonationDate.Value.ToString("yyyy-MM-dd") : string.Empty,
+            d.Supporter != null ? d.Supporter.DisplayName : string.Empty,
+            d.Supporter != null ? d.Supporter.Email : string.Empty,
+            d.Supporter != null ? d.Supporter.OrganizationName : string.Empty,
+            d.Supporter != null ? d.Supporter.RelationshipType : string.Empty,
+            d.DonationType,
+            d.DonationType == "Monetary" && d.Amount.HasValue ? (object)d.Amount.Value : "N/A",
+            d.CurrencyCode ?? string.Empty,
+            d.EstimatedValue,
+            d.IsRecurring ? "Yes" : "No",
+            d.CampaignName ?? string.Empty,
+            BuildDetails(d),
+            d.DonationType == "Monetary" ? TaxAcknowledgment : "N/A"
+        }).ToList();
 
         string[] headers =
         [
             "Donation Date", "Donor Name", "Donor Email", "Organization Name",
             "Relationship Type", "Donation Type", "Amount", "Currency",
-            "Estimated Value", "Recurring", "Campaign Name", "Tax Acknowledgment"
+            "Estimated Value", "Recurring", "Campaign Name", "Details",
+            "Tax Acknowledgment"
         ];
 
         string fileName = year.HasValue ? $"tax_report_{year}.{format}" : $"tax_report_all.{format}";
@@ -126,36 +133,38 @@ public class ExportController : ControllerBase
         var supporter = await _db.Supporters
             .FirstOrDefaultAsync(s => s.Email == email);
 
-        // If no supporter record, return an empty file with just headers rather than 404
         var supporterId = supporter?.SupporterId;
 
         var query = _db.Donations
+            .Include(d => d.InKindItems)
             .Where(d => supporterId != null && d.SupporterId == supporterId);
 
         if (year.HasValue)
             query = query.Where(d => d.DonationDate != null && d.DonationDate.Value.Year == year.Value);
 
-        var rows = await query
+        var donations = await query
             .OrderByDescending(d => d.DonationDate)
-            .Select(d => new object[]
-            {
-                d.DonationDate.HasValue ? d.DonationDate.Value.ToString("yyyy-MM-dd") : string.Empty,
-                d.DonationType,
-                d.DonationType == "Monetary" && d.Amount.HasValue ? (object)d.Amount.Value : "N/A",
-                d.CurrencyCode ?? string.Empty,
-                d.EstimatedValue,
-                d.ImpactUnit,
-                d.IsRecurring ? "Yes" : "No",
-                d.CampaignName ?? string.Empty,
-                d.DonationType == "Monetary" ? TaxAcknowledgment : "N/A"
-            })
             .ToListAsync();
+
+        var rows = donations.Select(d => new object[]
+        {
+            d.DonationDate.HasValue ? d.DonationDate.Value.ToString("yyyy-MM-dd") : string.Empty,
+            d.DonationType,
+            d.DonationType == "Monetary" && d.Amount.HasValue ? (object)d.Amount.Value : "N/A",
+            d.CurrencyCode ?? string.Empty,
+            d.EstimatedValue,
+            d.ImpactUnit,
+            d.IsRecurring ? "Yes" : "No",
+            d.CampaignName ?? string.Empty,
+            BuildDetails(d),
+            d.DonationType == "Monetary" ? TaxAcknowledgment : "N/A"
+        }).ToList();
 
         string[] headers =
         [
             "Donation Date", "Donation Type", "Amount", "Currency",
             "Estimated Value", "Impact Unit", "Recurring", "Campaign Name",
-            "Tax Acknowledgment"
+            "Details", "Tax Acknowledgment"
         ];
 
         string safeEmail = email.Replace("@", "_").Replace(".", "_");
@@ -164,6 +173,18 @@ public class ExportController : ControllerBase
             : $"tax_receipt_{safeEmail}_all.{format}";
 
         return BuildFile(rows, headers, format, fileName);
+    }
+
+    private static string BuildDetails(Donation d)
+    {
+        if (d.DonationType == "InKind" && d.InKindItems.Count > 0)
+        {
+            var items = string.Join("; ",
+                d.InKindItems.Select(i => $"{i.Quantity} {i.UnitOfMeasure} {i.ItemName} ({i.ItemCategory})"));
+            return string.IsNullOrWhiteSpace(d.Notes) ? items : $"{items} | {d.Notes}";
+        }
+
+        return d.Notes ?? string.Empty;
     }
 
     private FileContentResult BuildFile(

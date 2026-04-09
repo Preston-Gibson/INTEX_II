@@ -1,4 +1,15 @@
+import { useState, useEffect } from 'react'
+
 export default function ImpactSection() {
+  const [livesRestored, setLivesRestored] = useState<number | null>(null)
+
+  useEffect(() => {
+    fetch(`${import.meta.env.VITE_API_URL ?? 'http://localhost:5229'}/api/impact/stats`)
+      .then(r => r.json())
+      .then((data) => setLivesRestored(data.residentsServed))
+      .catch(() => {})
+  }, [])
+
   return (
     <section className="bg-surface-container-low py-24">
       <div className="max-w-7xl mx-auto px-6">
@@ -27,7 +38,7 @@ export default function ImpactSection() {
             </div>
             <div className="mt-auto pt-6 border-t border-outline-variant/15">
               <span className="font-manrope text-[3.25rem] font-extrabold text-primary tracking-tight leading-none block">
-                450+
+                {livesRestored !== null ? `${livesRestored.toLocaleString()}+` : '—'}
               </span>
               <span className="text-[0.7rem] font-bold tracking-[0.12em] uppercase text-on-surface-variant mt-1 block">
                 Lives Restored
@@ -59,16 +70,9 @@ export default function ImpactSection() {
               <span className="material-symbols-outlined text-[2.25rem] text-secondary">home_pin</span>
               <h3 className="font-manrope text-[1.3rem] font-bold text-on-surface">Safe Haven Housing</h3>
               <p className="text-[0.92rem] leading-[1.65] text-on-surface-variant">
-                Our residential facilities provide a secure, home-like environment away
-                from the reach of exploiters, allowing for deep, uninterrupted healing.
+                Our residential facilities provide a secure, home-like environment where
+                survivors can heal without fear, supported every step of the way.
               </p>
-              <a
-                href="#"
-                className="inline-flex items-center gap-1.5 font-manrope font-bold text-[0.95rem] text-primary hover:gap-3 transition-all"
-              >
-                Learn about our facilities
-                <span className="material-symbols-outlined text-[1.1rem]">arrow_forward</span>
-              </a>
             </div>
             <img
               className="w-full md:w-[45%] max-h-64 md:max-h-none flex-shrink-0 object-cover"

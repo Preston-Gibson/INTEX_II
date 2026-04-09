@@ -171,6 +171,21 @@ public class AdminDashboardController : ControllerBase
         return Ok(visits);
     }
 
+    // GET /api/admin-dashboard/reintegration-rate
+    // Returns the OKR metric: percentage of residents that successfully reintegrated
+    [HttpGet("reintegration-rate")]
+    public async Task<IActionResult> GetReintegrationRate()
+    {
+        var total = await _db.Residents.CountAsync();
+        var successful = await _db.Residents
+            .CountAsync(r => r.ReintegrationStatus != null &&
+                             r.ReintegrationStatus.ToLower().Contains("complet"));
+
+        var rate = total > 0 ? Math.Round((double)successful / total * 100, 1) : 0;
+
+        return Ok(new { total, successful, rate });
+    }
+
     // GET /api/admin-dashboard/recent-activity
     // Returns a merged, time-sorted feed of recent intakes, donations, visits, and incidents
     [HttpGet("recent-activity")]

@@ -12,7 +12,7 @@ export default function HowWeWork() {
           <p className="relative text-[1.05rem] leading-[1.8] text-on-surface-variant mb-10">
             We operate in the critical gap between vulnerability and assault. Our mission
             is to create a multi-layered defense that protects children before the worst
-            can happen, and heals them if it already has.
+            can happen, and help heal them if it already has.
           </p>
 
           <div className="relative flex flex-col gap-7">

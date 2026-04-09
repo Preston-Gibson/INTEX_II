@@ -311,7 +311,27 @@ export default function HomeVisitationCaseConference() {
           </div>
         </header>
 
-        <main className="flex-1 overflow-y-auto p-6">
+        {/* Main */}
+        <main className="flex-1 overflow-y-auto p-6 lg:px-12">
+          <header className="mb-10">
+            <h1 className="text-4xl font-extrabold text-on-surface tracking-tight mb-2 font-manrope">
+              Visitations &amp; Conferences
+            </h1>
+            <p className="text-on-surface-variant font-body">
+              Track and manage home visitations for residents.
+            </p>
+          </header>
+
+          {/* Bento Grid */}
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+            {/* Left column */}
+            <div className="lg:col-span-4 flex flex-col gap-6">
+              {/* Scheduled Visits */}
+              <section className="bg-surface-container-low rounded-xl p-6 shadow-sm">
+                <div className="flex items-center justify-between mb-6">
+                  <h2 className="font-manrope font-bold text-lg text-primary">Scheduled Visits</h2>
+                  <span className="bg-primary-fixed text-on-primary-fixed px-3 py-1 rounded-full text-xs font-bold">Upcoming</span>
+                </div>
 
           {/* Page title */}
           <div className="mb-6">

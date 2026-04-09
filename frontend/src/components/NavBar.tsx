@@ -30,24 +30,23 @@ export default function NavBar() {
           {/* Publicly Accessible Pages */}
           <NavLink to="/" end className={navClass}>Our Mission</NavLink>
           <NavLink to="/impact" className={navClass}>Impact</NavLink>
+          <NavLink to="/donor-shoutout" className={navClass}>Our Supporters</NavLink>
         </div>
 
-        <div className="flex items-center justify-end gap-3 w-[260px]">
+        <div className="flex items-center justify-end gap-3 justify-self-end min-w-0">
           <NavLink
             to={loggedIn ? dashboardPath : '/login'}
             className="px-5 py-2.5 aurora-gradient text-white text-sm font-bold rounded-xl transition-all active:scale-95 duration-150 ease-in-out whitespace-nowrap"
           >
             {loggedIn ? 'My Dashboard' : 'Portal Login'}
           </NavLink>
-          {loggedIn ? (
+          {loggedIn && (
             <button
               onClick={handleLogout}
-              className="px-4 py-2.5 text-sm font-bold text-slate-800 bg-slate-200 border border-slate-400 rounded-xl hover:bg-slate-300 transition-colors whitespace-nowrap"
+              className="px-4 py-2.5 text-sm font-bold text-white bg-slate-700 border border-slate-800 rounded-xl hover:bg-slate-800 transition-colors whitespace-nowrap"
             >
               Log Out
             </button>
-          ) : (
-            <div className="w-[88px]" />
           )}
         </div>
       </div>

@@ -73,17 +73,17 @@ export default function MapSection() {
           </h2>
           <p className="text-[1.02rem] leading-[1.75] text-on-surface-variant max-w-[560px]">
             Operating across Central America, Lucera maintains safe houses, legal
-            offices, and partner networks to reach the most vulnerable children.
+            offices, and partner networks to serve those most in need.
           </p>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-[1fr_320px] gap-10 items-stretch">
-          <div className="h-full rounded-[2rem] overflow-hidden shadow-[0_4px_24px_rgba(0,0,0,0.08)]" style={{ minHeight: 420 }}>
+          <div className="rounded-[2rem] overflow-hidden shadow-[0_4px_24px_rgba(0,0,0,0.08)]" style={{ height: 420 }}>
             <MapContainer
               center={[11.5, -85.5]}
               zoom={5}
               scrollWheelZoom={false}
-              style={{ width: '100%', height: '100%', minHeight: 420, borderRadius: '2rem' }}
+              style={{ width: '100%', height: '100%', borderRadius: '2rem' }}
             >
               <TileLayer
                 attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
