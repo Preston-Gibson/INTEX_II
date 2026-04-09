@@ -14,6 +14,7 @@ public class Donation
     public decimal EstimatedValue { get; set; }
     public string ImpactUnit { get; set; } = string.Empty;
     public string? Notes { get; set; }
+    public bool IsReviewed { get; set; }
     public int? ReferralPostId { get; set; }
 
     public Supporter? Supporter { get; set; }

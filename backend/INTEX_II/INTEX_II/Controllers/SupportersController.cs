@@ -171,6 +171,7 @@ public class SupportersController : ControllerBase
                 d.EstimatedValue,
                 d.ImpactUnit,
                 d.Notes,
+                d.IsReviewed,
                 Allocations = d.Allocations.Select(a => new
                 {
                     a.AllocationId,
@@ -213,6 +214,18 @@ public class SupportersController : ControllerBase
         return Ok(donation.DonationId);
     }
 
+    // PATCH /api/supporters/donations/{donationId}/review
+    [HttpPatch("donations/{donationId}/review")]
+    public async Task<IActionResult> ToggleReview(int donationId, [FromBody] ToggleReviewDto dto)
+    {
+        var donation = await _db.Donations.FindAsync(donationId);
+        if (donation is null) return NotFound();
+
+        donation.IsReviewed = dto.IsReviewed;
+        await _db.SaveChangesAsync();
+        return Ok();
+    }
+
     // GET /api/supporters/donations  – all donations across all supporters
     [HttpGet("donations")]
     public async Task<IActionResult> GetAllDonations(
@@ -252,6 +265,7 @@ public class SupportersController : ControllerBase
                 d.EstimatedValue,
                 d.ImpactUnit,
                 d.Notes,
+                d.IsReviewed,
                 AllocationCount = d.Allocations.Count,
                 Allocations = d.Allocations.Select(a => new
                 {
@@ -285,6 +299,8 @@ public record SupporterDto(
     DateOnly? FirstDonationDate,
     string AcquisitionChannel
 );
+
+public record ToggleReviewDto(bool IsReviewed);
 
 public record DonationDto(
     string DonationType,
