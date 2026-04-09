@@ -162,7 +162,7 @@ export default function GivingPage() {
   const addInkindItem = () => {
     if (!newItem.quantity || parseInt(newItem.quantity) <= 0) return;
     setInkindItems(prev => [...prev, { ...newItem, id: Date.now() }]);
-    setNewItem(prev => ({ ...prev, quantity: '1' }));
+    setNewItem({ itemName: INKIND_ITEMS[0], customItemName: '', category: INKIND_CATEGORIES[0], quantity: '1', unit: INKIND_UNITS[0] });
   };
 
   const removeInkindItem = (id: number) => {
@@ -382,8 +382,18 @@ export default function GivingPage() {
               {/* Add item form */}
               <p className="text-[10px] font-bold text-on-surface-variant uppercase tracking-widest mb-2">Add Items</p>
               <div className="space-y-2 mb-3">
-                {/* Row 1: Item Name | Donation Item Type */}
+                {/* Row 1: Item Type | Item Name */}
                 <div className="grid grid-cols-2 gap-2">
+                  <div>
+                    <label className="text-[10px] text-on-surface-variant font-semibold uppercase tracking-wide mb-1 block">Item Type</label>
+                    <select
+                      value={newItem.category}
+                      onChange={e => setNewItem(p => ({ ...p, category: e.target.value }))}
+                      className={selectClass}
+                    >
+                      {INKIND_CATEGORIES.map(c => <option key={c}>{c}</option>)}
+                    </select>
+                  </div>
                   <div>
                     <label className="text-[10px] text-on-surface-variant font-semibold uppercase tracking-wide mb-1 block">Item Name</label>
                     <select
@@ -393,16 +403,6 @@ export default function GivingPage() {
                     >
                       {INKIND_ITEMS.map(i => <option key={i}>{i}</option>)}
                       <option value="Other">Other</option>
-                    </select>
-                  </div>
-                  <div>
-                    <label className="text-[10px] text-on-surface-variant font-semibold uppercase tracking-wide mb-1 block">Item Type</label>
-                    <select
-                      value={newItem.category}
-                      onChange={e => setNewItem(p => ({ ...p, category: e.target.value }))}
-                      className={selectClass}
-                    >
-                      {INKIND_CATEGORIES.map(c => <option key={c}>{c}</option>)}
                     </select>
                   </div>
                 </div>
