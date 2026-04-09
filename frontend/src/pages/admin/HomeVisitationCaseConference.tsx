@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import AdminSidebar from '../../components/AdminSidebar';
+import UserAvatar from '../../components/UserAvatar';
 import { authHeaders } from '../../utils/auth';
 
 const API = `${import.meta.env.VITE_API_URL ?? 'http://localhost:5229'}/api/home-visitation`;
@@ -80,6 +81,9 @@ export default function HomeVisitationCaseConference() {
   const [visitSummary, setVisitSummary] = useState('');
   const [submitting, setSubmitting] = useState(false);
 
+  const [logToDelete, setLogToDelete] = useState<HistoricalLog | null>(null);
+  const [deleting, setDeleting] = useState(false);
+
   function loadData() {
     return Promise.all([
       fetch(`${API}/upcoming-visits`, { headers: authHeaders() }).then(r => r.json()),
@@ -94,6 +98,15 @@ export default function HomeVisitationCaseConference() {
   }
 
   useEffect(() => { loadData(); }, []);
+
+  async function handleDeleteLog() {
+    if (!logToDelete) return;
+    setDeleting(true);
+    await fetch(`${API}/${logToDelete.visitationId}`, { method: 'DELETE', headers: authHeaders() });
+    setHistoricalLogs(logs => logs.filter(l => l.visitationId !== logToDelete.visitationId));
+    setLogToDelete(null);
+    setDeleting(false);
+  }
 
   async function handleSubmit(e: React.SyntheticEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -142,7 +155,7 @@ export default function HomeVisitationCaseConference() {
               <span className="material-symbols-outlined text-on-surface-variant text-[22px]">notifications</span>
               <span className="absolute -top-1 -right-1 w-4 h-4 bg-error rounded-full text-white text-[9px] font-bold flex items-center justify-center">2</span>
             </button>
-            <div className="w-8 h-8 rounded-full bg-primary-container flex items-center justify-center text-xs font-bold text-on-primary">LA</div>
+            <UserAvatar />
           </div>
         </header>
 
@@ -385,10 +398,17 @@ export default function HomeVisitationCaseConference() {
                               </div>
                               <span className="text-xs font-medium">{log.socialWorker}</span>
                             </div>
-                            <div className="flex items-center gap-1">
+                            <div className="flex items-center gap-3">
                               <span className={`text-[10px] font-medium ${log.familyCooperationLevel === 'Cooperative' ? 'text-secondary' : log.familyCooperationLevel === 'Uncooperative' ? 'text-error' : 'text-on-surface-variant'}`}>
                                 {log.familyCooperationLevel}
                               </span>
+                              <button
+                                onClick={() => setLogToDelete(log)}
+                                className="text-on-surface-variant hover:text-error transition-colors"
+                                title="Delete log"
+                              >
+                                <span className="material-symbols-outlined text-[16px]">delete</span>
+                              </button>
                             </div>
                           </div>
                         </div>
@@ -401,6 +421,40 @@ export default function HomeVisitationCaseConference() {
           </div>
         </main>
       </div>
+      {/* Delete log confirmation modal */}
+      {logToDelete && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
+          <div className="bg-surface-container-lowest rounded-2xl shadow-xl w-full max-w-sm mx-4">
+            <div className="flex items-center justify-between px-6 pt-6 pb-4 border-b border-outline-variant/20">
+              <h2 className="text-base font-manrope font-bold text-on-surface">Delete Visit Log</h2>
+              <button onClick={() => setLogToDelete(null)} className="text-on-surface-variant hover:text-on-surface transition-colors">
+                <span className="material-symbols-outlined text-[20px]">close</span>
+              </button>
+            </div>
+            <div className="px-6 py-5">
+              <p className="text-sm text-on-surface mb-1">
+                Delete the <strong>{logToDelete.visitType}</strong> log for case <strong>{logToDelete.residentCaseNo}</strong>?
+              </p>
+              <p className="text-sm text-on-surface-variant mb-4">This action cannot be undone.</p>
+              <div className="flex justify-end gap-3">
+                <button
+                  onClick={() => setLogToDelete(null)}
+                  className="px-4 py-2 rounded-xl text-sm font-semibold text-on-surface-variant hover:bg-surface-container-low transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleDeleteLog}
+                  disabled={deleting}
+                  className="px-4 py-2 rounded-xl text-sm font-bold text-white bg-error hover:opacity-90 transition-opacity disabled:opacity-50"
+                >
+                  {deleting ? 'Deleting…' : 'Delete'}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

@@ -3,7 +3,7 @@ import { isAuthenticated, getRole } from '../utils/auth';
 
 interface Props {
   children: React.ReactNode;
-  requiredRole?: 'Admin' | 'Donor';
+  requiredRole?: 'Admin' | 'Donor' | ('Admin' | 'Donor')[];
 }
 
 export default function ProtectedRoute({ children, requiredRole }: Props) {
@@ -13,10 +13,12 @@ export default function ProtectedRoute({ children, requiredRole }: Props) {
     return <Navigate to="/login" replace state={{ from: location.pathname }} />;
   }
 
-  if (requiredRole && getRole() !== requiredRole) {
-    // Logged in but wrong role — send to their own dashboard
+  if (requiredRole) {
     const role = getRole();
-    return <Navigate to={role === 'Admin' ? '/admin-dashboard' : '/donor-dashboard'} replace />;
+    const allowed = Array.isArray(requiredRole) ? requiredRole : [requiredRole];
+    if (!role || !allowed.includes(role as 'Admin' | 'Donor')) {
+      return <Navigate to={role === 'Admin' ? '/admin-dashboard' : '/donor-dashboard'} replace />;
+    }
   }
 
   return <>{children}</>;

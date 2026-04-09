@@ -2,20 +2,33 @@ import { useState, useEffect } from 'react'
 import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet'
 import { Icon } from 'leaflet'
 import 'leaflet/dist/leaflet.css'
-import markerIcon2x from 'leaflet/dist/images/marker-icon-2x.png'
-import markerIcon from 'leaflet/dist/images/marker-icon.png'
-import markerShadow from 'leaflet/dist/images/marker-shadow.png'
 import { getCoords } from '../utils/cityCoords'
 
-const pinIcon = new Icon({
-  iconUrl: markerIcon,
-  iconRetinaUrl: markerIcon2x,
-  shadowUrl: markerShadow,
-  iconSize: [20, 33],
-  iconAnchor: [10, 33],
-  popupAnchor: [1, -28],
-  shadowSize: [33, 33],
-})
+const PIN_COLORS: Record<string, string> = {
+  Honduras:      '#1565C0',
+  'El Salvador': '#E53935',
+  Guatemala:     '#2E7D32',
+  Panama:        '#F9A825',
+  Nicaragua:     '#9E9E9E',
+  'Costa Rica':  '#C62828',
+}
+
+function makePinIcon(color: string): Icon {
+  const svg = `
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="36" viewBox="0 0 24 36">
+      <path d="M12 0C5.373 0 0 5.373 0 12c0 9 12 24 12 24S24 21 24 12C24 5.373 18.627 0 12 0z"
+        fill="${color}" stroke="white" stroke-width="1.5"/>
+      <circle cx="12" cy="12" r="5" fill="white"/>
+    </svg>`.trim()
+  const url = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`
+  return new Icon({
+    iconUrl: url,
+    iconSize: [24, 36],
+    iconAnchor: [12, 36],
+    popupAnchor: [0, -36],
+  })
+}
+
 
 interface CountryReach {
   country: string
@@ -38,11 +51,12 @@ interface SafehouseLocation {
 }
 
 const DOT_COLORS: Record<string, string> = {
-  Honduras: 'bg-primary',
-  Guatemala: 'bg-secondary',
-  'El Salvador': 'bg-tertiary-fixed-dim',
-  Nicaragua: 'bg-outline-variant',
-  'Costa Rica': 'bg-error',
+  Honduras:      'bg-[#1565C0]',
+  'El Salvador': 'bg-[#E53935]',
+  Guatemala:     'bg-[#2E7D32]',
+  Panama:        'bg-[#F9A825]',
+  Nicaragua:     'bg-[#9E9E9E]',
+  'Costa Rica':  'bg-[#C62828]',
 }
 
 export default function GeographicSection() {
@@ -90,7 +104,7 @@ export default function GeographicSection() {
               const coords = getCoords(sh.city)
               if (!coords) return null
               return (
-                <Marker key={sh.safehouseId} position={coords} icon={pinIcon}>
+                <Marker key={sh.safehouseId} position={coords} icon={makePinIcon(PIN_COLORS[sh.country] ?? '#1565C0')}>
                   <Popup>
                     <strong>{sh.name}</strong><br />
                     {sh.city}, {sh.country}
@@ -103,7 +117,7 @@ export default function GeographicSection() {
         <div className="mt-6 flex flex-wrap gap-4 text-sm font-medium text-on-surface-variant">
           {geoDisplay.map(({ country, percentage }, i) => (
             <div key={country} className="flex items-center gap-2">
-              <span className={`w-3 h-3 rounded-full ${DOT_COLORS[country] ?? (i === 0 ? 'bg-primary' : i === 1 ? 'bg-secondary' : 'bg-tertiary-fixed-dim')}`} />
+              <span className={`w-3 h-3 rounded-full ${DOT_COLORS[country] ?? ['bg-[#1565C0]','bg-[#E53935]','bg-[#2E7D32]','bg-[#F9A825]','bg-[#9E9E9E]','bg-[#C62828]'][i % 6]}`} />
               {country} ({percentage}%)
             </div>
           ))}

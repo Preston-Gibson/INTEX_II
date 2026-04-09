@@ -3,6 +3,7 @@ using CsvHelper;
 using CsvHelper.Configuration;
 using CsvHelper.TypeConversion;
 using INTEX_II.Models;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
 namespace INTEX_II.Data;
@@ -114,6 +115,60 @@ public static class DbSeeder
         await SeedTable(db, csvDataPath, "public_impact_snapshots.csv", config,
             () => db.PublicImpactSnapshots.Any(),
             (reader, cfg) => ReadRecords<PublicImpactSnapshot>(reader, cfg));
+
+        await ResetSequencesAsync(db);
+    }
+
+    /// <summary>
+    /// Resets all PostgreSQL sequences to MAX(id) so that EF Core inserts
+    /// don't collide with rows that were loaded via CSV seeding.
+    /// Safe to run on every startup — it's a no-op when no rows exist.
+    /// </summary>
+    public static async Task ResetSequencesAsync(AppDbContext db)
+    {
+        Console.WriteLine("[Seeder] Resetting PostgreSQL sequences…");
+        await db.Database.ExecuteSqlRawAsync(@"
+            SELECT setval(pg_get_serial_sequence('safehouses',               'safehouse_id'),  COALESCE(MAX(safehouse_id),  1)) FROM safehouses;
+            SELECT setval(pg_get_serial_sequence('supporters',               'supporter_id'),  COALESCE(MAX(supporter_id),  1)) FROM supporters;
+            SELECT setval(pg_get_serial_sequence('partners',                 'partner_id'),    COALESCE(MAX(partner_id),    1)) FROM partners;
+            SELECT setval(pg_get_serial_sequence('social_media_posts',       'post_id'),       COALESCE(MAX(post_id),       1)) FROM social_media_posts;
+            SELECT setval(pg_get_serial_sequence('residents',                'resident_id'),   COALESCE(MAX(resident_id),   1)) FROM residents;
+            SELECT setval(pg_get_serial_sequence('donations',                'donation_id'),   COALESCE(MAX(donation_id),   1)) FROM donations;
+            SELECT setval(pg_get_serial_sequence('donation_allocations',     'allocation_id'), COALESCE(MAX(allocation_id), 1)) FROM donation_allocations;
+            SELECT setval(pg_get_serial_sequence('in_kind_donation_items',   'item_id'),       COALESCE(MAX(item_id),       1)) FROM in_kind_donation_items;
+            SELECT setval(pg_get_serial_sequence('process_recordings',       'recording_id'),  COALESCE(MAX(recording_id),  1)) FROM process_recordings;
+            SELECT setval(pg_get_serial_sequence('home_visitations',         'visitation_id'), COALESCE(MAX(visitation_id), 1)) FROM home_visitations;
+            SELECT setval(pg_get_serial_sequence('health_wellbeing_records', 'health_record_id'),    COALESCE(MAX(health_record_id),    1)) FROM health_wellbeing_records;
+            SELECT setval(pg_get_serial_sequence('education_records',        'education_record_id'), COALESCE(MAX(education_record_id), 1)) FROM education_records;
+            SELECT setval(pg_get_serial_sequence('incident_reports',         'incident_id'),   COALESCE(MAX(incident_id),   1)) FROM incident_reports;
+            SELECT setval(pg_get_serial_sequence('intervention_plans',       'plan_id'),       COALESCE(MAX(plan_id),       1)) FROM intervention_plans;
+            SELECT setval(pg_get_serial_sequence('safehouse_monthly_metrics','metric_id'),     COALESCE(MAX(metric_id),     1)) FROM safehouse_monthly_metrics;
+            SELECT setval(pg_get_serial_sequence('partner_assignments',      'assignment_id'), COALESCE(MAX(assignment_id), 1)) FROM partner_assignments;
+            SELECT setval(pg_get_serial_sequence('public_impact_snapshots',  'snapshot_id'),   COALESCE(MAX(snapshot_id),   1)) FROM public_impact_snapshots;
+        ");
+        Console.WriteLine("[Seeder] Sequences reset.");
+    }
+
+    public static async Task SeedUsersAsync(UserManager<ApplicationUser> userManager)
+    {
+        var testUsers = new[]
+        {
+            (Email: "admin2@lucera.org",  First: "Sarah",  Last: "Mitchell", Password: "testadminpassword", Role: "Admin"),
+            (Email: "donor1@lucera.org",  First: "James",  Last: "Rivera",   Password: "testdonorpassword", Role: "Donor"),
+            (Email: "donor2@lucera.org",  First: "Emily",  Last: "Chen",     Password: "testdonorpassword", Role: "Donor"),
+        };
+
+        foreach (var (email, first, last, password, role) in testUsers)
+        {
+            if (await userManager.FindByEmailAsync(email) != null) continue;
+
+            var user = new ApplicationUser { UserName = email, Email = email, FirstName = first, LastName = last, EmailConfirmed = true };
+            var result = await userManager.CreateAsync(user, password);
+            if (result.Succeeded)
+                await userManager.AddToRoleAsync(user, role);
+            else
+                Console.WriteLine($"[Seeder] Failed to create {email}: {string.Join(", ", result.Errors.Select(e => e.Description))}");
+        }
     }
 
     private static async Task SeedTable<T>(

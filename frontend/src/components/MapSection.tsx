@@ -77,7 +77,7 @@ export default function MapSection() {
           </p>
         </div>
 
-        <div className="grid grid-cols-[1fr_320px] gap-10 items-stretch">
+        <div className="grid grid-cols-1 lg:grid-cols-[1fr_320px] gap-10 items-stretch">
           <div className="h-full rounded-[2rem] overflow-hidden shadow-[0_4px_24px_rgba(0,0,0,0.08)]" style={{ minHeight: 420 }}>
             <MapContainer
               center={[11.5, -85.5]}
@@ -157,8 +157,8 @@ export default function MapSection() {
               <div className="flex flex-col gap-3">
                 {safehouses.length > 0 ? safehouses.map(sh => (
                   <div key={sh.safehouseId} className="bg-surface-container-lowest rounded-xl px-4 py-3">
-                    <p className="text-[0.88rem] font-bold text-on-surface">{sh.name}</p>
-                    <p className="text-[0.78rem] text-on-surface-variant">{sh.city}, {sh.country}</p>
+                    <p className="text-[0.88rem] font-bold text-on-surface">{sh.city}</p>
+                    <p className="text-[0.78rem] text-on-surface-variant">{sh.country}</p>
                   </div>
                 )) : (
                   <p className="text-[0.85rem] text-on-surface-variant">Loading safehouses...</p>

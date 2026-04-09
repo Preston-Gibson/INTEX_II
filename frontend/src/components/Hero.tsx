@@ -1,7 +1,13 @@
-import { useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom'
+import { isAuthenticated } from '../utils/auth'
 
 export default function Hero() {
-  const navigate = useNavigate();
+  const navigate = useNavigate()
+
+  const handleDonateNow = () => {
+    navigate(isAuthenticated() ? '/donor-dashboard' : '/login')
+  }
+
   return (
     <section className="relative overflow-hidden min-h-[calc(100svh-7.25rem)] flex items-center">
       {/* Background image layer */}
@@ -21,7 +27,7 @@ export default function Hero() {
       </div>
 
       {/* Content */}
-      <div className="relative z-10 w-full max-w-7xl mx-auto px-6 grid grid-cols-2 gap-14 items-center py-12">
+      <div className="relative z-10 w-full max-w-7xl mx-auto px-6 grid grid-cols-1 lg:grid-cols-2 gap-14 items-center py-12">
         {/* Left — text */}
         <div>
           <span className="inline-flex items-center gap-2 px-4 py-1.5 bg-tertiary-fixed text-on-tertiary-fixed font-manrope text-[0.7rem] font-extrabold tracking-[0.1em] uppercase rounded-[9999px] mb-7">
@@ -47,14 +53,14 @@ export default function Hero() {
                 volunteer_activism
               </span>
             </button>
-            <button className="inline-flex items-center gap-2 px-8 py-3.5 bg-surface-container-lowest text-on-surface font-manrope font-bold text-base rounded-[0.75rem] border border-outline-variant/20 hover:bg-surface-container-low transition-colors">
-              Our Story
+            <button onClick={() => navigate('/impact')} className="inline-flex items-center gap-2 px-8 py-3.5 bg-surface-container-lowest text-on-surface font-manrope font-bold text-base rounded-[0.75rem] border border-outline-variant/20 hover:bg-surface-container-low transition-colors">
+              Our Impact
             </button>
           </div>
         </div>
 
         {/* Right — image + floating quote */}
-        <div className="relative flex justify-end">
+        <div className="relative hidden lg:flex justify-end">
           <div className="relative w-[90%]">
             <img
               className="w-full aspect-[4/5] object-cover rounded-[2rem] rotate-2 shadow-[0_16px_48px_rgba(0,0,0,0.14)] block"

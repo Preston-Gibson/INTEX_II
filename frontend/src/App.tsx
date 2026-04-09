@@ -19,7 +19,7 @@ import AdminCaseloadInventory from './pages/admin/CaseloadInventory.tsx';
 import AdminProcessRecording from './pages/admin/ProcessRecording.tsx';
 import AdminHomeVisitationCaseConference from './pages/admin/HomeVisitationCaseConference.tsx';
 import AdminReportsAnalytics from './pages/admin/ReportsAnalytics.tsx';
-import AdminSocialMediaComposer from './pages/admin/SocialMediaComposer.tsx';
+import AdminUserManagement from './pages/admin/UserManagement.tsx';
 
 // Page Elements
 import NavBar from './components/NavBar.tsx';
@@ -29,7 +29,7 @@ import CookieBanner from './components/CookieBanner.tsx';
 import ScrollToTop from './components/ScrollToTop.tsx';
 import ProtectedRoute from './components/ProtectedRoute.tsx';
 
-const DASHBOARD_PATHS = ['/donor-dashboard', '/admin-dashboard', '/admin-donors-contributions', '/admin-caseload-inventory', '/admin-process-recording', '/admin-home-visitation-case-conference', '/admin-reports-analytics', '/admin-social-media'];
+const DASHBOARD_PATHS = ['/donor-dashboard', '/admin-dashboard', '/admin-donors-contributions', '/admin-caseload-inventory', '/admin-process-recording', '/admin-home-visitation-case-conference', '/admin-reports-analytics', '/admin-user-management'];
 const NO_CHROME_PATHS = ['/login', '/register', '/oauth-callback'];
 
 function Layout() {
@@ -50,14 +50,14 @@ function Layout() {
           <Route path="/register" element={<Register />} />
           <Route path="/oauth-callback" element={<OAuthCallback />} />
           <Route path="/privacy-policy" element={<PrivacyPolicy />} />
-          <Route path="/donor-dashboard" element={<ProtectedRoute requiredRole="Donor"><DonorDashboard /></ProtectedRoute>} />
+          <Route path="/donor-dashboard" element={<ProtectedRoute requiredRole={['Admin', 'Donor']}><DonorDashboard /></ProtectedRoute>} />
           <Route path="/admin-dashboard" element={<ProtectedRoute requiredRole="Admin"><AdminDashboard /></ProtectedRoute>} />
           <Route path="/admin-donors-contributions" element={<ProtectedRoute requiredRole="Admin"><AdminDonorsContributions /></ProtectedRoute>} />
           <Route path="/admin-caseload-inventory" element={<ProtectedRoute requiredRole="Admin"><AdminCaseloadInventory /></ProtectedRoute>} />
           <Route path="/admin-process-recording" element={<ProtectedRoute requiredRole="Admin"><AdminProcessRecording /></ProtectedRoute>} />
           <Route path="/admin-home-visitation-case-conference" element={<ProtectedRoute requiredRole="Admin"><AdminHomeVisitationCaseConference /></ProtectedRoute>} />
           <Route path="/admin-reports-analytics" element={<ProtectedRoute requiredRole="Admin"><AdminReportsAnalytics /></ProtectedRoute>} />
-          <Route path="/admin-social-media" element={<ProtectedRoute requiredRole="Admin"><AdminSocialMediaComposer /></ProtectedRoute>} />
+          <Route path="/admin-user-management" element={<ProtectedRoute requiredRole="Admin"><AdminUserManagement /></ProtectedRoute>} />
         </Routes>
       </div>
       {!isDashboard && <Footer />}

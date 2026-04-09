@@ -1,4 +1,8 @@
+import { useNavigate } from 'react-router-dom'
+import { isAuthenticated } from '../utils/auth'
+
 export default function CTASection() {
+  const navigate = useNavigate()
   return (
     <section className="bg-surface py-24">
       <div className="max-w-7xl mx-auto px-6">
@@ -12,18 +16,19 @@ export default function CTASection() {
             }}
           />
           <h2 className="relative font-manrope text-[clamp(2.2rem,5vw,3.75rem)] font-extrabold text-white tracking-tight mb-6">
-            Join the Movement of Light.
+            Every Child Deserves a Safe Place.
           </h2>
           <p className="relative text-[1.1rem] leading-[1.75] text-primary-fixed max-w-[560px] mx-auto mb-12">
-            Whether as a monthly donor or a strategic partner, your contribution serves
-            as a radiant guardian for those who need it most.
+            Your generosity funds the shelter, education, and care that help vulnerable
+            children in Central America heal and build a future.
           </p>
-          <div className="relative flex gap-5 justify-center flex-wrap">
-            <button className="px-10 py-4 bg-tertiary-fixed text-on-tertiary-fixed font-manrope font-extrabold text-base rounded-[1rem] shadow-[0_8px_24px_rgba(0,0,0,0.18)] hover:scale-105 active:scale-[0.97] transition-transform">
-              Become a Partner
-            </button>
-            <button className="px-10 py-4 bg-white text-primary font-manrope font-extrabold text-base rounded-[1rem] shadow-[0_8px_24px_rgba(0,0,0,0.18)] hover:scale-105 active:scale-[0.97] transition-transform">
-              One-Time Gift
+          <div className="relative flex justify-center">
+            <button
+              onClick={() => navigate(isAuthenticated() ? '/donor-dashboard' : '/login')}
+              className="inline-flex items-center gap-3 px-10 py-4 bg-white text-primary font-manrope font-extrabold text-base rounded-[1rem] shadow-[0_8px_24px_rgba(0,0,0,0.18)] hover:scale-105 active:scale-[0.97] transition-transform"
+            >
+              <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }}>volunteer_activism</span>
+              Donate
             </button>
           </div>
         </div>

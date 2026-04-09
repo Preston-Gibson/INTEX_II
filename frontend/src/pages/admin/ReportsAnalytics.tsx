@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import AdminSidebar from '../../components/AdminSidebar';
+import UserAvatar from '../../components/UserAvatar';
 import { authHeaders, downloadExport } from '../../utils/auth';
 
 const API = `${import.meta.env.VITE_API_URL ?? 'http://localhost:5229'}/api/reports`;
@@ -115,6 +116,7 @@ export default function ReportsAnalytics() {
             <span className="material-symbols-outlined text-[16px]">download</span>
             Export CSV
           </button>
+          <UserAvatar />
         </div>
       </div>
 
@@ -130,7 +132,7 @@ export default function ReportsAnalytics() {
               <span className="w-1 h-5 rounded-full bg-secondary"></span>
               <h2 className="font-manrope font-bold text-on-surface">Annual Accomplishment Report — {year}</h2>
             </div>
-            <div className="grid grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               {/* Caring */}
               <div className="bg-surface-container-low rounded-2xl p-5 space-y-4">
                 <div className="flex items-center gap-3">
@@ -203,9 +205,9 @@ export default function ReportsAnalytics() {
           </section>
 
           {/* Donation Trend + Outcome Metrics */}
-          <div className="grid grid-cols-3 gap-4 mb-8">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
             {/* Donation Trend Chart */}
-            <div className="col-span-2 bg-surface-container-low rounded-2xl p-5">
+            <div className="md:col-span-2 bg-surface-container-low rounded-2xl p-5">
               <div className="flex items-center justify-between mb-5">
                 <div>
                   <p className="font-manrope font-bold text-on-surface">Donation Trends</p>
@@ -325,7 +327,7 @@ export default function ReportsAnalytics() {
             {!reintegration || reintegration.breakdown.length === 0 ? (
               <div className="bg-surface-container-low rounded-2xl p-8 text-center text-xs text-on-surface-variant">No reintegration data for {year}</div>
             ) : (
-              <div className={`grid gap-4 ${reintegration.breakdown.length <= 4 ? 'grid-cols-4' : 'grid-cols-3'}`}>
+              <div className={`grid gap-4 grid-cols-2 ${reintegration.breakdown.length <= 4 ? 'md:grid-cols-4' : 'md:grid-cols-3'}`}>
                 {reintegration.breakdown.map(({ type, count, percentage }) => (
                   <div key={type} className="bg-surface-container-low rounded-2xl p-5 text-center">
                     <div className="w-12 h-12 rounded-2xl bg-primary/10 flex items-center justify-center mx-auto mb-3">

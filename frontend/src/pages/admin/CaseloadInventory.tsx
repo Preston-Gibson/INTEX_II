@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import AdminSidebar from '../../components/AdminSidebar';
+import UserAvatar from '../../components/UserAvatar';
 import { authHeaders } from '../../utils/auth';
 
 const API = `${import.meta.env.VITE_API_URL ?? 'http://localhost:5229'}/api/residents`;
@@ -163,11 +164,14 @@ export default function CaseloadInventory() {
 
   const [currentPage, setCurrentPage] = useState(1);
 
-  const [modalMode, setModalMode] = useState<'add' | 'edit' | null>(null);
+  const [modalMode, setModalMode] = useState<'add' | 'edit' | 'delete' | null>(null);
   const [selectedResident, setSelectedResident] = useState<ResidentDetail | null>(null);
   const [formData, setFormData] = useState<ResidentFormData>(EMPTY_FORM);
   const [formLoading, setFormLoading] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
+
+  const [caseToClose, setCaseToClose] = useState<ResidentRow | null>(null);
+  const [closing, setClosing] = useState(false);
 
   // Fetch safehouses once on mount
   useEffect(() => {
@@ -222,6 +226,28 @@ export default function CaseloadInventory() {
     }
   }
 
+  async function handleCloseCase() {
+    if (!caseToClose) return;
+    setClosing(true);
+    try {
+      const detail: ResidentDetail = await fetch(`${API}/${caseToClose.residentId}`, { headers: authHeaders() }).then(r => r.json());
+      const updated = {
+        ...detail,
+        caseStatus: 'Closed',
+        dateClosed: new Date().toISOString().slice(0, 10),
+      };
+      await fetch(`${API}/${caseToClose.residentId}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json', ...authHeaders() },
+        body: JSON.stringify(updated),
+      });
+      setCaseToClose(null);
+      setRefreshKey(k => k + 1);
+    } finally {
+      setClosing(false);
+    }
+  }
+
   async function handleSubmit() {
     setFormError(null);
 
@@ -242,6 +268,28 @@ export default function CaseloadInventory() {
         body: JSON.stringify(body),
       });
       if (!res.ok) { setFormError('Save failed. Please check all fields and try again.'); return; }
+      setModalMode(null);
+      setRefreshKey(k => k + 1);
+    } catch {
+      setFormError('Network error. Please try again.');
+    }
+  }
+
+  function openDelete(resident: ResidentDetail) {
+    setSelectedResident(resident);
+    setFormError(null);
+    setModalMode('delete');
+  }
+
+  async function handleDelete() {
+    if (!selectedResident) return;
+    setFormError(null);
+    try {
+      const res = await fetch(`${API}/${selectedResident.residentId}`, {
+        method: 'DELETE',
+        headers: authHeaders(),
+      });
+      if (!res.ok) { setFormError('Delete failed. Please try again.'); return; }
       setModalMode(null);
       setRefreshKey(k => k + 1);
     } catch {
@@ -305,6 +353,7 @@ export default function CaseloadInventory() {
             <span className="material-symbols-outlined text-[18px]">add</span>
             Add Resident
           </button>
+          <UserAvatar />
         </header>
 
         {/* Main table */}
@@ -366,13 +415,24 @@ export default function CaseloadInventory() {
                             </span>
                           </td>
                           <td className="px-4 py-3">
-                            <button
-                              onClick={() => openEdit(r.residentId)}
-                              className="flex items-center gap-1 text-primary text-xs font-semibold hover:underline whitespace-nowrap"
-                            >
-                              <span className="material-symbols-outlined text-[15px]">edit</span>
-                              View/Edit
-                            </button>
+                            <div className="flex items-center gap-3">
+                              <button
+                                onClick={() => openEdit(r.residentId)}
+                                className="flex items-center gap-1 text-primary text-xs font-semibold hover:underline whitespace-nowrap"
+                              >
+                                <span className="material-symbols-outlined text-[15px]">edit</span>
+                                View/Edit
+                              </button>
+                              {r.caseStatus !== 'Closed' && (
+                                <button
+                                  onClick={() => setCaseToClose(r)}
+                                  className="flex items-center gap-1 text-on-surface-variant text-xs font-semibold hover:text-error hover:underline whitespace-nowrap transition-colors"
+                                >
+                                  <span className="material-symbols-outlined text-[15px]">folder_off</span>
+                                  Close Case
+                                </button>
+                              )}
+                            </div>
                           </td>
                         </tr>
                       ))}
@@ -444,8 +504,40 @@ export default function CaseloadInventory() {
         </main>
       </div>
 
+      {/* ── Delete Confirmation Modal ── */}
+      {modalMode === 'delete' && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
+          <div className="bg-surface-container-lowest rounded-2xl shadow-xl w-full max-w-sm mx-4 p-6">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-10 h-10 rounded-full bg-error/10 flex items-center justify-center flex-shrink-0">
+                <span className="material-symbols-outlined text-error text-[20px]">delete_forever</span>
+              </div>
+              <div>
+                <h2 className="font-headline font-bold text-on-surface">Delete Resident?</h2>
+                <p className="text-xs text-on-surface-variant">This will permanently remove the resident and all associated records.</p>
+              </div>
+            </div>
+            {formError && <p className="text-xs text-error mb-3">{formError}</p>}
+            <div className="flex gap-3 justify-end">
+              <button
+                onClick={() => setModalMode(null)}
+                className="px-4 py-2 rounded-xl text-sm font-semibold text-on-surface-variant hover:bg-surface-container-low transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleDelete}
+                className="px-4 py-2 rounded-xl text-sm font-bold text-white bg-error hover:opacity-90 transition-opacity"
+              >
+                Delete
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* ── Add / Edit Modal ── */}
-      {modalMode !== null && (
+      {(modalMode === 'add' || modalMode === 'edit') && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
           <div className="bg-surface-container-lowest rounded-xl shadow-xl w-full max-w-3xl max-h-[90vh] flex flex-col mx-4">
             {/* Modal header */}
@@ -715,8 +807,17 @@ export default function CaseloadInventory() {
 
             {/* Modal footer */}
             <div className="px-6 py-4 border-t border-outline-variant/20 flex items-center justify-between flex-shrink-0">
-              <div className="flex-1">
+              <div className="flex items-center gap-4 flex-1">
                 {formError && <p className="text-error text-xs font-semibold">{formError}</p>}
+                {modalMode === 'edit' && selectedResident && (
+                  <button
+                    onClick={() => openDelete(selectedResident)}
+                    className="flex items-center gap-1.5 text-error text-xs font-semibold hover:underline"
+                  >
+                    <span className="material-symbols-outlined text-[15px]">delete</span>
+                    Delete Resident
+                  </button>
+                )}
               </div>
               <div className="flex gap-3">
                 <button
@@ -730,6 +831,43 @@ export default function CaseloadInventory() {
                   className="aurora-gradient text-white text-sm font-bold px-6 py-2 rounded-xl hover:opacity-90 transition-opacity"
                 >
                   {modalMode === 'add' ? 'Create Resident' : 'Save Changes'}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Close Case confirmation modal */}
+      {caseToClose && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
+          <div className="bg-surface-container-lowest rounded-2xl shadow-xl w-full max-w-sm mx-4">
+            <div className="flex items-center justify-between px-6 pt-6 pb-4 border-b border-outline-variant/20">
+              <h2 className="text-base font-manrope font-bold text-on-surface">Close Case</h2>
+              <button onClick={() => setCaseToClose(null)} className="text-on-surface-variant hover:text-on-surface transition-colors">
+                <span className="material-symbols-outlined text-[20px]">close</span>
+              </button>
+            </div>
+            <div className="px-6 py-5">
+              <p className="text-sm text-on-surface mb-1">
+                Close case <strong>{caseToClose.caseControlNo}</strong>?
+              </p>
+              <p className="text-sm text-on-surface-variant mb-4">
+                The case status will be set to <strong>Closed</strong> and today will be recorded as the close date. This can be reversed by editing the case.
+              </p>
+              <div className="flex justify-end gap-3">
+                <button
+                  onClick={() => setCaseToClose(null)}
+                  className="px-4 py-2 rounded-xl text-sm font-semibold text-on-surface-variant hover:bg-surface-container-low transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleCloseCase}
+                  disabled={closing}
+                  className="px-4 py-2 rounded-xl text-sm font-bold text-white aurora-gradient hover:opacity-90 transition-opacity disabled:opacity-50"
+                >
+                  {closing ? 'Closing…' : 'Close Case'}
                 </button>
               </div>
             </div>

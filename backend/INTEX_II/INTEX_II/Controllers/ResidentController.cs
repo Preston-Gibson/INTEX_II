@@ -48,10 +48,13 @@ public class ResidentController : ControllerBase
         var query = _db.Residents.Include(r => r.Safehouse).AsQueryable();
 
         if (!string.IsNullOrWhiteSpace(search))
+        {
+            var pattern = $"%{search}%";
             query = query.Where(r =>
-                r.CaseControlNo.Contains(search) ||
-                r.InternalCode.Contains(search) ||
-                r.AssignedSocialWorker.Contains(search));
+                EF.Functions.ILike(r.CaseControlNo, pattern) ||
+                EF.Functions.ILike(r.InternalCode, pattern) ||
+                EF.Functions.ILike(r.AssignedSocialWorker, pattern));
+        }
 
         if (!string.IsNullOrWhiteSpace(caseStatus))
             query = query.Where(r => r.CaseStatus == caseStatus);
@@ -301,6 +304,18 @@ public class ResidentController : ControllerBase
         entity.DateClosed = dto.DateClosed;
         entity.NotesRestricted = dto.NotesRestricted;
 
+        await _db.SaveChangesAsync();
+        return NoContent();
+    }
+
+    // DELETE /api/residents/{id}
+    [HttpDelete("{id}")]
+    public async Task<IActionResult> Delete(int id)
+    {
+        var entity = await _db.Residents.FindAsync(id);
+        if (entity == null) return NotFound();
+
+        _db.Residents.Remove(entity);
         await _db.SaveChangesAsync();
         return NoContent();
     }
