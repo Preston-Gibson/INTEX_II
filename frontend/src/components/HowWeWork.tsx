@@ -78,8 +78,8 @@ export default function HowWeWork() {
             />
             <img
               className="w-full aspect-[3/4] object-cover rounded-[1.5rem] shadow-[0_4px_24px_rgba(0,0,0,0.08)]"
-              src="https://lh3.googleusercontent.com/aida-public/AB6AXuDyS8-zhBehfSldtHFWdfUTMRkPhR0mJDqvom_LNVrTx5wtCXBWxWQ4JclaWhumyGTQZZCfp93PZWY9FWdoFqD4oqXTVkTnyz8V5_VsOIGsypoVRn3Qb2jLiZfv4L_Jb20HqXKpmus_mFqWPjQkHBd1P-6HbgpNHtEmnDdSfFFHO5RVQZhO6dz7CdQS_f_anwJipnjYsyiVlB-gKraBYY2mBxutv_McRRns3yddrtgAv7fYXPbmZIPBIk6rUyRmQcEMnxFAnSj5VQ"
-              alt="Bright classroom scene"
+              src="https://images.unsplash.com/photo-1529156069898-49953e39b3ac?w=600&auto=format&fit=crop&q=80"
+              alt="Community of women in support"
             />
           </div>
         </div>

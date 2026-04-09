@@ -46,9 +46,9 @@ export default function ImpactSection() {
             </div>
           </div>
 
-          {/* Legal Advocacy — primary blue */}
+          {/* Healing — primary blue */}
           <div className="bg-primary rounded-[2rem] p-9 shadow-sm flex flex-col items-center justify-center gap-3 text-center hover:shadow-md hover:-translate-y-[3px] transition-all duration-300">
-            <span className="material-symbols-outlined text-[3rem] text-white">gavel</span>
+            <span className="material-symbols-outlined text-[3rem] text-white">favorite</span>
             <h3 className="font-manrope text-[1.1rem] font-bold text-white">{t('impact.legal.title')}</h3>
             <p className="text-[0.92rem] leading-[1.65] text-white/80">
               {t('impact.legal.desc')}
