@@ -177,13 +177,6 @@ export default function DonorDashboard() {
 
       <div className="flex-1 flex flex-col overflow-hidden">
         <header className="flex items-center gap-3 pl-14 lg:pl-6 pr-4 md:pr-6 py-3 bg-surface-container-lowest border-b border-outline-variant/20 flex-shrink-0">
-          <div className="hidden md:flex items-center gap-2 bg-surface-container-low rounded-xl px-3 py-2 flex-1 max-w-xs">
-            <span className="material-symbols-outlined text-on-surface-variant text-[18px]">search</span>
-            <input
-              className="bg-transparent text-sm text-on-surface placeholder:text-on-surface-variant outline-none w-full"
-              placeholder="Search mission reports..."
-            />
-          </div>
           <div className="flex items-center gap-3 ml-auto">
             <div className="flex items-center gap-2">
               <div className="w-8 h-8 rounded-full bg-primary-container flex items-center justify-center text-xs font-bold text-on-primary">{initials}</div>
