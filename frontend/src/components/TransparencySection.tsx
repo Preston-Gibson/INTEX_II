@@ -1,33 +1,36 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 
 interface Allocation {
   programArea: string
   percentage: number
 }
 
-const AREA_COLORS: Record<string, string> = {
-  'Direct Care': 'bg-primary',
-  'Education':   'bg-[#2196F3]', // blue
-  'Medical':     'bg-[#9C27B0]', // purple
-  'Operations':  'bg-[#FF9800]', // orange
-  'Nutrition':   'bg-[#4CAF50]', // green
-  'Mental Health':'bg-[#E91E63]',// pink
-  'Vocational':  'bg-[#00BCD4]', // cyan
-  'Administration':'bg-[#795548]',// brown
-  'Wellbeing':   'bg-[#009688]', // teal
-  'Transport':   'bg-[#9C27B0]', // purple
-  'Maintenance': 'bg-[#FF5722]', // deep orange
-  'Outreach':    'bg-[#4CAF50]', // green
+const AREA_META: Record<string, { color: string; icon: string }> = {
+  'Direct Care':     { color: '#1a7f64', icon: '🏠' },
+  'Education':       { color: '#2563eb', icon: '📚' },
+  'Medical':         { color: '#9333ea', icon: '🩺' },
+  'Operations':      { color: '#ea580c', icon: '⚙️' },
+  'Nutrition':       { color: '#16a34a', icon: '🥗' },
+  'Mental Health':   { color: '#db2777', icon: '🧠' },
+  'Vocational':      { color: '#0891b2', icon: '🛠️' },
+  'Administration':  { color: '#92400e', icon: '📋' },
+  'Wellbeing':       { color: '#0d9488', icon: '💚' },
+  'Transport':       { color: '#7c3aed', icon: '🚌' },
+  'Maintenance':     { color: '#c2410c', icon: '🔧' },
+  'Outreach':        { color: '#15803d', icon: '🤝' },
 }
 
-function colorForArea(area: string): string {
-  // Try exact match first, then partial
-  if (AREA_COLORS[area]) return AREA_COLORS[area]
-  const key = Object.keys(AREA_COLORS).find(k => area.toLowerCase().includes(k.toLowerCase()))
-  return key ? AREA_COLORS[key] : 'bg-primary'
+const PALETTE = [
+  '#1a7f64', '#2563eb', '#9333ea', '#ea580c',
+  '#16a34a', '#db2777', '#0891b2', '#0d9488',
+]
+
+function metaForArea(area: string, index: number): { color: string; icon: string } {
+  const key = Object.keys(AREA_META).find(k => area.toLowerCase().includes(k.toLowerCase()))
+  if (key) return AREA_META[key]
+  return { color: PALETTE[index % PALETTE.length], icon: '💰' }
 }
 
-// Fallback data if DB has no allocations yet
 const FALLBACK: Allocation[] = [
   { programArea: 'Direct Care & Nutrition', percentage: 55 },
   { programArea: 'Education & Vocational Training', percentage: 22 },
@@ -37,43 +40,70 @@ const FALLBACK: Allocation[] = [
 
 export default function TransparencySection() {
   const [allocations, setAllocations] = useState<Allocation[]>([])
+  const [animated, setAnimated] = useState(false)
+  const ref = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     fetch(`${import.meta.env.VITE_API_URL ?? 'http://localhost:5229'}/api/impact/donation-allocation`)
       .then(r => r.json())
-      .then((data: Allocation[]) => {
-        setAllocations(data.length > 0 ? data : FALLBACK)
-      })
+      .then((data: Allocation[]) => setAllocations(data.length > 0 ? data : FALLBACK))
       .catch(() => setAllocations(FALLBACK))
+  }, [])
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => { if (entry.isIntersecting) setAnimated(true) },
+      { threshold: 0.2 }
+    )
+    if (ref.current) observer.observe(ref.current)
+    return () => observer.disconnect()
   }, [])
 
   const display = allocations.length > 0 ? allocations : FALLBACK
 
   return (
-    <div className="bg-surface-container-lowest p-8 rounded-xl border border-outline-variant/10">
-      <h3 className="text-2xl font-bold text-primary mb-2">Where Your Money Goes</h3>
-      <p className="text-on-surface-variant mb-8 leading-relaxed">
-        For every $1 donated, 92 cents goes directly to program costs and essential care
-        for our residents.
+    <div ref={ref} className="bg-surface-container-lowest p-8 rounded-xl border border-outline-variant/10">
+      <h3 className="text-2xl font-bold text-primary mb-1">Where Your Money Goes</h3>
+      <p className="text-on-surface-variant text-sm mb-8">
+        For every $1 donated, 92 cents goes directly to program costs.
       </p>
 
-      <div className="space-y-10">
-        {display.map(({ programArea, percentage }) => (
-          <div key={programArea}>
-            <div className="flex justify-between mb-3 text-sm font-bold">
-              <span>{programArea}</span>
-              <span>{percentage}%</span>
-            </div>
-            <div className="w-full bg-surface-container h-3 rounded-full overflow-hidden">
-              <div
-                className={`${colorForArea(programArea)} h-full`}
-                style={{ width: `${percentage}%` }}
-              />
-            </div>
-          </div>
-        ))}
-      </div>
+      <div className="space-y-5">
+        {display.map(({ programArea, percentage }, i) => {
+          const { color, icon } = metaForArea(programArea, i)
+          return (
+            <div key={programArea} className="group">
+              <div className="flex items-center justify-between mb-2">
+                <div className="flex items-center gap-2">
+                  <span
+                    className="flex items-center justify-center w-8 h-8 rounded-lg text-base shrink-0"
+                    style={{ backgroundColor: `${color}20` }}
+                  >
+                    {icon}
+                  </span>
+                  <span className="text-sm font-semibold text-on-surface">{programArea}</span>
+                </div>
+                <span
+                  className="text-sm font-bold tabular-nums"
+                  style={{ color }}
+                >
+                  {percentage}%
+                </span>
+              </div>
 
+              <div className="relative w-full h-2.5 bg-surface-container rounded-full overflow-hidden">
+                <div
+                  className="absolute inset-y-0 left-0 rounded-full transition-all duration-1000 ease-out"
+                  style={{
+                    width: animated ? `${percentage}%` : '0%',
+                    background: `linear-gradient(90deg, ${color}cc, ${color})`,
+                  }}
+                />
+              </div>
+            </div>
+          )
+        })}
+      </div>
     </div>
   )
 }

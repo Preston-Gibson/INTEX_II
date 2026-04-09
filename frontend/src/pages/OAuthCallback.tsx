@@ -1,6 +1,7 @@
 import { useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { getRole } from '../utils/auth';
 
 export default function OAuthCallback() {
   const [params] = useSearchParams();
@@ -13,7 +14,7 @@ export default function OAuthCallback() {
 
     if (token) {
       login(token);
-      navigate('/donor-dashboard', { replace: true });
+      navigate(getRole() === 'Admin' ? '/admin-dashboard' : '/donor-dashboard', { replace: true });
     } else {
       navigate(`/login?error=${error ?? 'oauth_failed'}`, { replace: true });
     }
