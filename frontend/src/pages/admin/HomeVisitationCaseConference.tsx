@@ -88,6 +88,7 @@ export default function HomeVisitationCaseConference() {
   const [socialWorkers, setSocialWorkers] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
   const [logsLoading, setLogsLoading] = useState(true);
+  const [logToDelete, setLogToDelete] = useState<HistoricalLog | null>(null);
 
   // Log form
   const [form, setForm] = useState({
@@ -126,7 +127,6 @@ export default function HomeVisitationCaseConference() {
   });
   const [scheduling, setScheduling] = useState(false);
   const [scheduleError, setScheduleError] = useState<string | null>(null);
-  const [socialWorkers, setSocialWorkers] = useState<string[]>([]);
 
   useEffect(() => {
     fetch(`${import.meta.env.VITE_API_URL ?? 'http://localhost:5229'}/api/process-recordings/social-workers`, { headers: authHeaders() })
@@ -134,23 +134,6 @@ export default function HomeVisitationCaseConference() {
       .then(setSocialWorkers)
       .catch(() => {});
   }, []);
-
-  function loadData() {
-    return Promise.all([
-      fetch(`${API}/upcoming-visits`, { headers: authHeaders() }).then(r => r.json()),
-      fetch(`${API}/residents`, { headers: authHeaders() }).then(r => r.json()),
-    ]).then(([u, r]) => {
-      setUpcomingVisits(u);
-      setResidents(r);
-      setLoading(false);
-    }).catch(() => setLoading(false));
-
-    // social-workers is a new endpoint — fetch separately so a 404 doesn't break the rest
-    fetch(`${API}/social-workers`, { headers: authHeaders() })
-      .then(r => r.ok ? r.json() : [])
-      .then((sw: unknown) => { if (Array.isArray(sw)) setSocialWorkers(sw); })
-      .catch(() => {});
-  }
 
   async function handleScheduleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -176,7 +159,7 @@ export default function HomeVisitationCaseConference() {
       setShowScheduleForm(false);
       setScheduleForm({ residentId: '', visitDate: '', socialWorker: '', visitType: '', locationVisited: '' });
       setLoading(true);
-      loadData();
+      loadStatic();
     } catch {
       setScheduleError('Failed to schedule visit. Please try again.');
     } finally {
@@ -184,13 +167,27 @@ export default function HomeVisitationCaseConference() {
     }
   }
 
-  async function handleDeleteLog() {
-    if (!logToDelete) return;
-    setDeleting(true);
-    await fetch(`${API}/${logToDelete.visitationId}`, { method: 'DELETE', headers: authHeaders() });
-    setHistoricalLogs(logs => logs.filter(l => l.visitationId !== logToDelete.visitationId));
-    setLogToDelete(null);
-    setDeleting(false);
+  function loadStatic() {
+    Promise.all([
+      fetch(`${API}/upcoming-visits`, { headers: authHeaders() }).then(r => r.json()),
+      fetch(`${API}/residents`, { headers: authHeaders() }).then(r => r.json()),
+    ]).then(([u, r]) => {
+      setUpcomingVisits(u);
+      setResidents(r);
+      setLoading(false);
+    }).catch(() => setLoading(false));
+  }
+
+  function loadLogs(page: number) {
+    setLogsLoading(true);
+    fetch(`${API}/logs?page=${page}&pageSize=${PAGE_SIZE}`, { headers: authHeaders() })
+      .then(r => r.json())
+      .then((data: PagedLogs) => {
+        setLogs(data.data ?? []);
+        setTotalLogs(data.total ?? 0);
+        setLogsLoading(false);
+      })
+      .catch(() => setLogsLoading(false));
   }
 
   useEffect(() => { loadStatic(); }, []);
@@ -322,17 +319,6 @@ export default function HomeVisitationCaseConference() {
             </p>
           </header>
 
-          {/* Bento Grid */}
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-            {/* Left column */}
-            <div className="lg:col-span-4 flex flex-col gap-6">
-              {/* Scheduled Visits */}
-              <section className="bg-surface-container-low rounded-xl p-6 shadow-sm">
-                <div className="flex items-center justify-between mb-6">
-                  <h2 className="font-manrope font-bold text-lg text-primary">Scheduled Visits</h2>
-                  <span className="bg-primary-fixed text-on-primary-fixed px-3 py-1 rounded-full text-xs font-bold">Upcoming</span>
-                </div>
-
           {/* Page title */}
           <div className="mb-6">
             <h1 className="font-manrope text-2xl font-extrabold text-on-surface tracking-tight">Home Visitation</h1>
@@ -424,14 +410,8 @@ export default function HomeVisitationCaseConference() {
               </div>
             </div>
 
-                <button
-                  onClick={() => { setShowScheduleForm(true); setScheduleError(null); }}
-                  className="w-full mt-6 py-3 border-2 border-dashed border-outline-variant rounded-xl text-on-surface-variant text-sm font-semibold hover:bg-surface-container transition-colors"
-                >
-                  + Schedule New Visit
-                </button>
-              </section>
-
+            <div className="bg-surface-container-lowest border border-outline-variant/20 rounded-2xl overflow-hidden">
+              <form onSubmit={handleSubmit} className="p-5 flex flex-col gap-4">
                 <div className="grid grid-cols-2 gap-3">
                   <div>
                     <label className={labelCls}>Resident</label>
@@ -811,7 +791,7 @@ export default function HomeVisitationCaseConference() {
               </form>
             </div>
           </div>
-        </>
+        </div>
       )}
     </div>
   );

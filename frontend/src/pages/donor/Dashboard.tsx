@@ -106,17 +106,15 @@ export default function DonorDashboard() {
     : 0;
   const recentDonations = myDonations?.donations.slice(0, 3) ?? [];
 
-  return (
-    <div className="flex h-screen bg-surface overflow-hidden font-body">
-      <aside className="w-56 flex-shrink-0 flex flex-col bg-surface-container-lowest border-r border-outline-variant/20 py-6 px-4 relative z-10">
-        <div className="mb-8 px-2">
-          <img src="/logo.png" alt="Lucera" className="h-8 w-auto object-contain mb-1" />
-          <p className="text-on-surface-variant text-[10px] font-bold uppercase tracking-widest mt-0.5">Donor Command Center</p>
-        </div>
-        <button onClick={() => setSidebarOpen(false)} className="lg:hidden text-on-surface-variant hover:text-on-surface transition-colors">
-          <span className="material-symbols-outlined text-[20px]">close</span>
-        </button>
+  const sidebarContent = (
+    <aside className="w-56 flex-shrink-0 flex flex-col bg-surface-container-lowest border-r border-outline-variant/20 py-6 px-4 relative z-10">
+      <div className="mb-8 px-2">
+        <img src="/logo.png" alt="Lucera" className="h-8 w-auto object-contain mb-1" />
+        <p className="text-on-surface-variant text-[10px] font-bold uppercase tracking-widest mt-0.5">Donor Command Center</p>
       </div>
+      <button onClick={() => setSidebarOpen(false)} className="lg:hidden text-on-surface-variant hover:text-on-surface transition-colors">
+        <span className="material-symbols-outlined text-[20px]">close</span>
+      </button>
       <nav className="flex-1 space-y-1">
         {NAV_ITEMS.map(({ label, icon }) => (
           <button

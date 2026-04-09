@@ -14,7 +14,7 @@ export default function AdminSidebar() {
   const navigate = useNavigate();
   const [open, setOpen] = useState(false);
 
-  return (
+  const sidebarContent = (
     <aside className="w-56 flex-shrink-0 flex flex-col bg-surface-container-lowest border-r border-outline-variant/20 py-6 px-4 relative z-10">
       <div className="mb-8 px-2">
         <img src="/logo.png" alt="Lucera" className="h-8 w-auto object-contain mb-1" />

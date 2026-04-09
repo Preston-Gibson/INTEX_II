@@ -28,10 +28,13 @@ export default function NavBar() {
 
   return (
     <nav className="fixed top-9 w-full z-[1001] bg-white/90 backdrop-blur-xl shadow-sm border-b border-slate-200/60">
-      <div className="flex justify-between md:grid md:grid-cols-3 items-center max-w-7xl mx-auto px-6 h-20">
+      <div className="grid grid-cols-3 items-center max-w-7xl mx-auto px-6 h-20">
+
+        {/* Left — logo + wordmark + language toggle */}
         <div className="flex items-center gap-3">
-          <NavLink to="/" className="text-2xl font-bold text-primary dark:text-white">
-            Lucera
+          <NavLink to="/" className="flex items-center gap-2">
+            <img src="/logo.png" alt="Lucera" className="h-10 w-auto object-contain" />
+            <span className="text-2xl font-bold text-primary">Lucera</span>
           </NavLink>
           <button
             onClick={toggleLanguage}
@@ -42,21 +45,16 @@ export default function NavBar() {
             {language === 'en' ? 'ES' : 'EN'}
           </button>
         </div>
-        
-        <div className="grid grid-cols-3 items-center max-w-7xl mx-auto px-6 h-20">
-        <NavLink to="/" className="flex items-center">
-          <img src="/logo.png" alt="Lucera" className="h-10 w-auto object-contain" />
-        </NavLink>
-        <div/>
 
+        {/* Center — nav links */}
         <div className="hidden md:flex justify-center items-center gap-8 font-manrope text-sm font-semibold tracking-tight">
-          {/* Publicly Accessible Pages */}
-          <NavLink to="/" end className={navClass}>Our Mission</NavLink>
-          <NavLink to="/impact" className={navClass}>Impact</NavLink>
+          <NavLink to="/" end className={navClass}>{t('nav.mission')}</NavLink>
+          <NavLink to="/impact" className={navClass}>{t('nav.impact')}</NavLink>
           <NavLink to="/donor-shoutout" className={navClass}>Our Supporters</NavLink>
         </div>
 
-        <div className="flex items-center justify-end gap-3 justify-self-end min-w-0">
+        {/* Right — auth */}
+        <div className="flex items-center justify-end gap-3">
           <NavLink
             to={loggedIn ? dashboardPath : '/login'}
             className="px-5 py-2.5 aurora-gradient text-white text-sm font-bold rounded-xl transition-all active:scale-95 duration-150 ease-in-out whitespace-nowrap"
@@ -72,6 +70,7 @@ export default function NavBar() {
             </button>
           )}
         </div>
+
       </div>
     </nav>
   );
