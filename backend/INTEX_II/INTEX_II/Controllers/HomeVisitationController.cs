@@ -94,6 +94,23 @@ public class HomeVisitationController : ControllerBase
         return Ok(residents);
     }
 
+    // PUT /api/home-visitation/{id}
+    [HttpPut("{id}")]
+    public async Task<IActionResult> UpdateVisit(int id, [FromBody] ScheduleVisitRequest request)
+    {
+        var visit = await _db.HomeVisitations.FindAsync(id);
+        if (visit == null) return NotFound();
+
+        visit.VisitDate = DateOnly.Parse(request.VisitDate);
+        visit.SocialWorker = request.SocialWorker;
+        visit.VisitType = request.VisitType;
+        visit.LocationVisited = request.LocationVisited;
+        visit.Purpose = request.VisitType;
+
+        await _db.SaveChangesAsync();
+        return NoContent();
+    }
+
     // POST /api/home-visitation/schedule
     // Schedules a future visit
     [HttpPost("schedule")]

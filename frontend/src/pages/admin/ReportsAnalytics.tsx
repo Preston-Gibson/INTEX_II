@@ -89,7 +89,7 @@ export default function ReportsAnalytics() {
       <AdminSidebar />
       <div className="flex-1 flex flex-col overflow-hidden">
 
-        {/* Top bar */}
+        {/* Standard top bar */}
         <header className="flex items-center gap-3 px-6 py-3 bg-surface-container-lowest border-b border-outline-variant/20 flex-shrink-0">
           <div className="flex bg-surface-container-low rounded-xl p-1 gap-1">
             {(['2026', '2025', '2024', '2023', '2022'] as ReportYear[]).map((y) => (
@@ -99,21 +99,21 @@ export default function ReportsAnalytics() {
               </button>
             ))}
           </div>
-          <button
-            onClick={() => downloadExport('/api/export/donations', 'csv', year)}
-            className="flex items-center gap-2 bg-surface-container-low text-on-surface text-xs font-bold px-4 py-2.5 rounded-xl hover:bg-surface-container transition-colors">
-            <span className="material-symbols-outlined text-[16px]">download</span>
-            Export CSV
-          </button>
-          <div className="ml-auto">
+          <div className="ml-auto flex items-center gap-3">
+            <button
+              onClick={() => downloadExport('/api/export/donations', 'csv', year)}
+              className="flex items-center gap-2 bg-surface-container-low text-on-surface text-xs font-bold px-4 py-2.5 rounded-xl hover:bg-surface-container transition-colors">
+              <span className="material-symbols-outlined text-[16px]">download</span>
+              Export CSV
+            </button>
             <UserAvatar />
           </div>
         </header>
 
-        <div className="flex-1 overflow-y-auto">
+      <div className="flex-1 overflow-y-auto">
       <div className="p-6 max-w-7xl mx-auto">
 
-      {/* Page title */}
+      {/* Page heading */}
       <div className="mb-8">
         <h1 className="font-manrope text-3xl font-extrabold text-primary tracking-tight mb-2">
           Reports &amp; Analytics
@@ -123,11 +123,7 @@ export default function ReportsAnalytics() {
         </p>
       </div>
 
-      {loading ? (
-        <div className="flex items-center justify-center h-64">
-          <div className="w-8 h-8 rounded-full aurora-gradient animate-spin opacity-80" />
-        </div>
-      ) : (
+      {!loading && (
         <>
           {/* Annual Accomplishment — 3 Service Pillars */}
           <section className="mb-8">
@@ -388,6 +384,7 @@ export default function ReportsAnalytics() {
       )}
     </div>
         </div>
+      </div>
       </div>
     </div>
   );

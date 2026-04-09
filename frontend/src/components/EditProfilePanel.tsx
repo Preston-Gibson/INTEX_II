@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
-import { authHeaders } from '../utils/auth';
+import { authHeaders, clearToken } from '../utils/auth';
+import { useNavigate } from 'react-router-dom';
 
 const API = `${import.meta.env.VITE_API_URL ?? 'http://localhost:5229'}/api/auth`;
 
@@ -21,6 +22,7 @@ const labelCls =
   'text-[10px] font-bold text-on-surface-variant uppercase tracking-widest mb-1 block';
 
 export default function EditProfilePanel({ onClose, onSaved }: Props) {
+  const navigate = useNavigate();
   const [profile, setProfile]       = useState<Profile | null>(null);
   const [firstName, setFirstName]   = useState('');
   const [lastName, setLastName]     = useState('');
@@ -294,6 +296,17 @@ export default function EditProfilePanel({ onClose, onSaved }: Props) {
                     </button>
                   </form>
                 )}
+              </div>
+
+              {/* Sign Out */}
+              <div className="pt-2">
+                <button
+                  onClick={() => { clearToken(); navigate('/login'); }}
+                  className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-bold text-error border border-error/30 hover:bg-error/5 transition-colors"
+                >
+                  <span className="material-symbols-outlined text-[16px]">logout</span>
+                  Sign Out
+                </button>
               </div>
             </>
           )}

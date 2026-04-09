@@ -344,14 +344,16 @@ export default function CaseloadInventory() {
             {CASE_CATEGORY_OPTIONS.map(c => <option key={c} value={c}>{c}</option>)}
           </select>
 
-          <button
-            onClick={openAdd}
-            className="aurora-gradient text-white text-sm font-bold px-4 py-2 rounded-xl hover:opacity-90 transition-opacity flex items-center gap-2 flex-shrink-0 ml-auto"
-          >
-            <span className="material-symbols-outlined text-[18px]">add</span>
-            Add Resident
-          </button>
-          <UserAvatar />
+          <div className="ml-auto flex items-center gap-3">
+            <button
+              onClick={openAdd}
+              className="aurora-gradient text-white text-sm font-bold px-4 py-2 rounded-xl hover:opacity-90 transition-opacity flex items-center gap-2 flex-shrink-0"
+            >
+              <span className="material-symbols-outlined text-[18px]">add</span>
+              Add Resident
+            </button>
+            <UserAvatar />
+          </div>
         </header>
 
         {/* Main table */}
