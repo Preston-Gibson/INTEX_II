@@ -331,7 +331,7 @@ export default function CaseloadInventory() {
           >
             <option value="">All Safehouses</option>
             {safehouses.map(s => (
-              <option key={s.safehouseId} value={s.safehouseId}>{s.name}</option>
+              <option key={s.safehouseId} value={s.safehouseId}>{s.city}, {s.province}</option>
             ))}
           </select>
 
@@ -344,16 +344,16 @@ export default function CaseloadInventory() {
             {CASE_CATEGORY_OPTIONS.map(c => <option key={c} value={c}>{c}</option>)}
           </select>
 
-          <p className="flex-1 text-center text-sm font-bold text-on-surface">Caseload Inventory</p>
-
-          <button
-            onClick={openAdd}
-            className="aurora-gradient text-white text-sm font-bold px-4 py-2 rounded-xl hover:opacity-90 transition-opacity flex items-center gap-2 flex-shrink-0"
-          >
-            <span className="material-symbols-outlined text-[18px]">add</span>
-            Add Resident
-          </button>
-          <UserAvatar />
+          <div className="ml-auto flex items-center gap-3">
+            <button
+              onClick={openAdd}
+              className="aurora-gradient text-white text-sm font-bold px-4 py-2 rounded-xl hover:opacity-90 transition-opacity flex items-center gap-2 flex-shrink-0"
+            >
+              <span className="material-symbols-outlined text-[18px]">add</span>
+              Add Resident
+            </button>
+            <UserAvatar />
+          </div>
         </header>
 
         {/* Main table */}
@@ -418,10 +418,10 @@ export default function CaseloadInventory() {
                             <div className="flex items-center gap-3">
                               <button
                                 onClick={() => openEdit(r.residentId)}
-                                className="flex items-center gap-1 text-primary text-xs font-semibold hover:underline whitespace-nowrap"
+                                className="flex items-center gap-1 text-primary text-xs font-semibold whitespace-nowrap"
                               >
                                 <span className="material-symbols-outlined text-[15px]">edit</span>
-                                View/Edit
+                                <span className="hover:underline">View/Edit</span>
                               </button>
                               {r.caseStatus !== 'Closed' && (
                                 <button
@@ -571,7 +571,7 @@ export default function CaseloadInventory() {
                         onChange={e => patch({ safehouseId: Number(e.target.value) })}>
                         <option value={0} disabled>Select safehouse...</option>
                         {safehouses.map(s => (
-                          <option key={s.safehouseId} value={s.safehouseId}>{s.name}</option>
+                          <option key={s.safehouseId} value={s.safehouseId}>{s.city}, {s.province}</option>
                         ))}
                       </select>
                     </Field>

@@ -102,9 +102,9 @@ export default function GivingPage() {
         </div>
       </div>
 
-      <div className="grid grid-cols-5 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
         {/* Make a Gift */}
-        <div className="col-span-2 bg-surface-container-low rounded-xl p-6">
+        <div className="md:col-span-2 bg-surface-container-low rounded-xl p-6">
           <div className="flex items-center justify-between mb-5">
             <p className="font-manrope font-bold text-lg text-on-surface">Make a Gift</p>
             <span className="material-symbols-outlined text-secondary text-[22px]" style={{ fontVariationSettings: "'FILL' 1" }}>favorite</span>
@@ -176,7 +176,7 @@ export default function GivingPage() {
         </div>
 
         {/* Right column */}
-        <div className="col-span-3 space-y-4">
+        <div className="md:col-span-3 space-y-4">
           <div className="grid grid-cols-2 gap-4">
             <div className="bg-secondary-container/30 rounded-xl p-4">
               <span className="material-symbols-outlined text-secondary text-[24px] mb-2 block" style={{ fontVariationSettings: "'FILL' 1" }}>savings</span>

@@ -1,12 +1,7 @@
 import { useNavigate } from 'react-router-dom'
-import { isAuthenticated } from '../utils/auth'
 
 export default function Hero() {
   const navigate = useNavigate()
-
-  const handleDonateNow = () => {
-    navigate(isAuthenticated() ? '/donor-dashboard' : '/login')
-  }
 
   return (
     <section className="relative overflow-hidden min-h-[calc(100svh-7.25rem)] flex items-center">
@@ -27,7 +22,7 @@ export default function Hero() {
       </div>
 
       {/* Content */}
-      <div className="relative z-10 w-full max-w-7xl mx-auto px-6 grid grid-cols-2 gap-14 items-center py-12">
+      <div className="relative z-10 w-full max-w-7xl mx-auto px-6 grid grid-cols-1 lg:grid-cols-2 gap-14 items-center py-12">
         {/* Left — text */}
         <div>
           <span className="inline-flex items-center gap-2 px-4 py-1.5 bg-tertiary-fixed text-on-tertiary-fixed font-manrope text-[0.7rem] font-extrabold tracking-[0.1em] uppercase rounded-[9999px] mb-7">
@@ -47,7 +42,7 @@ export default function Hero() {
           </p>
 
           <div className="flex gap-4 flex-wrap">
-            <button onClick={handleDonateNow} className="aurora-gradient inline-flex items-center gap-2 px-8 py-3.5 text-white font-manrope font-bold text-base rounded-[0.75rem] shadow-[0_4px_16px_rgba(0,63,135,0.35)] hover:opacity-90 active:scale-[0.97] transition-all">
+            <button onClick={() => navigate('/donor-dashboard', { state: { tab: 'Giving' } })} className="aurora-gradient inline-flex items-center gap-2 px-8 py-3.5 text-white font-manrope font-bold text-base rounded-[0.75rem] shadow-[0_4px_16px_rgba(0,63,135,0.35)] hover:opacity-90 active:scale-[0.97] transition-all">
               Donate Now
               <span className="material-symbols-outlined" style={{ fontSize: '1.2rem' }}>
                 volunteer_activism
@@ -60,7 +55,7 @@ export default function Hero() {
         </div>
 
         {/* Right — image + floating quote */}
-        <div className="relative flex justify-end">
+        <div className="relative hidden lg:flex justify-end">
           <div className="relative w-[90%]">
             <img
               className="w-full aspect-[4/5] object-cover rounded-[2rem] rotate-2 shadow-[0_16px_48px_rgba(0,0,0,0.14)] block"

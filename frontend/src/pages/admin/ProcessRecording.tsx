@@ -115,8 +115,18 @@ export default function ProcessRecording() {
   const REC_PER_PAGE = 15;
   const [recordingToDelete, setRecordingToDelete] = useState<number | null>(null);
   const [deleting, setDeleting] = useState(false);
+  const [editingRecordingId, setEditingRecordingId] = useState<number | null>(null);
 
+  const [socialWorkers, setSocialWorkers] = useState<string[]>([]);
   const [residentPage, setResidentPage] = useState(1);
+
+  // Load social workers once
+  useEffect(() => {
+    fetch(`${API}/social-workers`, { headers: authHeaders() })
+      .then(r => r.json())
+      .then(setSocialWorkers)
+      .catch(() => {});
+  }, []);
 
   // Load residents
   useEffect(() => {
@@ -141,6 +151,27 @@ export default function ProcessRecording() {
     setShowForm(false);
     setExpandedId(null);
     setRecPage(1);
+    setEditingRecordingId(null);
+  }
+
+  function openEditRecording(rec: Recording) {
+    setEditingRecordingId(rec.recordingId);
+    setForm({
+      sessionDate: rec.sessionDate.slice(0, 10),
+      socialWorker: rec.socialWorker,
+      sessionType: rec.sessionType,
+      sessionDurationMinutes: rec.sessionDurationMinutes,
+      emotionalStateObserved: rec.emotionalStateObserved,
+      emotionalStateEnd: rec.emotionalStateEnd,
+      sessionNarrative: rec.sessionNarrative,
+      interventionsApplied: rec.interventionsApplied,
+      followUpActions: rec.followUpActions,
+      progressNoted: rec.progressNoted,
+      concernsFlagged: rec.concernsFlagged,
+      referralMade: rec.referralMade,
+    });
+    setShowForm(true);
+    setSubmitError(null);
   }
 
   function handleFormChange(field: string, value: string | number | boolean) {
@@ -153,17 +184,20 @@ export default function ProcessRecording() {
     setSubmitting(true);
     setSubmitError(null);
     try {
-      const res = await fetch(API, {
-        method: 'POST',
+      const isEdit = editingRecordingId !== null;
+      const url = isEdit ? `${API}/${editingRecordingId}` : API;
+      const method = isEdit ? 'PUT' : 'POST';
+      const res = await fetch(url, {
+        method,
         headers: { 'Content-Type': 'application/json', ...authHeaders() },
         body: JSON.stringify({ ...form, residentId: selected.residentId }),
       });
       if (!res.ok) throw new Error('Failed to save');
-      // Reload recordings
       const updated = await fetch(`${API}?residentId=${selected.residentId}`, { headers: authHeaders() }).then(r => r.json());
       setRecordings(updated);
       setShowForm(false);
       setForm(EMPTY_FORM);
+      setEditingRecordingId(null);
     } catch {
       setSubmitError('Failed to save recording. Please try again.');
     } finally {
@@ -199,11 +233,10 @@ export default function ProcessRecording() {
               onChange={e => setSearch(e.target.value)}
             />
           </div>
-          <p className="flex-1 text-center text-sm font-bold text-on-surface">Process Recording — Session Documentation</p>
           <div className="flex items-center gap-3 flex-1 justify-end">
             {selected && (
               <button
-                onClick={() => { setShowForm(true); setForm(EMPTY_FORM); }}
+                onClick={() => { setShowForm(true); setForm(EMPTY_FORM); setEditingRecordingId(null); }}
                 className="flex items-center gap-2 aurora-gradient text-white text-xs font-bold px-4 py-2 rounded-xl hover:opacity-90 transition-opacity"
               >
                 <span className="material-symbols-outlined text-[16px]">add</span>
@@ -341,7 +374,11 @@ export default function ProcessRecording() {
                               <p className={labelCls}>Follow-Up Actions</p>
                               <p className="text-sm text-on-surface leading-relaxed whitespace-pre-wrap">{rec.followUpActions || '—'}</p>
                             </div>
-                            <div className="flex justify-end">
+                            <div className="flex justify-end gap-4">
+                              <button onClick={() => openEditRecording(rec)} className="text-xs text-primary hover:underline flex items-center gap-1">
+                                <span className="material-symbols-outlined text-[14px]">edit</span>
+                                Edit
+                              </button>
                               <button onClick={() => setRecordingToDelete(rec.recordingId)} className="text-xs text-error hover:underline flex items-center gap-1">
                                 <span className="material-symbols-outlined text-[14px]">delete</span>
                                 Delete
@@ -402,10 +439,10 @@ export default function ProcessRecording() {
                   <div className="w-96 flex-shrink-0 flex flex-col border-l border-outline-variant/20 bg-surface-container-lowest overflow-hidden">
                     <div className="px-5 py-4 border-b border-outline-variant/20 flex items-center justify-between flex-shrink-0">
                       <div>
-                        <p className="font-manrope font-bold text-on-surface text-sm">New Recording</p>
+                        <p className="font-manrope font-bold text-on-surface text-sm">{editingRecordingId ? 'Edit Recording' : 'New Recording'}</p>
                         <p className="text-[10px] text-on-surface-variant">{selected.caseControlNo}</p>
                       </div>
-                      <button onClick={() => setShowForm(false)} className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-surface-container transition-colors">
+                      <button onClick={() => { setShowForm(false); setEditingRecordingId(null); }} className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-surface-container transition-colors">
                         <span className="material-symbols-outlined text-on-surface-variant text-[18px]">close</span>
                       </button>
                     </div>
@@ -427,8 +464,11 @@ export default function ProcessRecording() {
 
                       <div>
                         <label className={labelCls}>Social Worker</label>
-                        <input required className={inputCls} placeholder="Full name" value={form.socialWorker}
-                          onChange={e => handleFormChange('socialWorker', e.target.value)} />
+                        <select required className={inputCls} value={form.socialWorker}
+                          onChange={e => handleFormChange('socialWorker', e.target.value)}>
+                          <option value="">Select…</option>
+                          {socialWorkers.map(sw => <option key={sw} value={sw}>{sw}</option>)}
+                        </select>
                       </div>
 
                       <div>
@@ -507,13 +547,13 @@ export default function ProcessRecording() {
                       {submitError && <p className="text-xs text-error">{submitError}</p>}
 
                       <div className="flex gap-2 pt-2 pb-4">
-                        <button type="button" onClick={() => setShowForm(false)}
+                        <button type="button" onClick={() => { setShowForm(false); setEditingRecordingId(null); }}
                           className="flex-1 py-2.5 rounded-xl text-xs font-bold bg-surface-container text-on-surface-variant hover:bg-surface-container-high transition-colors">
                           Cancel
                         </button>
                         <button type="submit" disabled={submitting}
                           className="flex-1 py-2.5 rounded-xl text-xs font-bold aurora-gradient text-white hover:opacity-90 transition-opacity disabled:opacity-50">
-                          {submitting ? 'Saving…' : 'Save Recording'}
+                          {submitting ? 'Saving…' : editingRecordingId ? 'Save Changes' : 'Save Recording'}
                         </button>
                       </div>
                     </form>

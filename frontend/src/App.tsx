@@ -60,7 +60,7 @@ function Layout() {
           <Route path="/admin-user-management" element={<ProtectedRoute requiredRole="Admin"><AdminUserManagement /></ProtectedRoute>} />
         </Routes>
       </div>
-      {!isDashboard && <Footer />}
+      {!isDashboard && !isNoChrome && <Footer />}
       <CookieBanner />
     </>
   );

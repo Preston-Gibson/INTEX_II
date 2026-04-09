@@ -1,17 +1,18 @@
+import { useState } from 'react';
 import { NavLink, Link, useNavigate } from 'react-router-dom';
-import { clearToken } from '../utils/auth';
 
 const NAV_ITEMS = [
   { to: '/admin-dashboard',                      icon: 'dashboard',          label: 'Dashboard' },
-  { to: '/admin-caseload-inventory',             icon: 'folder_shared',      label: 'Caseload' },
+  { to: '/admin-caseload-inventory',             icon: 'folder_shared',      label: 'Residents' },
   { to: '/admin-donors-contributions',           icon: 'volunteer_activism', label: 'Donors' },
-  { to: '/admin-process-recording',              icon: 'history_edu',        label: 'Recordings' },
+  { to: '/admin-process-recording',              icon: 'history_edu',        label: 'Counseling' },
   { to: '/admin-home-visitation-case-conference',icon: 'home_pin',           label: 'Visits' },
-  { to: '/admin-reports-analytics',              icon: 'analytics',          label: 'Analytics' },
+  { to: '/admin-reports-analytics',             icon: 'analytics',          label: 'Analytics' },
 ];
 
 export default function AdminSidebar() {
   const navigate = useNavigate();
+  const [open, setOpen] = useState(false);
 
   return (
     <aside className="w-56 flex-shrink-0 flex flex-col bg-surface-container-lowest border-r border-outline-variant/20 py-6 px-4 relative z-10">
@@ -26,6 +27,7 @@ export default function AdminSidebar() {
             key={to}
             to={to}
             end={to === '/admin-dashboard'}
+            onClick={() => setOpen(false)}
             className={({ isActive }) =>
               `flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold transition-colors ${
                 isActive
@@ -41,25 +43,14 @@ export default function AdminSidebar() {
       </nav>
 
       <button
-        onClick={() => navigate('/admin-caseload-inventory')}
+        onClick={() => { navigate('/admin-caseload-inventory'); setOpen(false); }}
         className="w-full py-3 rounded-xl font-bold text-sm flex items-center justify-center gap-2 hover:opacity-90 transition-opacity mb-2 shadow-sm"
         style={{ backgroundColor: '#ffba38', color: '#281900' }}
       >
-        <span
-          className="material-symbols-outlined text-[18px]"
-          style={{ fontVariationSettings: "'FILL' 1" }}
-        >
+        <span className="material-symbols-outlined text-[18px]" style={{ fontVariationSettings: "'FILL' 1" }}>
           add_circle
         </span>
         New Case
-      </button>
-
-      <button
-        onClick={() => { clearToken(); navigate('/login'); }}
-        className="flex items-center justify-center gap-2 text-on-surface-variant text-xs font-semibold py-2 rounded-xl hover:bg-surface-container-low transition-colors w-full mb-1"
-      >
-        <span className="material-symbols-outlined text-[16px]">logout</span>
-        Sign out
       </button>
 
       <Link
@@ -70,5 +61,35 @@ export default function AdminSidebar() {
         Back to Home
       </Link>
     </aside>
+  );
+
+  return (
+    <>
+      {/* Desktop sidebar — always visible on lg+ */}
+      <div className="hidden lg:flex h-full">
+        {sidebarContent}
+      </div>
+
+      {/* Mobile hamburger button */}
+      <button
+        onClick={() => setOpen(true)}
+        className="lg:hidden fixed top-3 left-3 z-50 w-10 h-10 flex items-center justify-center bg-surface-container-lowest border border-outline-variant/20 rounded-xl shadow-sm"
+      >
+        <span className="material-symbols-outlined text-on-surface-variant text-[22px]">menu</span>
+      </button>
+
+      {/* Mobile drawer overlay */}
+      {open && (
+        <>
+          <div
+            className="lg:hidden fixed inset-0 z-40 bg-black/40 backdrop-blur-sm"
+            onClick={() => setOpen(false)}
+          />
+          <div className="lg:hidden fixed inset-y-0 left-0 z-50 flex">
+            {sidebarContent}
+          </div>
+        </>
+      )}
+    </>
   );
 }

@@ -62,9 +62,9 @@ export default function StoriesSection() {
 
   return (
     <section>
-      <div className="flex justify-between items-end mb-12">
+      <div className="flex flex-col md:flex-row md:justify-between md:items-end gap-6 mb-12">
         <div className="max-w-xl">
-          <h2 className="text-4xl font-extrabold text-primary mb-4 tracking-tight">
+          <h2 className="text-3xl md:text-4xl font-extrabold text-primary mb-4 tracking-tight">
             The Lives Behind the Data
           </h2>
           <p className="text-on-surface-variant leading-relaxed">

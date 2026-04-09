@@ -259,7 +259,7 @@ export default function SettingsPage() {
       </div>
 
       {/* Privacy & Security */}
-      <div className="flex items-center justify-between p-5 bg-surface-container-low rounded-xl">
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 p-5 bg-surface-container-low rounded-xl">
         <div>
           <p className="text-sm font-bold text-on-surface">Privacy &amp; Security</p>
           <p className="text-xs text-on-surface-variant">Your data is encrypted and protected by Guardian Shield Protocols.</p>
