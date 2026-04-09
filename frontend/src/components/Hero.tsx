@@ -1,12 +1,7 @@
 import { useNavigate } from 'react-router-dom'
-import { isAuthenticated } from '../utils/auth'
 
 export default function Hero() {
   const navigate = useNavigate()
-
-  const handleDonateNow = () => {
-    navigate(isAuthenticated() ? '/donor-dashboard' : '/login')
-  }
 
   return (
     <section className="relative overflow-hidden min-h-[calc(100svh-7.25rem)] flex items-center">
