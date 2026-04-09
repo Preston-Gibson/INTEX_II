@@ -114,7 +114,7 @@ public class DonorDashboardController : ControllerBase
             })
             .ToListAsync();
 
-        var lifetimeTotal = donations.Sum(d => d.Amount ?? 0);
+        var lifetimeTotal = donations.Sum(d => d.EstimatedValue);
 
         return Ok(new { lifetimeTotal, donations });
     }
@@ -181,6 +181,82 @@ public class DonorDashboardController : ControllerBase
         return Ok(new { donation.DonationId });
     }
 
+    // POST /api/donor-dashboard/my-inkind-donations
+    // Records a new in-kind donation request for the logged-in donor
+    [HttpPost("my-inkind-donations")]
+    public async Task<IActionResult> SubmitInKindDonation([FromBody] SubmitInKindDonationDto dto)
+    {
+        var email = User.FindFirst(JwtRegisteredClaimNames.Email)?.Value
+                    ?? User.FindFirst(System.Security.Claims.ClaimTypes.Email)?.Value;
+        if (string.IsNullOrEmpty(email)) return Unauthorized();
+
+        var supporter = await _db.Supporters.FirstOrDefaultAsync(s => s.Email == email);
+        if (supporter is null)
+        {
+            supporter = new Supporter
+            {
+                Email              = email,
+                FirstName          = string.Empty,
+                LastName           = string.Empty,
+                DisplayName        = email,
+                OrganizationName   = string.Empty,
+                SupporterType      = "In-Kind Donor",
+                RelationshipType   = "Individual",
+                Region             = string.Empty,
+                Country            = string.Empty,
+                Phone              = string.Empty,
+                Status             = "Active",
+                CreatedAt          = DateTime.UtcNow,
+                AcquisitionChannel = "Self-Registration",
+            };
+            await _db.Database.ExecuteSqlRawAsync(
+                "SELECT setval('supporters_supporter_id_seq', GREATEST((SELECT MAX(supporter_id) FROM supporters), nextval('supporters_supporter_id_seq') - 1))");
+            _db.Supporters.Add(supporter);
+            await _db.SaveChangesAsync();
+        }
+
+        if (dto.Items is null || dto.Items.Count == 0)
+            return BadRequest("At least one item is required.");
+
+        var donation = new Donation
+        {
+            SupporterId    = supporter.SupporterId,
+            DonationType   = "InKind",
+            DonationDate   = DateOnly.FromDateTime(DateTime.UtcNow),
+            IsRecurring    = false,
+            CampaignName   = dto.CampaignName,
+            CurrencyCode   = null,
+            Amount         = null,
+            EstimatedValue = 0,
+            ImpactUnit     = "items",
+            Notes          = dto.Notes
+        };
+
+        foreach (var item in dto.Items)
+        {
+            donation.InKindItems.Add(new InKindDonationItem
+            {
+                ItemName           = item.ItemName,
+                ItemCategory       = item.ItemCategory,
+                Quantity           = item.Quantity,
+                UnitOfMeasure      = item.UnitOfMeasure,
+                EstimatedUnitValue = 0,
+                IntendedUse        = "General",
+                ReceivedCondition  = "Pending",
+            });
+        }
+
+        await _db.Database.ExecuteSqlRawAsync(
+            "SELECT setval('donations_donation_id_seq', GREATEST((SELECT MAX(donation_id) FROM donations), nextval('donations_donation_id_seq') - 1))");
+        await _db.Database.ExecuteSqlRawAsync(
+            "SELECT setval('in_kind_donation_items_item_id_seq', GREATEST((SELECT MAX(item_id) FROM in_kind_donation_items), nextval('in_kind_donation_items_item_id_seq') - 1))");
+
+        _db.Donations.Add(donation);
+        await _db.SaveChangesAsync();
+
+        return Ok(new { donation.DonationId });
+    }
+
     // GET /api/donor-dashboard/donation-allocation
     // Returns donation allocation breakdown by program area
     [HttpGet("donation-allocation")]
@@ -216,5 +292,18 @@ public record SubmitDonationDto(
     decimal Amount,
     string? CampaignName,
     bool IsRecurring,
+    string? Notes
+);
+
+public record InKindItemDto(
+    string ItemName,
+    string ItemCategory,
+    int Quantity,
+    string UnitOfMeasure
+);
+
+public record SubmitInKindDonationDto(
+    List<InKindItemDto> Items,
+    string? CampaignName,
     string? Notes
 );

@@ -169,15 +169,43 @@ export default function GivingPage() {
     setInkindItems(prev => prev.filter(i => i.id !== id));
   };
 
-  const handleInkindSubmit = () => {
+  const handleInkindSubmit = async () => {
     if (inkindItems.length === 0) {
       setInkindMsg({ ok: false, text: 'Please add at least one item to your request.' });
       return;
     }
-    // UI only for now — simulate success
-    setInkindMsg({ ok: true, text: 'Your in-kind donation request has been submitted! Our team will be in touch.' });
-    setInkindItems([]);
-    setInkindNotes('');
+    setSubmitting(true);
+    setInkindMsg(null);
+    try {
+      const payload = {
+        items: inkindItems.map(i => ({
+          itemName: i.itemName === 'Other' ? (i.customItemName || 'Other') : i.itemName,
+          itemCategory: i.category,
+          quantity: parseInt(i.quantity),
+          unitOfMeasure: i.unit,
+        })),
+        campaignName: program,
+        notes: inkindNotes || null,
+      };
+      const res = await fetch(`${API}/my-inkind-donations`, {
+        method: 'POST',
+        headers: { ...authHeaders(), 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+      if (res.ok) {
+        setInkindMsg({ ok: true, text: 'Your donation request has been submitted! Our team will be in touch.' });
+        setInkindItems([]);
+        setInkindNotes('');
+        loadDonations();
+      } else {
+        const msg = await res.text().catch(() => 'Submission failed.');
+        setInkindMsg({ ok: false, text: msg });
+      }
+    } catch {
+      setInkindMsg({ ok: false, text: 'Network error. Please try again.' });
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   const formatDate = (d: string | null) => {
@@ -471,10 +499,11 @@ export default function GivingPage() {
 
               <button
                 onClick={handleInkindSubmit}
-                className="w-full aurora-gradient text-white font-bold py-3.5 rounded-xl text-sm hover:opacity-90 transition-opacity flex items-center justify-center gap-2"
+                disabled={submitting}
+                className="w-full aurora-gradient text-white font-bold py-3.5 rounded-xl text-sm hover:opacity-90 transition-opacity flex items-center justify-center gap-2 disabled:opacity-60"
               >
-                Submit Donation Request
-                <span className="material-symbols-outlined text-[18px]">send</span>
+                {submitting ? 'Submitting…' : 'Submit Donation Request'}
+                {!submitting && <span className="material-symbols-outlined text-[18px]">send</span>}
               </button>
             </>
           )}
@@ -532,14 +561,18 @@ export default function GivingPage() {
                     <tr key={d.donationId}>
                       <td className="py-2.5 text-on-surface-variant">{formatDate(d.donationDate)}</td>
                       <td className="py-2.5 font-bold text-on-surface">
-                        {d.amount != null ? `$${d.amount.toFixed(2)}` : `~$${d.estimatedValue.toFixed(2)}`}
+                        {d.donationType === 'InKind'
+                          ? 'In-Kind'
+                          : d.amount != null ? `$${d.amount.toFixed(2)}` : `~$${d.estimatedValue.toFixed(2)}`}
                       </td>
                       <td className="py-2.5 text-on-surface-variant">{d.campaignName ?? '—'}</td>
                       <td className="py-2.5">
                         <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
-                          d.isRecurring ? 'bg-secondary/10 text-secondary' : 'bg-surface-container-high text-on-surface-variant'
+                          d.donationType === 'InKind'
+                            ? 'bg-tertiary/10 text-tertiary'
+                            : d.isRecurring ? 'bg-secondary/10 text-secondary' : 'bg-surface-container-high text-on-surface-variant'
                         }`}>
-                          {d.isRecurring ? 'Monthly' : 'One-time'}
+                          {d.donationType === 'InKind' ? 'In-Kind' : d.isRecurring ? 'Monthly' : 'One-time'}
                         </span>
                       </td>
                     </tr>
