@@ -193,14 +193,7 @@ export default function HomeVisitationCaseConference() {
       <div className="flex-1 flex flex-col overflow-hidden">
         {/* Top header */}
         <header className="flex items-center justify-between px-6 py-3 bg-surface-container-lowest border-b border-outline-variant/20 flex-shrink-0 h-16">
-          <div className="flex items-center gap-2 bg-surface-container-low rounded-xl px-3 py-2 w-64">
-            <span className="material-symbols-outlined text-on-surface-variant text-[18px]">search</span>
-            <input
-              className="bg-transparent text-sm text-on-surface placeholder:text-on-surface-variant outline-none w-full"
-              placeholder="Search visits..."
-            />
-          </div>
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-3 ml-auto">
             <UserAvatar />
           </div>
         </header>

@@ -129,14 +129,6 @@ export default function AdminCommandCenter() {
 
         {/* Slim top bar – search + page label + user (mirrors donor dashboard) */}
         <header className="flex items-center gap-4 px-6 py-3 bg-surface-container-lowest border-b border-outline-variant/20 flex-shrink-0">
-          <div className="flex items-center gap-2 bg-surface-container-low rounded-xl px-3 py-2 flex-1 max-w-xs">
-            <span className="material-symbols-outlined text-on-surface-variant text-[18px]">search</span>
-            <input
-              className="bg-transparent text-sm text-on-surface placeholder:text-on-surface-variant outline-none w-full"
-              placeholder="Search cases, visits…"
-            />
-          </div>
-
           <div className="flex items-center gap-3 ml-auto">
             <UserAvatar />
           </div>

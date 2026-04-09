@@ -383,7 +383,6 @@ export default function ReportsAnalytics() {
         </>
       )}
     </div>
-        </div>
       </div>
       </div>
     </div>
