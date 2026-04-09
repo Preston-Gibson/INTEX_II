@@ -20,6 +20,18 @@ export function isAuthenticated(): boolean {
   return !!getToken();
 }
 
+export function getUser(): { email: string; firstName?: string; lastName?: string } | null {
+  const token = getToken();
+  if (!token) return null;
+  try {
+    const payload = JSON.parse(atob(token.split('.')[1]));
+    const email = payload['email'] ?? payload['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress'] ?? '';
+    const firstName = payload['given_name'] ?? undefined;
+    const lastName = payload['family_name'] ?? undefined;
+    return { email, firstName, lastName };
+  } catch { return null; }
+}
+
 export function getRole(): string | null {
   const token = getToken();
   if (!token) return null;

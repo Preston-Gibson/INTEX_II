@@ -140,9 +140,6 @@ export default function AdminCommandCenter() {
           <p className="flex-1 text-center text-sm font-bold text-on-surface">Admin Dashboard — Operational Oversight</p>
 
           <div className="flex items-center gap-3">
-            <button className="relative" aria-label="Notifications">
-              <span className="material-symbols-outlined text-on-surface-variant text-[22px]">notifications</span>
-            </button>
             <button aria-label="Help">
               <span className="material-symbols-outlined text-on-surface-variant text-[22px]">help</span>
             </button>
