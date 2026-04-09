@@ -23,48 +23,98 @@ interface Donation {
   notes: string | null;
 }
 
+const PayPalLogo = () => (
+  <svg viewBox="0 0 24 24" className="w-6 h-5" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M19.5 6.5c.3 1.9-.6 3.9-2.3 5-1.4.9-3.1 1-4.7 1H11l-.8 5H7.5L9.5 4h5c1.8 0 3.8.4 5 2.5z" fill="#009cde"/>
+    <path d="M8.5 13.5l.5-3h1.5c1.6 0 3.3-.1 4.7-1 1.7-1.1 2.6-3.1 2.3-5C16.3 2.4 14.3 2 12.5 2h-5L5 18h3l.5-4.5z" fill="#003087"/>
+    <path d="M10 9.5l-.5 4h1.5c1.6 0 3.3-.1 4.7-1 1.7-1.1 2.6-3.1 2.3-5-.2-.9-.7-1.6-1.5-2.1C15.8 7.1 14.2 9.5 10 9.5z" fill="#012169"/>
+  </svg>
+);
+
+const ApplePayLogo = () => (
+  <svg viewBox="0 0 52 20" className="w-12 h-5" xmlns="http://www.w3.org/2000/svg">
+    <path d="M9.2 4.1c.5-.6.8-1.4.7-2.2-.7.1-1.6.5-2.1 1.1-.5.5-.9 1.3-.8 2.1.8.1 1.6-.4 2.2-1z" fill="currentColor"/>
+    <path d="M9.9 5.3c-1.2-.1-2.3.7-2.8.7-.6 0-1.5-.6-2.5-.6-1.3 0-2.4.7-3.1 1.9C.1 9.7 1.1 13.3 2.5 15.2c.7 1 1.5 2.1 2.6 2 1-.1 1.4-.6 2.6-.6 1.2 0 1.5.6 2.6.6 1.1 0 1.8-1 2.5-2 .8-1.1 1.1-2.2 1.1-2.3-.1 0-2.1-.8-2.1-3.1 0-1.9 1.6-2.8 1.6-2.9C12.8 5.7 9.9 5.3 9.9 5.3z" fill="currentColor"/>
+    <text x="15" y="15" fontFamily="-apple-system, BlinkMacSystemFont, 'Helvetica Neue', sans-serif" fontSize="13" fontWeight="500" fill="currentColor">Pay</text>
+  </svg>
+);
+
+const PAYMENT_METHODS = [
+  {
+    id: 'ach',
+    label: 'Bank Account (ACH)',
+    logo: <span className="material-symbols-outlined text-on-surface-variant text-[20px]">account_balance</span>,
+  },
+  {
+    id: 'paypal',
+    label: 'PayPal',
+    logo: <PayPalLogo />,
+  },
+  {
+    id: 'applepay',
+    label: 'Apple Pay',
+    logo: <ApplePayLogo />,
+  },
+];
+
 export default function GivingPage() {
+  const [isRecurring, setIsRecurring] = useState(false);
   const [selectedAmount, setSelectedAmount] = useState<number | null>(50);
   const [customAmount, setCustomAmount] = useState('');
   const [program, setProgram] = useState(PROGRAMS[0]);
-  const [isRecurring, setIsRecurring] = useState(false);
+  const [paymentMethod, setPaymentMethod] = useState('ach');
+  const [showConfirm, setShowConfirm] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [submitMsg, setSubmitMsg] = useState<{ ok: boolean; text: string } | null>(null);
 
   const [donations, setDonations] = useState<Donation[]>([]);
   const [lifetimeTotal, setLifetimeTotal] = useState<number>(0);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState<string | null>(null);
 
   const loadDonations = useCallback(() => {
     setLoading(true);
+    setLoadError(null);
     fetch(`${API}/my-donations`, { headers: authHeaders() })
-      .then(r => r.json())
+      .then(async r => {
+        if (!r.ok) {
+          const text = await r.text().catch(() => r.statusText);
+          throw new Error(`${r.status}: ${text}`);
+        }
+        return r.json();
+      })
       .then(data => {
         setDonations(data.donations ?? []);
         setLifetimeTotal(data.lifetimeTotal ?? 0);
       })
-      .catch(() => {})
+      .catch(err => setLoadError(err.message ?? 'Failed to load donations'))
       .finally(() => setLoading(false));
   }, []);
 
   useEffect(() => { loadDonations(); }, [loadDonations]);
 
-  const handleSubmit = async () => {
-    const amount = selectedAmount ?? parseFloat(customAmount);
-    if (!amount || amount <= 0) {
+  const baseAmount = selectedAmount ?? (parseFloat(customAmount) || 0);
+
+  const confirmAndSubmit = () => {
+    if (!baseAmount || baseAmount <= 0) {
       setSubmitMsg({ ok: false, text: 'Please enter a valid amount.' });
       return;
     }
+    setShowConfirm(true);
+  };
+
+  const handleSubmit = async () => {
+    setShowConfirm(false);
     setSubmitting(true);
     setSubmitMsg(null);
     try {
       const res = await fetch(`${API}/my-donations`, {
         method: 'POST',
         headers: { ...authHeaders(), 'Content-Type': 'application/json' },
-        body: JSON.stringify({ amount, campaignName: program, isRecurring, notes: null }),
+        body: JSON.stringify({ amount: baseAmount, campaignName: program, isRecurring, notes: null }),
       });
       if (res.ok) {
-        setSubmitMsg({ ok: true, text: `Thank you! Your $${amount.toFixed(2)} gift has been recorded.` });
+        setSubmitMsg({ ok: true, text: `Thank you! Your $${baseAmount.toFixed(2)} gift has been recorded.` });
         setSelectedAmount(50);
         setCustomAmount('');
         loadDonations();
@@ -83,6 +133,8 @@ export default function GivingPage() {
     if (!d) return '—';
     return new Date(d).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
   };
+
+  const selectedMethodLabel = PAYMENT_METHODS.find(m => m.id === paymentMethod)?.label ?? '';
 
   return (
     <div className="space-y-6">
@@ -110,6 +162,31 @@ export default function GivingPage() {
             <span className="material-symbols-outlined text-secondary text-[22px]" style={{ fontVariationSettings: "'FILL' 1" }}>favorite</span>
           </div>
 
+          {/* One-time / Monthly toggle */}
+          <div className="flex items-center bg-primary/10 rounded-full p-1 mb-4">
+            <button
+              onClick={() => setIsRecurring(false)}
+              className={`flex-1 py-2 rounded-full text-sm font-bold transition-all ${
+                !isRecurring ? 'bg-primary text-white shadow-sm' : 'text-on-surface-variant hover:text-on-surface'
+              }`}
+            >
+              One-time
+            </button>
+            <button
+              onClick={() => setIsRecurring(true)}
+              className={`flex-1 py-2 rounded-full text-sm font-bold transition-all ${
+                isRecurring ? 'bg-primary text-white shadow-sm' : 'text-on-surface-variant hover:text-on-surface'
+              }`}
+            >
+              Monthly
+            </button>
+          </div>
+
+          <p className="text-center text-sm text-on-surface mb-4">
+            Choose a <strong>{isRecurring ? 'monthly' : 'one-time'}</strong> amount
+          </p>
+
+          {/* Preset amounts */}
           <div className="flex gap-2 mb-4">
             {[25, 50, 100].map((amt) => (
               <button
@@ -117,7 +194,7 @@ export default function GivingPage() {
                 onClick={() => { setSelectedAmount(amt); setCustomAmount(''); }}
                 className={`flex-1 py-2.5 rounded-xl text-sm font-bold border-2 transition-colors ${
                   selectedAmount === amt
-                    ? 'border-primary text-primary bg-primary/5'
+                    ? 'border-primary text-white bg-primary'
                     : 'border-outline-variant/30 text-on-surface hover:border-primary/40'
                 }`}
               >
@@ -126,17 +203,19 @@ export default function GivingPage() {
             ))}
           </div>
 
+          {/* Custom amount */}
           <div className="flex items-center gap-2 border border-outline-variant/30 rounded-xl px-3 py-2.5 mb-4 focus-within:border-primary/50">
             <span className="material-symbols-outlined text-on-surface-variant text-[16px]">attach_money</span>
             <input
               type="number"
-              placeholder="Custom Amount"
+              placeholder="Other amount"
               value={customAmount}
               onChange={(e) => { setCustomAmount(e.target.value); setSelectedAmount(null); }}
               className="bg-transparent text-sm text-on-surface placeholder:text-on-surface-variant outline-none w-full"
             />
           </div>
 
+          {/* Program */}
           <p className="text-[10px] font-bold text-on-surface-variant uppercase tracking-widest mb-2">Designate Your Impact</p>
           <div className="relative mb-4">
             <select
@@ -149,15 +228,29 @@ export default function GivingPage() {
             <span className="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-on-surface-variant text-[18px] pointer-events-none">expand_more</span>
           </div>
 
-          <label className="flex items-center gap-2 mb-6 cursor-pointer">
-            <input
-              type="checkbox"
-              checked={isRecurring}
-              onChange={e => setIsRecurring(e.target.checked)}
-              className="w-4 h-4 accent-primary"
-            />
-            <span className="text-xs text-on-surface-variant font-medium">Make this a monthly recurring gift</span>
-          </label>
+          {/* Payment method */}
+          <p className="text-[10px] font-bold text-on-surface-variant uppercase tracking-widest mb-2">Payment Method</p>
+          <div className="border border-outline-variant/30 rounded-xl overflow-hidden mb-5">
+            {PAYMENT_METHODS.map((method, i) => (
+              <button
+                key={method.id}
+                onClick={() => setPaymentMethod(method.id)}
+                className={`w-full flex items-center gap-3 px-4 py-3 text-sm text-left transition-colors ${
+                  i > 0 ? 'border-t border-outline-variant/20' : ''
+                } ${paymentMethod === method.id ? 'bg-primary/5' : 'hover:bg-surface-container-high/50'}`}
+              >
+                <span className={`w-4 h-4 rounded-full border-2 flex items-center justify-center flex-shrink-0 ${
+                  paymentMethod === method.id ? 'border-primary' : 'border-outline-variant'
+                }`}>
+                  {paymentMethod === method.id && <span className="w-2 h-2 rounded-full bg-primary block" />}
+                </span>
+                <span className="w-8 h-6 flex items-center justify-center flex-shrink-0">
+                  {method.logo}
+                </span>
+                <span className="font-medium text-on-surface">{method.label}</span>
+              </button>
+            ))}
+          </div>
 
           {submitMsg && (
             <div className={`text-xs font-semibold px-3 py-2 rounded-lg mb-4 ${submitMsg.ok ? 'bg-secondary/10 text-secondary' : 'bg-error/10 text-error'}`}>
@@ -166,11 +259,11 @@ export default function GivingPage() {
           )}
 
           <button
-            onClick={handleSubmit}
+            onClick={confirmAndSubmit}
             disabled={submitting}
             className="w-full aurora-gradient text-white font-bold py-3.5 rounded-xl text-sm hover:opacity-90 transition-opacity flex items-center justify-center gap-2 disabled:opacity-60"
           >
-            {submitting ? 'Processing…' : 'Proceed to Secure Gift'}
+            {submitting ? 'Processing…' : 'Make Donation'}
             {!submitting && <span className="material-symbols-outlined text-[18px]">arrow_forward</span>}
           </button>
         </div>
@@ -208,6 +301,8 @@ export default function GivingPage() {
             </div>
             {loading ? (
               <p className="text-xs text-on-surface-variant py-4 text-center">Loading…</p>
+            ) : loadError ? (
+              <p className="text-xs text-error py-4 text-center font-semibold">{loadError}</p>
             ) : donations.length === 0 ? (
               <p className="text-xs text-on-surface-variant py-4 text-center">No donations recorded yet.</p>
             ) : (
@@ -263,6 +358,38 @@ export default function GivingPage() {
           </div>
         </div>
       </div>
+
+      {/* Confirmation modal */}
+      {showConfirm && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
+          <div className="bg-surface rounded-2xl shadow-xl p-8 max-w-sm w-full mx-4">
+            <div className="flex items-center justify-center w-12 h-12 rounded-full bg-primary/10 mx-auto mb-4">
+              <span className="material-symbols-outlined text-primary text-[24px]" style={{ fontVariationSettings: "'FILL' 1" }}>volunteer_activism</span>
+            </div>
+            <h3 className="font-manrope text-lg font-extrabold text-on-surface text-center mb-1">Confirm Your Donation</h3>
+            <p className="text-sm text-on-surface-variant text-center mb-5">
+              You're about to make a{' '}
+              <strong className="text-on-surface">{isRecurring ? 'monthly' : 'one-time'}</strong> gift of{' '}
+              <strong className="text-primary">${baseAmount.toFixed(2)}</strong> to{' '}
+              <strong className="text-on-surface">{program}</strong> via {selectedMethodLabel}.
+            </p>
+            <div className="flex gap-3">
+              <button
+                onClick={() => setShowConfirm(false)}
+                className="flex-1 py-3 rounded-xl border-2 border-outline-variant/40 text-sm font-bold text-on-surface-variant hover:border-outline-variant transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleSubmit}
+                className="flex-1 py-3 rounded-xl aurora-gradient text-white text-sm font-bold hover:opacity-90 transition-opacity"
+              >
+                Confirm
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
