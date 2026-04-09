@@ -768,10 +768,10 @@ export default function DonorsContributions() {
                   <p className="text-[10px] font-bold text-on-surface-variant uppercase tracking-widest mb-3 border-b border-outline-variant/20 pb-1">Contact & Location</p>
                   <div className="grid grid-cols-2 gap-4">
                     <Field label="Email">
-                      <input className={inputCls} type="email" value={suppForm.email} onChange={e => patchSupp({ email: e.target.value })} />
+                      <input className={`${inputCls} ${suppModalMode === 'edit' ? 'opacity-60 cursor-not-allowed' : ''}`} type="email" value={suppForm.email} onChange={e => patchSupp({ email: e.target.value })} readOnly={suppModalMode === 'edit'} />
                     </Field>
                     <Field label="Phone">
-                      <input className={inputCls} value={suppForm.phone} onChange={e => patchSupp({ phone: e.target.value })} />
+                      <input className={`${inputCls} ${suppModalMode === 'edit' ? 'opacity-60 cursor-not-allowed' : ''}`} value={suppForm.phone} onChange={e => patchSupp({ phone: e.target.value })} readOnly={suppModalMode === 'edit'} />
                     </Field>
                     <Field label="Region">
                       <input className={inputCls} value={suppForm.region} onChange={e => patchSupp({ region: e.target.value })} />
