@@ -142,7 +142,7 @@ export default function ImpactPage() {
       {/* Personal Impact Summary */}
       <div className="aurora-gradient rounded-xl p-6 text-white">
         <p className="text-[10px] font-bold text-white/60 uppercase tracking-widest mb-1">Your Personal Impact</p>
-        <h3 className="font-manrope text-xl font-extrabold mb-4">
+        <h3 className="font-manrope text-xl font-extrabold mb-4 text-white">
           {user?.firstName ? `${user.firstName}, here's the difference you've made.` : "Here's the difference you've made."}
         </h3>
         <div className="grid grid-cols-3 gap-4">
@@ -283,7 +283,7 @@ export default function ImpactPage() {
 
       {/* CTA */}
       <div className="aurora-gradient rounded-2xl p-8 text-center text-white">
-        <h3 className="font-manrope text-2xl font-extrabold mb-2">
+        <h3 className="font-manrope text-2xl font-extrabold mb-2 text-white">
           The next chapter starts with{' '}
           <span className="text-secondary-fixed">your support.</span>
         </h3>
