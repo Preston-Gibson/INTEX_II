@@ -20,29 +20,6 @@ export function isAuthenticated(): boolean {
   return !!getToken();
 }
 
-export function getUser(): { email: string; firstName?: string; lastName?: string } | null {
-  const token = getToken();
-  if (!token) return null;
-  try {
-    const payload = JSON.parse(atob(token.split('.')[1]));
-    const email = payload['email'] ?? payload['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress'] ?? '';
-    const firstName = payload['given_name'] ?? undefined;
-    const lastName = payload['family_name'] ?? undefined;
-    return { email, firstName, lastName };
-  } catch { return null; }
-}
-
-export function getRole(): string | null {
-  const token = getToken();
-  if (!token) return null;
-  try {
-    const payload = JSON.parse(atob(token.split('.')[1]));
-    return payload['http://schemas.microsoft.com/ws/2008/06/identity/claims/role'] ?? null;
-  } catch {
-    return null;
-  }
-}
-
 export interface UserInfo {
   id: string;
   email: string;
@@ -58,9 +35,9 @@ export function getUser(): UserInfo | null {
   if (!token) return null;
   try {
     const payload = JSON.parse(atob(token.split('.')[1]));
-    const firstName: string = payload['firstName'] ?? '';
-    const lastName: string  = payload['lastName']  ?? '';
-    const email: string     = payload['email']     ?? payload['sub'] ?? '';
+    const firstName: string = payload['given_name'] ?? payload['firstName'] ?? '';
+    const lastName: string  = payload['family_name'] ?? payload['lastName'] ?? '';
+    const email: string     = payload['email'] ?? payload['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress'] ?? payload['sub'] ?? '';
     const role: string | null =
       payload['http://schemas.microsoft.com/ws/2008/06/identity/claims/role'] ?? null;
     const nameParts = [firstName, lastName].filter(Boolean);
@@ -69,6 +46,17 @@ export function getUser(): UserInfo | null {
       ? nameParts.map(p => p.charAt(0)).join('').toUpperCase()
       : fullName.charAt(0).toUpperCase();
     return { id: payload['sub'] ?? '', email, firstName, lastName, role, initials, fullName };
+  } catch {
+    return null;
+  }
+}
+
+export function getRole(): string | null {
+  const token = getToken();
+  if (!token) return null;
+  try {
+    const payload = JSON.parse(atob(token.split('.')[1]));
+    return payload['http://schemas.microsoft.com/ws/2008/06/identity/claims/role'] ?? null;
   } catch {
     return null;
   }
