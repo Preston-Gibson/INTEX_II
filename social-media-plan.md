@@ -1,18 +1,51 @@
-# Social Media Post Composer — Implementation Plan
+# Social Media Post Composer — Implementation Plan (Updated)
 
 ## Context
 
-Lighthouse Sanctuary needs a social media tool inside the existing admin dashboard. The founders post sporadically and lack marketing experience. This tool lets admins compose one post, auto-adapt it per platform, upload media, and publish or schedule it to Instagram, Facebook, Twitter/X, and LinkedIn — all from one UI. A post analytics view shows what is working.
+Lighthouse Sanctuary's founders post sporadically and lack marketing experience. This feature adds an admin-only social media post composer to the existing dashboard. The key differentiator: the org already has **812 historical posts** and **two trained ML models** that predict engagement tier and donation conversion probability. The composer will surface these data-driven insights in real time as the admin composes a post — telling them *before* they publish how likely the post is to drive donations, and what to change to improve it.
 
-**Key existing asset:** `SocialMediaPost` table (44 fields) already exists with historical engagement data. No DB schema changes needed.
+---
+
+## What Already Exists (Do Not Rebuild)
+
+| Asset | Location | Status |
+|---|---|---|
+| `SocialMediaPost` model (44 fields) | `backend/.../Models/SocialMediaPost.cs` | Complete |
+| `DbSet<SocialMediaPost>` | `backend/.../Data/IntexIIContext.cs` | Registered |
+| 812 historical posts | `pipeline/data/social_media_posts.csv` | Seeded |
+| Engagement tier ML model | `pipeline/artifacts/*.sav` | Trained (63.5% acc) |
+| Donation conversion ML model | `pipeline/artifacts/*.sav` | Trained (78.8% acc) |
+| ETL + train + inference scripts | `pipeline/jobs/` | Complete |
+| `Donation.ReferralPostId` FK | `backend/.../Models/Donation.cs` | Registered |
+| SOCIAL_MEDIA.md controller template | `pipeline/SOCIAL_MEDIA.md` | Reference |
 
 ---
 
 ## Tech Stack
 - **Frontend:** React 19 + TypeScript, Vite, Tailwind CSS
 - **Backend:** ASP.NET Core 10, Entity Framework Core 9, PostgreSQL (Supabase)
+- **ML Layer:** Python (scikit-learn), predictions stored in `social_media_predictions` table
 - **Auth:** JWT Bearer + ASP.NET Identity (admin role gate)
 - **Hosting:** Azure (backend), Vercel (frontend)
+
+---
+
+## ML Pipeline Insights (Key Findings from 812 Posts)
+
+These facts drive the recommendations shown in the composer UI:
+
+| Factor | Insight |
+|---|---|
+| **#1 signal** | Posts featuring a resident story: **96.6%** donation probability vs 57.1% without |
+| **Best post type** | ImpactStory → 92.7% donation prob; FundraisingAppeal → 77.2% |
+| **Best platform** | YouTube (74.5%) → TikTok (72.8%) → Instagram (67.5%) |
+| **Best media** | Reel/Video (75%) vs Text-only (58.7%) |
+| **Best time** | 1pm strongest (83.8%); 5–8pm window (76–77%); avoid Thursday |
+| **Best tone** | Emotional or Celebratory |
+| **Optimal hashtags** | 5 hashtags (not more, not fewer) |
+| **Underused opportunity** | Only 20% of posts currently use resident stories — biggest gap |
+
+**Perfect post formula:** ImpactStory + resident story + Reel/Video + YouTube or Instagram + Emotional tone + DonateNow CTA + 1pm Saturday–Monday + 5 hashtags + boosted.
 
 ---
 
@@ -20,102 +53,163 @@ Lighthouse Sanctuary needs a social media tool inside the existing admin dashboa
 
 | Platform | Path | Timeline | Priority |
 |---|---|---|---|
-| Instagram + Facebook | One Meta Developer App → `instagram_content_publish` + `pages_manage_posts` | 1–4 weeks (nonprofit-friendly) | 1 |
+| Instagram + Facebook | One Meta Developer App → `instagram_content_publish` + `pages_manage_posts` | 1–4 weeks | 1 |
 | Twitter/X | Twitter Developer account, free tier (1,500 posts/month) | Days | 2 |
-| LinkedIn | LinkedIn Partner Program (slow, uncertain for small orgs) | Weeks–months | 3 |
+| LinkedIn | LinkedIn Partner Program | Weeks–months | 3 |
 
-**Fallback built-in:** Every platform tab has a "Copy caption" button. If API approval is pending, the org pastes manually — no value lost.
+**Fallback:** Every platform tab has "Copy caption" — works immediately with zero API dependency.
 
 ---
 
-## Phase 1 — Core UI + Database (no API approval needed)
+## Phase 1 — ML Pipeline Integration (backend plumbing)
 
-### 1.1 Backend: New Controller + Service
+### 1.1 Add `SocialMediaPrediction` Model
 
-**File:** `backend/Controllers/SocialMediaController.cs`
+**File:** `backend/.../Models/SocialMediaPrediction.cs` (create)
 
 ```csharp
-[ApiController]
-[Route("api/social-media")]
-[Authorize(Roles = "Admin")]
-public class SocialMediaController : ControllerBase
+public class SocialMediaPrediction
 {
-    // POST /api/social-media/draft       — save a draft post
-    // POST /api/social-media/schedule    — save with scheduled_at timestamp
-    // GET  /api/social-media/posts       — paginated post history
-    // GET  /api/social-media/posts/{id}  — single post detail + metrics
-    // POST /api/social-media/upload-media — upload image/video, return temp URL
+    public int PostId { get; set; }
+    public string PredictedEngagementTier { get; set; } = string.Empty; // Low/Medium/High
+    public double ProbEngagementLow { get; set; }
+    public double ProbEngagementMedium { get; set; }
+    public double ProbEngagementHigh { get; set; }
+    public int PredictedHasDonations { get; set; }       // 0 or 1
+    public double ProbHasDonations { get; set; }          // 0.0–1.0
+    public DateTime PredictionTs { get; set; }
+    public SocialMediaPost Post { get; set; } = null!;
 }
 ```
 
-**File:** `backend/Services/SocialMediaAdapterService.cs`
+**Modify:** `IntexIIContext.cs` — add `DbSet<SocialMediaPrediction>` with composite key config.
 
-Rule-based caption adaptation (no AI):
-- **Instagram:** full caption + `\n\n` + hashtag block
-- **Facebook:** full caption, optional hashtags appended
-- **Twitter/X:** truncate to 257 chars + `…` + 2–3 key hashtags (≤280 total)
-- **LinkedIn:** strip inline hashtags, append max 3 at end
+**Run migration** to create `social_media_predictions` table.
 
-### 1.2 Frontend: Composer Page
+### 1.2 Run ML Inference to Populate Predictions
 
-**File:** `frontend/src/pages/admin/SocialMediaComposer.tsx`
+```bash
+cd pipeline
+python jobs/etl.py              # Build features from raw posts
+python jobs/train_social.py     # Train both models (already done, re-run to refresh)
+python jobs/inference_social.py # Write predictions into social_media_predictions table
+```
 
-Layout:
+This populates `social_media_predictions` with donation conversion probability for all 812 existing posts.
+
+### 1.3 `SocialMediaController` — Analytics Endpoints
+
+**File:** `backend/.../Controllers/SocialMediaController.cs` (create, use SOCIAL_MEDIA.md as template)
 
 ```
-┌─────────────────────────────────────────────────────┐
-│  COMPOSE                                            │
-│  ┌──────────────────────────────────────────────┐  │
-│  │  Caption textarea (char counter)             │  │
-│  └──────────────────────────────────────────────┘  │
-│  [📎 Upload Image/Video]                            │
-│                                                     │
-│  Post to:  [✓] Instagram  [✓] Facebook             │
-│            [✓] Twitter/X  [ ] LinkedIn              │
-│                                                     │
-│  ┌──── Preview Tabs ──────────────────────────────┐ │
-│  │ Instagram | Facebook | Twitter/X | LinkedIn   │ │
-│  │ ─────────────────────────────────────────── │ │
-│  │  [Adapted caption shown here — editable]    │ │
-│  │                            [Copy Caption]   │ │
-│  └─────────────────────────────────────────────┘ │
-│                                                     │
-│  [ Post Now ]   [ Schedule ▼ date/time picker ]    │
-└─────────────────────────────────────────────────────┘
+GET  /api/social-media/posts          — all posts + predictions (sorted by donation prob)
+GET  /api/social-media/posts/{id}     — single post + prediction detail
+GET  /api/social-media/insights       — aggregate: best platform, best hour, best topic
+POST /api/social-media/score-draft    — score a draft post on-the-fly (key new endpoint)
+POST /api/social-media/draft          — save a draft post to DB
+POST /api/social-media/schedule       — save with scheduled_at timestamp
+POST /api/social-media/upload-media   — upload image/video, return temp URL
+```
+
+### `POST /api/social-media/score-draft` — Real-Time Scoring
+
+This is the key endpoint that makes the composer intelligent. Request body:
+
+```json
+{
+  "postType": "ImpactStory",
+  "platform": "Instagram",
+  "mediaType": "Reel",
+  "sentimentTone": "Emotional",
+  "hasCallToAction": true,
+  "callToActionType": "DonateNow",
+  "featuresResidentStory": true,
+  "numHashtags": 5,
+  "captionLength": 220,
+  "postHour": 13,
+  "dayOfWeek": "Saturday"
+}
+```
+
+Response:
+
+```json
+{
+  "donationProbability": 0.91,
+  "engagementTier": "High",
+  "probEngagementHigh": 0.78,
+  "suggestions": [
+    "Add a resident story to increase donation probability by ~40%",
+    "Switch from Thursday to Saturday for +15% donation probability",
+    "Trim to 5 hashtags (currently 12) for optimal engagement"
+  ]
+}
+```
+
+**Implementation:** The backend calls the Python inference script via a pre-computed lookup table (rules derived from the model) — no live Python call needed. The "suggestions" are rule-based comparisons against the ML findings above.
+
+---
+
+## Phase 2 — Composer UI
+
+### 2.1 Composer Page
+
+**File:** `frontend/src/pages/admin/SocialMediaComposer.tsx` (create)
+
+Layout — three-panel:
+
+```
+┌────────────────────┬──────────────────────┬──────────────────────┐
+│   COMPOSE          │   PLATFORM PREVIEW   │   INSIGHTS           │
+│                    │                      │                      │
+│ Post Type ▼        │ [Instagram] [FB] ... │ Donation Score       │
+│ ImpactStory        │ ─────────────────── │ ████████░░  91%      │
+│                    │ Caption text here    │                      │
+│ Caption:           │ (editable)           │ Engagement: HIGH     │
+│ ┌──────────────┐  │                      │                      │
+│ │              │  │ [Copy Caption]       │ Suggestions:         │
+│ │  textarea    │  │                      │ ✓ Has resident story │
+│ │  (char cntr) │  │                      │ ✓ DonateNow CTA      │
+│ └──────────────┘  │                      │ ⚠ Post at 1pm not   │
+│                    │                      │   7pm for +8%        │
+│ [Upload Media]     │                      │                      │
+│                    │                      │ Best time: Sat 1pm   │
+│ Features           │                      │ Best platform: IG    │
+│ resident story ☑  │                      │ Top format: Reel     │
+│                    │                      │                      │
+│ Platforms:         │                      │                      │
+│ [✓]IG [✓]FB        │                      │                      │
+│ [✓]TW [ ]LI        │                      │                      │
+│                    │                      │                      │
+│ Hashtags:          │                      │                      │
+│ [tag input]  (5✓) │                      │                      │
+│                    │                      │                      │
+│ Schedule:          │                      │                      │
+│ [Now] [Later ▼]   │                      │                      │
+│                    │                      │                      │
+│ [Post Now]         │                      │                      │
+└────────────────────┴──────────────────────┴──────────────────────┘
 ```
 
 Key behaviors:
-- Caption changes auto-update all platform preview tabs
-- Each tab is independently editable (overrides the auto-adaptation)
-- "Copy Caption" always available — works before any API is connected
-- "Post Now" calls `POST /api/social-media/publish` (Phase 2) or saves draft
-- "Schedule" opens inline date/time picker, calls `POST /api/social-media/schedule`
+- Every change to post type, platform, media type, tone, hashtag count, resident story toggle, or scheduled hour triggers a debounced call to `POST /api/social-media/score-draft`
+- Donation probability gauge updates live (color: red < 50%, yellow 50–75%, green > 75%)
+- Suggestions list shows 1–3 actionable tips derived from the ML findings
+- Caption auto-adapts per platform (Twitter truncates to 280, LinkedIn strips hashtags)
+- Each platform preview tab is independently editable
+- "Copy Caption" available on every tab — no API dependency
 
-### 1.3 Frontend: Analytics Page
+### 2.2 Analytics Page
 
-**File:** `frontend/src/pages/admin/SocialMediaAnalytics.tsx`
+**File:** `frontend/src/pages/admin/SocialMediaAnalytics.tsx` (create)
 
-```
-┌─────────────────────────────────────────────────────┐
-│  POST HISTORY                  [Filter by platform] │
-│  ┌───────────────────────────────────────────────┐  │
-│  │ Date | Platform | Caption preview | Status   │  │
-│  │ ──────────────────────────────────────────── │  │
-│  │ Apr 5 | Instagram | "Last week our…"      ✓  │  │
-│  │  ↳ Likes: 142  Reach: 2,400  Donations: 3   │  │
-│  │ Apr 3 | Twitter   | "Meet Sarah…"         ✓  │  │
-│  └───────────────────────────────────────────────┘  │
-│                                                     │
-│  TOP PERFORMING CONTENT                             │
-│  Best time to post: Tue/Thu 7–9pm                  │
-│  Top hashtag: #domesticviolenceawareness (+34%)    │
-│  Stories with resident photos: 2.1x more donations │
-└─────────────────────────────────────────────────────┘
-```
+Sections:
+1. **Top-line stats** — avg donation prob across all posts, total donation referrals, total estimated value
+2. **Post history table** — date, platform, post type, engagement tier (predicted vs actual), donation referrals
+3. **Insights panel** — best platform chart, best time heatmap (hour × day), best content topic bar chart — all from `GET /api/social-media/insights`
+4. **Underused opportunities** — "Only 20% of your posts feature resident stories. Posts with stories are 2.1x more likely to drive donations."
 
-Analytics are computed from existing `social_media_posts` data — no external API needed for the insights panel. Live metrics (likes, reach) sync from platform APIs in Phase 3.
-
-### 1.4 Routing + Nav
+### 2.3 Routing + Nav
 
 **Modify:** `frontend/src/App.tsx`
 ```tsx
@@ -123,15 +217,15 @@ Analytics are computed from existing `social_media_posts` data — no external A
 <Route path="/admin-social-analytics" element={<SocialMediaAnalytics />} />
 ```
 
-**Modify:** Admin nav component — add "Social Media" and "Post Analytics" links.
+**Modify:** Admin nav — add "Social Media" and "Post Analytics" links (admin role only).
 
 ---
 
-## Phase 2 — Live Publishing (as API approvals land)
+## Phase 3 — Live Publishing (as Meta/Twitter API approvals land)
 
-### 2.1 Backend: Publisher Service
+### 3.1 Publisher Service
 
-**File:** `backend/Services/SocialMediaPublisher.cs`
+**File:** `backend/.../Services/SocialMediaPublisher.cs` (create)
 
 ```csharp
 public interface ISocialMediaPublisher
@@ -143,36 +237,26 @@ public interface ISocialMediaPublisher
 }
 ```
 
-**Meta (Instagram + Facebook):**
-- Step 1: `POST https://graph.facebook.com/v18.0/{ig-user-id}/media` → `creation_id`
-- Step 2: `POST https://graph.facebook.com/v18.0/{ig-user-id}/media_publish` with `creation_id`
-- Facebook: `POST https://graph.facebook.com/v18.0/{page-id}/feed`
+Meta two-step: `POST /media` → `creation_id` → `POST /media_publish`  
+Twitter: `POST /2/tweets` with OAuth 2.0  
+LinkedIn: `POST /v2/ugcPosts` with OAuth 2.0
 
-**Twitter/X:**
-- `POST https://api.twitter.com/2/tweets` with OAuth 2.0 Bearer token
-
-**LinkedIn:**
-- `POST https://api.linkedin.com/v2/ugcPosts` with OAuth 2.0 token
-
-**Token storage:** All tokens stored as Azure App Service environment variables. Never in DB or frontend.
-
+**Token storage:** Azure App Service environment variables only. Never in DB or frontend.
 ```
-META_PAGE_ACCESS_TOKEN
-META_IG_USER_ID
-META_PAGE_ID
+META_PAGE_ACCESS_TOKEN, META_IG_USER_ID, META_PAGE_ID
 TWITTER_BEARER_TOKEN
 LINKEDIN_ACCESS_TOKEN
 ```
 
-### 2.2 Backend: Scheduled Post Worker
+### 3.2 Scheduled Post Worker
 
-**File:** `backend/Services/ScheduledPostWorker.cs`
+**File:** `backend/.../Services/ScheduledPostWorker.cs` (create)
 
-`IHostedService` that runs every 60 seconds:
-1. Query `social_media_posts WHERE is_published = false AND scheduled_at <= NOW()`
-2. For each due post, call `ISocialMediaPublisher` per platform
-3. On success: set `is_published = true`, `posted_at = NOW()`
-4. On failure: log error, increment retry count, skip if retried 3x
+`IHostedService` polling every 60 seconds:
+1. Query posts where `is_published = false AND scheduled_at <= NOW()`
+2. Call `ISocialMediaPublisher` per selected platform
+3. On success: `is_published = true`, `posted_at = NOW()`
+4. On failure: log error, skip after 3 retries
 
 Register in `Program.cs`:
 ```csharp
@@ -181,62 +265,43 @@ builder.Services.AddHostedService<ScheduledPostWorker>();
 
 ---
 
-## Phase 3 — Analytics Sync
-
-**File:** `backend/Services/MetricsSyncService.cs`
-
-Background sync (runs daily):
-- Meta Insights API: `GET /{media-id}/insights?metric=impressions,reach,likes,comments,shares,saved`
-- Twitter: `GET /2/tweets/{id}?tweet.fields=public_metrics`
-- Update `social_media_posts` fields: `likes_count`, `comments_count`, `shares_count`, `reach`, `impressions`, `engagement_rate`
-
-**Donation attribution** (no API needed):
-```sql
-SELECT sp.post_id, COUNT(d.donation_id) as referral_donations, SUM(d.amount) as total_value
-FROM social_media_posts sp
-JOIN donations d ON d.referral_post_id = sp.post_id
-GROUP BY sp.post_id
-```
-
----
-
 ## Files to Create / Modify
 
-| File | Action |
-|---|---|
-| `frontend/src/pages/admin/SocialMediaComposer.tsx` | **Create** |
-| `frontend/src/pages/admin/SocialMediaAnalytics.tsx` | **Create** |
-| `frontend/src/App.tsx` | **Modify** — add 2 routes |
-| Admin nav component | **Modify** — add nav links |
-| `backend/Controllers/SocialMediaController.cs` | **Create** |
-| `backend/Services/SocialMediaAdapterService.cs` | **Create** |
-| `backend/Services/SocialMediaPublisher.cs` | **Create** (Phase 2) |
-| `backend/Services/ScheduledPostWorker.cs` | **Create** (Phase 2) |
-| `backend/Services/MetricsSyncService.cs` | **Create** (Phase 3) |
-| `backend/Models/SocialMediaPost.cs` | **No change** — already complete |
-| `backend/Data/IntexIIContext.cs` | **No change** — DbSet already registered |
-| `backend/Program.cs` | **Modify** — register hosted service (Phase 2) |
+| File | Action | Phase |
+|---|---|---|
+| `backend/.../Models/SocialMediaPrediction.cs` | **Create** | 1 |
+| `backend/.../Data/IntexIIContext.cs` | **Modify** — add DbSet + key config | 1 |
+| `backend/.../Controllers/SocialMediaController.cs` | **Create** | 1 |
+| `frontend/src/pages/admin/SocialMediaComposer.tsx` | **Create** | 2 |
+| `frontend/src/pages/admin/SocialMediaAnalytics.tsx` | **Create** | 2 |
+| `frontend/src/App.tsx` | **Modify** — add 2 routes | 2 |
+| Admin nav component | **Modify** — add nav links | 2 |
+| `backend/.../Services/SocialMediaPublisher.cs` | **Create** | 3 |
+| `backend/.../Services/ScheduledPostWorker.cs` | **Create** | 3 |
+| `backend/.../Program.cs` | **Modify** — register hosted service | 3 |
+| `backend/.../Models/SocialMediaPost.cs` | **No change** | — |
 
 ---
 
 ## Recommended Build Order
 
-1. `SocialMediaAdapterService` (rule-based caption adaptation)
-2. `SocialMediaController` — draft + schedule endpoints + media upload
-3. `SocialMediaComposer.tsx` — composer UI with copy-to-clipboard
-4. `SocialMediaAnalytics.tsx` — post history table + insights panel from existing data
+1. `SocialMediaPrediction` model + migration + run inference pipeline
+2. `SocialMediaController` — insights + score-draft + draft + schedule endpoints
+3. `SocialMediaComposer.tsx` — composer with live scoring gauge + suggestions + copy-to-clipboard
+4. `SocialMediaAnalytics.tsx` — post history + insights charts
 5. Routing + nav links
-6. **[ API approvals in parallel ]**
-7. `SocialMediaPublisher.cs` — Meta first, then Twitter, then LinkedIn
-8. "Post Now" button goes live in UI
-9. `ScheduledPostWorker.cs` — scheduled publishing
-10. `MetricsSyncService.cs` — daily engagement metric sync
+6. **[ Meta + Twitter API approvals in parallel ]**
+7. `SocialMediaPublisher.cs` + `ScheduledPostWorker.cs`
+8. "Post Now" button goes live
 
 ---
 
 ## Verification
 
-- **Phase 1:** Compose a post as admin, verify per-platform preview tabs show adapted captions, verify "Copy Caption" works, verify post saves to DB with `is_published = false`
-- **Phase 1:** Schedule a post 2 minutes out, confirm `scheduled_at` is set and worker processes it
-- **Phase 2:** Configure Meta sandbox tokens, post to Instagram test account, confirm `is_published = true` + post appears on Instagram
-- **Phase 3:** Verify analytics page shows engagement metrics updating daily, verify donation attribution query links correctly to `donations` table
+- **Phase 1:** Call `GET /api/social-media/insights` — confirm best platform, hour, and topic return correctly from historical data
+- **Phase 1:** Call `POST /api/social-media/score-draft` with an ImpactStory + resident story — confirm donation probability > 90% and no suggestions for improvement
+- **Phase 1:** Call same endpoint with a ThankYou post on Thursday at midnight — confirm low probability + suggestions to switch type and time
+- **Phase 2:** Open composer as admin, toggle "Features resident story" on/off — confirm gauge updates live
+- **Phase 2:** Change post hour slider — confirm suggestions update to reflect best time recommendations
+- **Phase 2:** Verify "Copy Caption" works on all platform tabs before any API is connected
+- **Phase 3:** Configure Meta sandbox tokens → post to Instagram test account → confirm `is_published = true` in DB and post visible on Instagram
