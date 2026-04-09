@@ -3,7 +3,6 @@ import { Link, useLocation } from 'react-router-dom';
 import { downloadExport, authHeaders, getUser } from '../../utils/auth';
 import ImpactPage from './ImpactPage';
 import GivingPage from './GivingPage';
-import UserAvatar from '../../components/UserAvatar';
 
 const API = `${import.meta.env.VITE_API_URL ?? 'http://localhost:5229'}/api/donor-dashboard`;
 
@@ -106,8 +105,7 @@ export default function DonorDashboard() {
     : 0;
   const recentDonations = myDonations?.donations.slice(0, 3) ?? [];
 
-  return (
-    <div className="flex h-screen bg-surface overflow-hidden font-body">
+  const sidebarContent = (
       <aside className="w-56 flex-shrink-0 flex flex-col bg-surface-container-lowest border-r border-outline-variant/20 py-6 px-4 relative z-10">
         <div className="mb-8 px-2">
           <img src="/logo.png" alt="Lucera" className="h-8 w-auto object-contain mb-1" />
@@ -116,7 +114,6 @@ export default function DonorDashboard() {
         <button onClick={() => setSidebarOpen(false)} className="lg:hidden text-on-surface-variant hover:text-on-surface transition-colors">
           <span className="material-symbols-outlined text-[20px]">close</span>
         </button>
-      </div>
       <nav className="flex-1 space-y-1">
         {NAV_ITEMS.map(({ label, icon }) => (
           <button
@@ -172,9 +169,9 @@ export default function DonorDashboard() {
         <header className="flex items-center gap-3 pl-14 lg:pl-6 pr-4 md:pr-6 py-3 bg-surface-container-lowest border-b border-outline-variant/20 flex-shrink-0">
           <div className="flex items-center gap-3 ml-auto">
             <div className="flex items-center gap-2">
-              <div className="w-8 h-8 rounded-full bg-primary-container flex items-center justify-center text-xs font-bold text-on-primary">{initials}</div>
+              <div className="w-8 h-8 rounded-full bg-primary-container flex items-center justify-center text-xs font-bold text-on-primary"></div>
               <div className="text-right">
-                <p className="text-xs font-bold text-on-surface leading-tight">{displayName}</p>
+                <p className="text-xs font-bold text-on-surface leading-tight"></p>
                 <p className="text-[10px] text-secondary font-semibold">Donor</p>
               </div>
             </div>
