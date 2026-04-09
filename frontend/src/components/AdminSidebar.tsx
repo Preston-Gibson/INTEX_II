@@ -8,6 +8,7 @@ const NAV_ITEMS = [
   { to: '/admin-process-recording',              icon: 'history_edu',        label: 'Recordings' },
   { to: '/admin-home-visitation-case-conference',icon: 'home_pin',           label: 'Visits' },
   { to: '/admin-reports-analytics',              icon: 'analytics',          label: 'Analytics' },
+  { to: '/admin-social-media',                   icon: 'campaign',           label: 'Social Media' },
 ];
 
 export default function AdminSidebar() {
