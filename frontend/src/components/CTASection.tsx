@@ -24,7 +24,7 @@ export default function CTASection() {
           </p>
           <div className="relative flex justify-center">
             <button
-              onClick={() => navigate(isAuthenticated() ? '/donor-dashboard' : '/login')}
+              onClick={() => navigate(isAuthenticated() ? '/donor-dashboard' : '/login', isAuthenticated() ? { state: { tab: 'Giving' } } : undefined)}
               className="inline-flex items-center gap-3 px-10 py-4 bg-white text-primary font-manrope font-extrabold text-base rounded-[1rem] shadow-[0_8px_24px_rgba(0,0,0,0.18)] hover:scale-105 active:scale-[0.97] transition-transform"
             >
               <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }}>volunteer_activism</span>

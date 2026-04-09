@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { downloadExport, authHeaders, getUser } from '../../utils/auth';
 import ImpactPage from './ImpactPage';
 import GivingPage from './GivingPage';
@@ -57,7 +57,8 @@ interface MyDonationsResponse {
 }
 
 export default function DonorDashboard() {
-  const [activeNav, setActiveNav] = useState('Overview');
+  const location = useLocation();
+  const [activeNav, setActiveNav] = useState<string>((location.state as { tab?: string })?.tab ?? 'Overview');
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [chartRange, setChartRange] = useState<'6 MONTHS' | '12 MONTHS'>('12 MONTHS');
 
