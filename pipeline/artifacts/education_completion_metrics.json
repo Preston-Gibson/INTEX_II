@@ -1,7 +1,6 @@
 {
   "accuracy": 0.6666666666666666,
   "weighted_f1": 0.6636500754147813,
-  "cv_f1_mean": 0.5871895862994934,
   "classification_report": {
     "Completed": {
       "precision": 0.6666666666666666,

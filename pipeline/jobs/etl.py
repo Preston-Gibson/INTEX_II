@@ -339,6 +339,14 @@ def build_social_warehouse():
     wh_engine = get_engine(WAREHOUSE_SCHEMA)
     df_model.to_sql(
         "fact_social_media_ml",
+        wh_engine,
+        schema=WAREHOUSE_SCHEMA,
+        if_exists="replace",
+        index=False,
+    )
+    print(f"Built fact_social_media_ml: {len(df_model)} rows")
+
+
 # Phase C — Build donor warehouse modeling table
 # ---------------------------------------------------------------------------
 
