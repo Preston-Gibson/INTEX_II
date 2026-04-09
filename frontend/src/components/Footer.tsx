@@ -9,8 +9,7 @@ export default function Footer() {
             Lucera
           </div>
           <p className="text-slate-400 font-inter text-sm leading-relaxed max-w-xs">
-            © 2026 Lucera. Dedicated to the children of Central America.
-            Providing safety, education, and hope.
+            Lucera is a registered 501(c)(3) non-profit organization dedicated to the children of Central America.
           </p>
         </div>
         <div className="grid grid-cols-2 sm:grid-cols-3 gap-8">
@@ -47,6 +46,11 @@ export default function Footer() {
               <span className="material-symbols-outlined text-slate-400 hover:text-blue-400 cursor-pointer">
                 alternate_email
               </span>
+            </div>
+            <div>
+              <p className="text-slate-400 font-inter text-xs leading-relaxed max-w-xs">
+                © 2026 Lucera. All rights reserved.
+              </p>
             </div>
           </div>
         </div>
