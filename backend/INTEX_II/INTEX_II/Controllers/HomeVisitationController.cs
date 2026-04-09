@@ -94,6 +94,34 @@ public class HomeVisitationController : ControllerBase
         return Ok(residents);
     }
 
+    // POST /api/home-visitation/schedule
+    // Schedules a future visit
+    [HttpPost("schedule")]
+    public async Task<IActionResult> ScheduleVisit([FromBody] ScheduleVisitRequest request)
+    {
+        var visit = new HomeVisitation
+        {
+            ResidentId = request.ResidentId,
+            VisitDate = DateOnly.Parse(request.VisitDate),
+            SocialWorker = request.SocialWorker,
+            VisitType = request.VisitType,
+            LocationVisited = request.LocationVisited,
+            FamilyMembersPresent = string.Empty,
+            Purpose = request.VisitType,
+            Observations = string.Empty,
+            FamilyCooperationLevel = string.Empty,
+            SafetyConcernsNoted = false,
+            FollowUpNeeded = false,
+            FollowUpNotes = string.Empty,
+            VisitOutcome = "Scheduled"
+        };
+
+        _db.HomeVisitations.Add(visit);
+        await _db.SaveChangesAsync();
+
+        return Ok(new { visitationId = visit.VisitationId });
+    }
+
     // DELETE /api/home-visitation/{id}
     [HttpDelete("{id}")]
     public async Task<IActionResult> DeleteVisit(int id)
@@ -133,6 +161,15 @@ public class HomeVisitationController : ControllerBase
 
         return Ok(new { visitationId = visit.VisitationId });
     }
+}
+
+public class ScheduleVisitRequest
+{
+    public int ResidentId { get; set; }
+    public string VisitDate { get; set; } = string.Empty;
+    public string SocialWorker { get; set; } = string.Empty;
+    public string VisitType { get; set; } = string.Empty;
+    public string LocationVisited { get; set; } = string.Empty;
 }
 
 public class LogVisitRequest

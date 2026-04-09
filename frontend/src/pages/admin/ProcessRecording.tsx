@@ -117,7 +117,16 @@ export default function ProcessRecording() {
   const [deleting, setDeleting] = useState(false);
   const [editingRecordingId, setEditingRecordingId] = useState<number | null>(null);
 
+  const [socialWorkers, setSocialWorkers] = useState<string[]>([]);
   const [residentPage, setResidentPage] = useState(1);
+
+  // Load social workers once
+  useEffect(() => {
+    fetch(`${API}/social-workers`, { headers: authHeaders() })
+      .then(r => r.json())
+      .then(setSocialWorkers)
+      .catch(() => {});
+  }, []);
 
   // Load residents
   useEffect(() => {
@@ -456,8 +465,11 @@ export default function ProcessRecording() {
 
                       <div>
                         <label className={labelCls}>Social Worker</label>
-                        <input required className={inputCls} placeholder="Full name" value={form.socialWorker}
-                          onChange={e => handleFormChange('socialWorker', e.target.value)} />
+                        <select required className={inputCls} value={form.socialWorker}
+                          onChange={e => handleFormChange('socialWorker', e.target.value)}>
+                          <option value="">Select…</option>
+                          {socialWorkers.map(sw => <option key={sw} value={sw}>{sw}</option>)}
+                        </select>
                       </div>
 
                       <div>
