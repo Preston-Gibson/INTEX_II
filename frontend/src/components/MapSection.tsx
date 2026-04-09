@@ -78,12 +78,12 @@ export default function MapSection() {
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-[1fr_320px] gap-10 items-stretch">
-          <div className="h-full rounded-[2rem] overflow-hidden shadow-[0_4px_24px_rgba(0,0,0,0.08)]" style={{ minHeight: 420 }}>
+          <div className="rounded-[2rem] overflow-hidden shadow-[0_4px_24px_rgba(0,0,0,0.08)]" style={{ height: 420 }}>
             <MapContainer
               center={[11.5, -85.5]}
               zoom={5}
               scrollWheelZoom={false}
-              style={{ width: '100%', height: '100%', minHeight: 420, borderRadius: '2rem' }}
+              style={{ width: '100%', height: '100%', borderRadius: '2rem' }}
             >
               <TileLayer
                 attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
