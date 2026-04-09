@@ -12,9 +12,9 @@ export default function ImpactSection() {
           </p>
         </div>
 
-        <div className="grid grid-cols-4 gap-5">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
           {/* Holistic Recovery — spans 2 cols */}
-          <div className="col-span-2 bg-surface-container-lowest rounded-[2rem] p-9 shadow-sm flex flex-col justify-between hover:shadow-md hover:-translate-y-[3px] transition-all duration-300">
+          <div className="sm:col-span-2 bg-surface-container-lowest rounded-[2rem] p-9 shadow-sm flex flex-col justify-between hover:shadow-md hover:-translate-y-[3px] transition-all duration-300">
             <div>
               <span className="material-symbols-outlined text-[2.25rem] text-secondary mb-2 block">
                 health_and_safety
@@ -54,8 +54,8 @@ export default function ImpactSection() {
           </div>
 
           {/* Safe Haven Housing — full width, horizontal */}
-          <div className="col-span-4 bg-surface-container-lowest rounded-[2rem] shadow-sm flex flex-row items-stretch overflow-hidden hover:shadow-md hover:-translate-y-[3px] transition-all duration-300">
-            <div className="p-12 flex-1 flex flex-col justify-center gap-4">
+          <div className="sm:col-span-2 lg:col-span-4 bg-surface-container-lowest rounded-[2rem] shadow-sm flex flex-col md:flex-row items-stretch overflow-hidden hover:shadow-md hover:-translate-y-[3px] transition-all duration-300">
+            <div className="p-9 md:p-12 flex-1 flex flex-col justify-center gap-4">
               <span className="material-symbols-outlined text-[2.25rem] text-secondary">home_pin</span>
               <h3 className="font-manrope text-[1.3rem] font-bold text-on-surface">Safe Haven Housing</h3>
               <p className="text-[0.92rem] leading-[1.65] text-on-surface-variant">
@@ -71,7 +71,7 @@ export default function ImpactSection() {
               </a>
             </div>
             <img
-              className="w-[45%] flex-shrink-0 object-cover"
+              className="w-full md:w-[45%] max-h-64 md:max-h-none flex-shrink-0 object-cover"
               src="https://lh3.googleusercontent.com/aida-public/AB6AXuAfE69d4d8O2ZuXYj4kishQKYX7UoXk_1JPXpqO373kVEbsM4F5S3a2twa7LhszUIe6iDUVQdBCmKYDzVgJPtJicoS2sDZfB_oQXMRM5rylfkoRhThT4jhL1GxkSvjPRkpZb_RH6weGslqNGVBtqDjbgD6X6qGmKAikVOuOu_ydNk7kvy5ME8y7f1Co26hcwVSwP6Hs8qN9pSFEkZ2NjI1q-OKmUK9DlxksUg8QhdlbBEaQz9BR8nuD8CGmICP41sYgfnebbdQngw"
               alt="Safe haven interior"
             />

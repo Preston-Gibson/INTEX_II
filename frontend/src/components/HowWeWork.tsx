@@ -1,7 +1,7 @@
 export default function HowWeWork() {
   return (
     <section className="bg-surface py-28 overflow-hidden">
-      <div className="max-w-7xl mx-auto px-6 grid grid-cols-[5fr_7fr] gap-20 items-center">
+      <div className="max-w-7xl mx-auto px-6 grid grid-cols-1 lg:grid-cols-[5fr_7fr] gap-12 lg:gap-20 items-center">
         {/* Left — text + bullets */}
         <div className="relative">
           <div className="absolute -top-12 -left-12 w-64 h-64 bg-secondary/[0.08] rounded-full blur-[3rem] pointer-events-none" />
@@ -55,7 +55,7 @@ export default function HowWeWork() {
         </div>
 
         {/* Right — staggered image grid */}
-        <div className="grid grid-cols-2 gap-4">
+        <div className="hidden md:grid grid-cols-2 gap-4">
           <div className="flex flex-col gap-4 mt-12">
             <img
               className="w-full aspect-[3/4] object-cover rounded-[1.5rem] shadow-[0_4px_24px_rgba(0,0,0,0.08)]"

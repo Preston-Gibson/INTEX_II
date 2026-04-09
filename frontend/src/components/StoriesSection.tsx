@@ -30,16 +30,16 @@ const stories = [
 export default function StoriesSection() {
   return (
     <section>
-      <div className="flex justify-between items-end mb-12">
+      <div className="flex flex-col md:flex-row md:justify-between md:items-end gap-6 mb-12">
         <div className="max-w-xl">
-          <h2 className="text-4xl font-extrabold text-primary mb-4 tracking-tight">
+          <h2 className="text-3xl md:text-4xl font-extrabold text-primary mb-4 tracking-tight">
             The Lives Behind the Data
           </h2>
           <p className="text-on-surface-variant leading-relaxed">
             Names and locations have been changed to protect the privacy and safety of our residents.
           </p>
         </div>
-        <button className="text-primary font-bold flex items-center gap-2 hover:underline">
+        <button className="text-primary font-bold flex items-center gap-2 hover:underline self-start md:self-auto flex-shrink-0">
           View More Stories
           <span className="material-symbols-outlined">arrow_forward</span>
         </button>
