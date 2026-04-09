@@ -352,7 +352,7 @@ export default function DonorsContributions() {
     try {
       const res = await fetch(url, {
         method,
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', ...authHeaders() },
         body: JSON.stringify(suppForm),
       });
       if (!res.ok) { setSuppFormError('Save failed. Please check all fields and try again.'); return; }
@@ -583,9 +583,9 @@ export default function DonorsContributions() {
                           <td className="px-4 py-3 text-xs text-on-surface whitespace-nowrap">${fmt(s.totalEstimatedValue)}</td>
                           <td className="px-4 py-3 whitespace-nowrap">
                             <button onClick={() => openEditSupporter(s.supporterId)}
-                              className="flex items-center gap-1 text-primary text-xs font-semibold hover:underline whitespace-nowrap">
+                              className="flex items-center gap-1 text-primary text-xs font-semibold whitespace-nowrap">
                               <span className="material-symbols-outlined text-[15px]">edit</span>
-                              View/Edit
+                              <span className="hover:underline">View/Edit</span>
                             </button>
                           </td>
                         </tr>

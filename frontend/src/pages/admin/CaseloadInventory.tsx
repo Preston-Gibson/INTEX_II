@@ -331,7 +331,7 @@ export default function CaseloadInventory() {
           >
             <option value="">All Safehouses</option>
             {safehouses.map(s => (
-              <option key={s.safehouseId} value={s.safehouseId}>{s.name}</option>
+              <option key={s.safehouseId} value={s.safehouseId}>{s.city}, {s.province}</option>
             ))}
           </select>
 
@@ -418,10 +418,10 @@ export default function CaseloadInventory() {
                             <div className="flex items-center gap-3">
                               <button
                                 onClick={() => openEdit(r.residentId)}
-                                className="flex items-center gap-1 text-primary text-xs font-semibold hover:underline whitespace-nowrap"
+                                className="flex items-center gap-1 text-primary text-xs font-semibold whitespace-nowrap"
                               >
                                 <span className="material-symbols-outlined text-[15px]">edit</span>
-                                View/Edit
+                                <span className="hover:underline">View/Edit</span>
                               </button>
                               {r.caseStatus !== 'Closed' && (
                                 <button
@@ -571,7 +571,7 @@ export default function CaseloadInventory() {
                         onChange={e => patch({ safehouseId: Number(e.target.value) })}>
                         <option value={0} disabled>Select safehouse...</option>
                         {safehouses.map(s => (
-                          <option key={s.safehouseId} value={s.safehouseId}>{s.name}</option>
+                          <option key={s.safehouseId} value={s.safehouseId}>{s.city}, {s.province}</option>
                         ))}
                       </select>
                     </Field>
