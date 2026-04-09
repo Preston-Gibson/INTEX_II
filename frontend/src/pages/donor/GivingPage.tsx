@@ -11,6 +11,29 @@ const PROGRAMS = [
   'Health Clinic',
 ];
 
+// Distinct values from in_kind_donation_items data
+const INKIND_ITEMS = [
+  'Bags', 'Blankets', 'Books', 'Furniture', 'Hygiene Kits',
+  'Medicines', 'Rice', 'School Supplies', 'Uniforms',
+];
+
+const INKIND_CATEGORIES = [
+  'Clothing', 'Food', 'Furniture', 'Hygiene',
+  'Medical', 'School Materials', 'Supplies',
+];
+
+const INKIND_UNITS = ['boxes', 'kg', 'packs', 'pcs', 'sets', 'units'];
+
+
+interface InKindItem {
+  id: number;
+  itemName: string;
+  customItemName?: string;
+  category: string;
+  quantity: string;
+  unit: string;
+}
+
 interface Donation {
   donationId: number;
   donationType: string;
@@ -23,48 +46,115 @@ interface Donation {
   notes: string | null;
 }
 
+const PayPalLogo = () => (
+  <svg viewBox="0 0 24 24" className="w-6 h-5" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M19.5 6.5c.3 1.9-.6 3.9-2.3 5-1.4.9-3.1 1-4.7 1H11l-.8 5H7.5L9.5 4h5c1.8 0 3.8.4 5 2.5z" fill="#009cde"/>
+    <path d="M8.5 13.5l.5-3h1.5c1.6 0 3.3-.1 4.7-1 1.7-1.1 2.6-3.1 2.3-5C16.3 2.4 14.3 2 12.5 2h-5L5 18h3l.5-4.5z" fill="#003087"/>
+    <path d="M10 9.5l-.5 4h1.5c1.6 0 3.3-.1 4.7-1 1.7-1.1 2.6-3.1 2.3-5-.2-.9-.7-1.6-1.5-2.1C15.8 7.1 14.2 9.5 10 9.5z" fill="#012169"/>
+  </svg>
+);
+
+const ApplePayLogo = () => (
+  <svg viewBox="0 0 52 20" className="w-12 h-5" xmlns="http://www.w3.org/2000/svg">
+    <path d="M9.2 4.1c.5-.6.8-1.4.7-2.2-.7.1-1.6.5-2.1 1.1-.5.5-.9 1.3-.8 2.1.8.1 1.6-.4 2.2-1z" fill="currentColor"/>
+    <path d="M9.9 5.3c-1.2-.1-2.3.7-2.8.7-.6 0-1.5-.6-2.5-.6-1.3 0-2.4.7-3.1 1.9C.1 9.7 1.1 13.3 2.5 15.2c.7 1 1.5 2.1 2.6 2 1-.1 1.4-.6 2.6-.6 1.2 0 1.5.6 2.6.6 1.1 0 1.8-1 2.5-2 .8-1.1 1.1-2.2 1.1-2.3-.1 0-2.1-.8-2.1-3.1 0-1.9 1.6-2.8 1.6-2.9C12.8 5.7 9.9 5.3 9.9 5.3z" fill="currentColor"/>
+    <text x="15" y="15" fontFamily="-apple-system, BlinkMacSystemFont, 'Helvetica Neue', sans-serif" fontSize="13" fontWeight="500" fill="currentColor">Pay</text>
+  </svg>
+);
+
+const PAYMENT_METHODS = [
+  { id: 'ach', label: 'Bank Account (ACH)', logo: <span className="material-symbols-outlined text-on-surface-variant text-[20px]">account_balance</span> },
+  { id: 'paypal', label: 'PayPal', logo: <PayPalLogo /> },
+  { id: 'applepay', label: 'Apple Pay', logo: <ApplePayLogo /> },
+];
+
 export default function GivingPage() {
+  // Tab: monetary vs in-kind vs time
+  const [giftTab, setGiftTab] = useState<'monetary' | 'inkind' | 'time'>('monetary');
+
+  // Monetary state
+  const [isRecurring, setIsRecurring] = useState(false);
   const [selectedAmount, setSelectedAmount] = useState<number | null>(50);
   const [customAmount, setCustomAmount] = useState('');
   const [program, setProgram] = useState(PROGRAMS[0]);
-  const [isRecurring, setIsRecurring] = useState(false);
+  const [paymentMethod, setPaymentMethod] = useState('ach');
+  const [showConfirm, setShowConfirm] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [submitMsg, setSubmitMsg] = useState<{ ok: boolean; text: string } | null>(null);
 
+  // In-kind state
+  const [inkindItems, setInkindItems] = useState<InKindItem[]>([]);
+  const [inkindNotes, setInkindNotes] = useState('');
+  const [inkindMsg, setInkindMsg] = useState<{ ok: boolean; text: string } | null>(null);
+  const [newItem, setNewItem] = useState<Omit<InKindItem, 'id'>>({
+    itemName: '',
+    customItemName: '',
+    category: '',
+    quantity: '',
+    unit: '',
+  });
+
+  // Time / volunteer state
+  const [timeFullName, setTimeFullName] = useState('');
+  const [timeEmail, setTimeEmail] = useState('');
+  const [timePhone, setTimePhone] = useState('');
+  const [timeAvailability, setTimeAvailability] = useState<string[]>([]);
+  const [timeNotes, setTimeNotes] = useState('');
+  const [timeMsg, setTimeMsg] = useState<{ ok: boolean; text: string } | null>(null);
+  const [timeNameErr, setTimeNameErr] = useState('');
+  const [timeEmailErr, setTimeEmailErr] = useState('');
+  const [timePhoneErr, setTimePhoneErr] = useState('');
+
+  // History
   const [donations, setDonations] = useState<Donation[]>([]);
   const [lifetimeTotal, setLifetimeTotal] = useState<number>(0);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState<string | null>(null);
 
   const loadDonations = useCallback(() => {
     setLoading(true);
+    setLoadError(null);
     fetch(`${API}/my-donations`, { headers: authHeaders() })
-      .then(r => r.json())
+      .then(async r => {
+        if (!r.ok) {
+          const text = await r.text().catch(() => r.statusText);
+          throw new Error(`${r.status}: ${text}`);
+        }
+        return r.json();
+      })
       .then(data => {
         setDonations(data.donations ?? []);
         setLifetimeTotal(data.lifetimeTotal ?? 0);
       })
-      .catch(() => {})
+      .catch(err => setLoadError(err.message ?? 'Failed to load donations'))
       .finally(() => setLoading(false));
   }, []);
 
   useEffect(() => { loadDonations(); }, [loadDonations]);
 
-  const handleSubmit = async () => {
-    const amount = selectedAmount ?? parseFloat(customAmount);
-    if (!amount || amount <= 0) {
+  const baseAmount = selectedAmount ?? (parseFloat(customAmount) || 0);
+
+  // Monetary flow
+  const confirmAndSubmit = () => {
+    if (!baseAmount || baseAmount <= 0) {
       setSubmitMsg({ ok: false, text: 'Please enter a valid amount.' });
       return;
     }
+    setShowConfirm(true);
+  };
+
+  const handleSubmit = async () => {
+    setShowConfirm(false);
     setSubmitting(true);
     setSubmitMsg(null);
     try {
       const res = await fetch(`${API}/my-donations`, {
         method: 'POST',
         headers: { ...authHeaders(), 'Content-Type': 'application/json' },
-        body: JSON.stringify({ amount, campaignName: program, isRecurring, notes: null }),
+        body: JSON.stringify({ amount: baseAmount, campaignName: program, isRecurring, notes: null }),
       });
       if (res.ok) {
-        setSubmitMsg({ ok: true, text: `Thank you! Your $${amount.toFixed(2)} gift has been recorded.` });
+        setSubmitMsg({ ok: true, text: `Thank you! Your $${baseAmount.toFixed(2)} gift has been recorded.` });
         setSelectedAmount(50);
         setCustomAmount('');
         loadDonations();
@@ -79,10 +169,112 @@ export default function GivingPage() {
     }
   };
 
+  // In-kind flow
+  const addInkindItem = () => {
+    if (!newItem.category || !newItem.itemName || !newItem.quantity || parseInt(newItem.quantity) <= 0 || !newItem.unit) return;
+    setInkindItems(prev => [...prev, { ...newItem, id: Date.now() }]);
+    setNewItem({ itemName: '', customItemName: '', category: '', quantity: '', unit: '' });
+  };
+
+  const removeInkindItem = (id: number) => {
+    setInkindItems(prev => prev.filter(i => i.id !== id));
+  };
+
+  const handleInkindSubmit = async () => {
+    if (inkindItems.length === 0) {
+      setInkindMsg({ ok: false, text: 'Please add at least one item to your request.' });
+      return;
+    }
+    setSubmitting(true);
+    setInkindMsg(null);
+    try {
+      const payload = {
+        items: inkindItems.map(i => ({
+          itemName: i.itemName === 'Other' ? (i.customItemName || 'Other') : i.itemName,
+          itemCategory: i.category,
+          quantity: parseInt(i.quantity),
+          unitOfMeasure: i.unit,
+        })),
+        campaignName: program,
+        notes: inkindNotes || null,
+      };
+      const res = await fetch(`${API}/my-inkind-donations`, {
+        method: 'POST',
+        headers: { ...authHeaders(), 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+      if (res.ok) {
+        setInkindMsg({ ok: true, text: 'Your donation request has been submitted! Our team will be in touch.' });
+        setInkindItems([]);
+        setInkindNotes('');
+        loadDonations();
+      } else {
+        const msg = await res.text().catch(() => 'Submission failed.');
+        setInkindMsg({ ok: false, text: msg });
+      }
+    } catch {
+      setInkindMsg({ ok: false, text: 'Network error. Please try again.' });
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const handleTimeSubmit = async () => {
+    const name = timeFullName.trim();
+    if (!name) {
+      setTimeMsg({ ok: false, text: 'Please enter your full name.' });
+      return;
+    }
+    if (/\d/.test(name) || timeEmailErr || timePhoneErr) {
+      setTimeMsg({ ok: false, text: 'Please fix the highlighted fields above.' });
+      return;
+    }
+    setSubmitting(true);
+    setTimeMsg(null);
+    try {
+      const payload = {
+        fullName: timeFullName.trim(),
+        email: timeEmail.trim() || null,
+        phone: timePhone.trim() || null,
+        availability: timeAvailability.length > 0 ? timeAvailability.join(', ') : null,
+        campaignName: program,
+        notes: timeNotes.trim() || null,
+      };
+      const res = await fetch(`${API}/my-time-donations`, {
+        method: 'POST',
+        headers: { ...authHeaders(), 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+      if (res.ok) {
+        setTimeMsg({ ok: true, text: 'Your volunteer request has been submitted! Our team will review and be in touch.' });
+        setTimeFullName('');
+        setTimeEmail('');
+        setTimePhone('');
+        setTimeAvailability([]);
+        setTimeNotes('');
+        setTimeNameErr('');
+        setTimeEmailErr('');
+        setTimePhoneErr('');
+        loadDonations();
+      } else {
+        const msg = await res.text().catch(() => 'Submission failed.');
+        setTimeMsg({ ok: false, text: msg });
+      }
+    } catch {
+      setTimeMsg({ ok: false, text: 'Network error. Please try again.' });
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
   const formatDate = (d: string | null) => {
     if (!d) return '—';
     return new Date(d).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
   };
+
+  const selectedMethodLabel = PAYMENT_METHODS.find(m => m.id === paymentMethod)?.label ?? '';
+
+  const selectClass = "w-full appearance-none border border-outline-variant/30 rounded-xl px-3 py-2 text-sm text-on-surface bg-surface-container-lowest outline-none focus:border-primary/50";
 
   return (
     <div className="space-y-6">
@@ -103,76 +295,425 @@ export default function GivingPage() {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
-        {/* Make a Gift */}
+        {/* Make a Gift card */}
         <div className="md:col-span-2 bg-surface-container-low rounded-xl p-6">
           <div className="flex items-center justify-between mb-5">
             <p className="font-manrope font-bold text-lg text-on-surface">Make a Gift</p>
             <span className="material-symbols-outlined text-secondary text-[22px]" style={{ fontVariationSettings: "'FILL' 1" }}>favorite</span>
           </div>
 
-          <div className="flex gap-2 mb-4">
-            {[25, 50, 100].map((amt) => (
+          {/* Monetary / In-Kind / Time tab switcher */}
+          <div className="flex items-center bg-surface-container-high rounded-xl p-1 mb-5">
+            {([
+              { id: 'monetary' as const, icon: 'payments', label: 'Monetary' },
+              { id: 'inkind' as const, icon: 'inventory_2', label: 'In-Kind' },
+              { id: 'time' as const, icon: 'schedule', label: 'Time' },
+            ]).map(tab => (
               <button
-                key={amt}
-                onClick={() => { setSelectedAmount(amt); setCustomAmount(''); }}
-                className={`flex-1 py-2.5 rounded-xl text-sm font-bold border-2 transition-colors ${
-                  selectedAmount === amt
-                    ? 'border-primary text-primary bg-primary/5'
-                    : 'border-outline-variant/30 text-on-surface hover:border-primary/40'
+                key={tab.id}
+                onClick={() => { setGiftTab(tab.id); setSubmitMsg(null); setInkindMsg(null); setTimeMsg(null); }}
+                className={`flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg text-xs font-bold transition-all ${
+                  giftTab === tab.id
+                    ? 'bg-surface text-primary shadow-sm'
+                    : 'text-on-surface-variant hover:text-on-surface'
                 }`}
               >
-                ${amt}
+                <span className="material-symbols-outlined text-[16px]">{tab.icon}</span>
+                {tab.label}
               </button>
             ))}
           </div>
 
-          <div className="flex items-center gap-2 border border-outline-variant/30 rounded-xl px-3 py-2.5 mb-4 focus-within:border-primary/50">
-            <span className="material-symbols-outlined text-on-surface-variant text-[16px]">attach_money</span>
-            <input
-              type="number"
-              placeholder="Custom Amount"
-              value={customAmount}
-              onChange={(e) => { setCustomAmount(e.target.value); setSelectedAmount(null); }}
-              className="bg-transparent text-sm text-on-surface placeholder:text-on-surface-variant outline-none w-full"
-            />
-          </div>
+          {/* ── MONETARY TAB ── */}
+          {giftTab === 'monetary' && (
+            <>
+              {/* One-time / Monthly toggle */}
+              <div className="flex items-center bg-primary/10 rounded-full p-1 mb-4">
+                <button
+                  onClick={() => setIsRecurring(false)}
+                  className={`flex-1 py-2 rounded-full text-sm font-bold transition-all ${
+                    !isRecurring ? 'bg-primary text-white shadow-sm' : 'text-on-surface-variant hover:text-on-surface'
+                  }`}
+                >
+                  One-time
+                </button>
+                <button
+                  onClick={() => setIsRecurring(true)}
+                  className={`flex-1 py-2 rounded-full text-sm font-bold transition-all ${
+                    isRecurring ? 'bg-primary text-white shadow-sm' : 'text-on-surface-variant hover:text-on-surface'
+                  }`}
+                >
+                  Monthly
+                </button>
+              </div>
 
-          <p className="text-[10px] font-bold text-on-surface-variant uppercase tracking-widest mb-2">Designate Your Impact</p>
-          <div className="relative mb-4">
-            <select
-              value={program}
-              onChange={(e) => setProgram(e.target.value)}
-              className="w-full appearance-none border border-outline-variant/30 rounded-xl px-3 py-2.5 text-sm text-on-surface bg-surface-container-lowest outline-none focus:border-primary/50 pr-8"
-            >
-              {PROGRAMS.map((p) => <option key={p}>{p}</option>)}
-            </select>
-            <span className="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-on-surface-variant text-[18px] pointer-events-none">expand_more</span>
-          </div>
+              <p className="text-center text-sm text-on-surface mb-4">
+                Choose a <strong>{isRecurring ? 'monthly' : 'one-time'}</strong> amount
+              </p>
 
-          <label className="flex items-center gap-2 mb-6 cursor-pointer">
-            <input
-              type="checkbox"
-              checked={isRecurring}
-              onChange={e => setIsRecurring(e.target.checked)}
-              className="w-4 h-4 accent-primary"
-            />
-            <span className="text-xs text-on-surface-variant font-medium">Make this a monthly recurring gift</span>
-          </label>
+              <div className="flex gap-2 mb-4">
+                {[25, 50, 100].map((amt) => (
+                  <button
+                    key={amt}
+                    onClick={() => { setSelectedAmount(amt); setCustomAmount(''); }}
+                    className={`flex-1 py-2.5 rounded-xl text-sm font-bold border-2 transition-colors ${
+                      selectedAmount === amt
+                        ? 'border-primary text-white bg-primary'
+                        : 'border-outline-variant/30 text-on-surface hover:border-primary/40'
+                    }`}
+                  >
+                    ${amt}
+                  </button>
+                ))}
+              </div>
 
-          {submitMsg && (
-            <div className={`text-xs font-semibold px-3 py-2 rounded-lg mb-4 ${submitMsg.ok ? 'bg-secondary/10 text-secondary' : 'bg-error/10 text-error'}`}>
-              {submitMsg.text}
-            </div>
+              <div className="flex items-center gap-2 border border-outline-variant/30 rounded-xl px-3 py-2.5 mb-4 focus-within:border-primary/50">
+                <span className="material-symbols-outlined text-on-surface-variant text-[16px]">attach_money</span>
+                <input
+                  type="number"
+                  placeholder="Other amount"
+                  value={customAmount}
+                  onChange={(e) => { setCustomAmount(e.target.value); setSelectedAmount(null); }}
+                  className="bg-transparent text-sm text-on-surface placeholder:text-on-surface-variant outline-none w-full"
+                />
+              </div>
+
+              <p className="text-[10px] font-bold text-on-surface-variant uppercase tracking-widest mb-2">Designate Your Impact</p>
+              <div className="relative mb-4">
+                <select value={program} onChange={(e) => setProgram(e.target.value)} className={selectClass}>
+                  {PROGRAMS.map((p) => <option key={p}>{p}</option>)}
+                </select>
+                <span className="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-on-surface-variant text-[18px] pointer-events-none">expand_more</span>
+              </div>
+
+              <p className="text-[10px] font-bold text-on-surface-variant uppercase tracking-widest mb-2">Payment Method</p>
+              <div className="border border-outline-variant/30 rounded-xl overflow-hidden mb-5">
+                {PAYMENT_METHODS.map((method, i) => (
+                  <button
+                    key={method.id}
+                    onClick={() => setPaymentMethod(method.id)}
+                    className={`w-full flex items-center gap-3 px-4 py-3 text-sm text-left transition-colors ${
+                      i > 0 ? 'border-t border-outline-variant/20' : ''
+                    } ${paymentMethod === method.id ? 'bg-primary/5' : 'hover:bg-surface-container-high/50'}`}
+                  >
+                    <span className={`w-4 h-4 rounded-full border-2 flex items-center justify-center flex-shrink-0 ${
+                      paymentMethod === method.id ? 'border-primary' : 'border-outline-variant'
+                    }`}>
+                      {paymentMethod === method.id && <span className="w-2 h-2 rounded-full bg-primary block" />}
+                    </span>
+                    <span className="w-8 h-6 flex items-center justify-center flex-shrink-0">{method.logo}</span>
+                    <span className="font-medium text-on-surface">{method.label}</span>
+                  </button>
+                ))}
+              </div>
+
+              {submitMsg && (
+                <div className={`text-xs font-semibold px-3 py-2 rounded-lg mb-4 ${submitMsg.ok ? 'bg-secondary/10 text-secondary' : 'bg-error/10 text-error'}`}>
+                  {submitMsg.text}
+                </div>
+              )}
+
+              <button
+                onClick={confirmAndSubmit}
+                disabled={submitting}
+                className="w-full aurora-gradient text-white font-bold py-3.5 rounded-xl text-sm hover:opacity-90 transition-opacity flex items-center justify-center gap-2 disabled:opacity-60"
+              >
+                {submitting ? 'Processing…' : 'Make Donation'}
+                {!submitting && <span className="material-symbols-outlined text-[18px]">arrow_forward</span>}
+              </button>
+            </>
           )}
 
-          <button
-            onClick={handleSubmit}
-            disabled={submitting}
-            className="w-full aurora-gradient text-white font-bold py-3.5 rounded-xl text-sm hover:opacity-90 transition-opacity flex items-center justify-center gap-2 disabled:opacity-60"
-          >
-            {submitting ? 'Processing…' : 'Proceed to Secure Gift'}
-            {!submitting && <span className="material-symbols-outlined text-[18px]">arrow_forward</span>}
-          </button>
+          {/* ── IN-KIND TAB ── */}
+          {giftTab === 'inkind' && (
+            <>
+              <div className="bg-primary/5 border border-primary/20 rounded-xl px-4 py-3 mb-4 flex gap-2">
+                <span className="material-symbols-outlined text-primary text-[18px] flex-shrink-0 mt-0.5">info</span>
+                <p className="text-xs text-on-surface-variant leading-relaxed">
+                  Submit a supply donation request and our team will coordinate pickup or delivery with you directly.
+                </p>
+              </div>
+
+              {/* Add item form */}
+              <p className="text-[10px] font-bold text-on-surface-variant uppercase tracking-widest mb-2">Add Items</p>
+              <div className="space-y-2 mb-3">
+                {/* Row 1: Item Type | Item Name */}
+                <div className="grid grid-cols-2 gap-2">
+                  <div>
+                    <label className="text-[10px] text-on-surface-variant font-semibold uppercase tracking-wide mb-1 block">Item Type</label>
+                    <select
+                      value={newItem.category}
+                      onChange={e => setNewItem(p => ({ ...p, category: e.target.value }))}
+                      className={selectClass}
+                    >
+                      <option value="" disabled>Select type…</option>
+                      {INKIND_CATEGORIES.map(c => <option key={c}>{c}</option>)}
+                    </select>
+                  </div>
+                  <div>
+                    <label className="text-[10px] text-on-surface-variant font-semibold uppercase tracking-wide mb-1 block">Item Name</label>
+                    <select
+                      value={newItem.itemName}
+                      onChange={e => setNewItem(p => ({ ...p, itemName: e.target.value, customItemName: '' }))}
+                      className={selectClass}
+                    >
+                      <option value="" disabled>Select item…</option>
+                      {INKIND_ITEMS.map(i => <option key={i}>{i}</option>)}
+                      <option value="Other">Other</option>
+                    </select>
+                  </div>
+                </div>
+                {/* Other item description */}
+                {newItem.itemName === 'Other' && (
+                  <div>
+                    <label className="text-[10px] text-on-surface-variant font-semibold uppercase tracking-wide mb-1 block">Describe the Item</label>
+                    <input
+                      type="text"
+                      placeholder="e.g. Sleeping bags, Canned food…"
+                      value={newItem.customItemName ?? ''}
+                      onChange={e => setNewItem(p => ({ ...p, customItemName: e.target.value }))}
+                      className="w-full border border-outline-variant/30 rounded-xl px-3 py-2 text-sm text-on-surface bg-surface-container-lowest outline-none focus:border-primary/50"
+                    />
+                  </div>
+                )}
+                {/* Row 2: Quantity | Shipment Type */}
+                <div className="grid grid-cols-2 gap-2">
+                  <div>
+                    <label className="text-[10px] text-on-surface-variant font-semibold uppercase tracking-wide mb-1 block">Quantity</label>
+                    <input
+                      type="number"
+                      min="1"
+                      value={newItem.quantity}
+                      onChange={e => setNewItem(p => ({ ...p, quantity: e.target.value }))}
+                      placeholder="e.g. 10"
+                      className="w-full border border-outline-variant/30 rounded-xl px-3 py-2 text-sm text-on-surface bg-surface-container-lowest outline-none focus:border-primary/50"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-[10px] text-on-surface-variant font-semibold uppercase tracking-wide mb-1 block">Shipment Type</label>
+                    <select
+                      value={newItem.unit}
+                      onChange={e => setNewItem(p => ({ ...p, unit: e.target.value }))}
+                      className={selectClass}
+                    >
+                      <option value="" disabled>Select unit…</option>
+                      {INKIND_UNITS.map(u => <option key={u}>{u}</option>)}
+                    </select>
+                  </div>
+                </div>
+              </div>
+
+              <button
+                onClick={addInkindItem}
+                className="w-full py-2 mb-4 rounded-xl border-2 border-dashed border-primary/40 text-sm font-bold text-primary hover:border-primary hover:bg-primary/5 transition-colors flex items-center justify-center gap-1"
+              >
+                <span className="material-symbols-outlined text-[18px]">add</span>
+                Add Item
+              </button>
+
+              {/* Item list */}
+              {inkindItems.length > 0 && (
+                <div className="border border-outline-variant/30 rounded-xl overflow-hidden mb-4">
+                  <div className="px-4 py-2 bg-surface-container-high/50 border-b border-outline-variant/20">
+                    <p className="text-[10px] font-bold text-on-surface-variant uppercase tracking-widest">
+                      Your Request ({inkindItems.length} item{inkindItems.length > 1 ? 's' : ''})
+                    </p>
+                  </div>
+                  {inkindItems.map((item) => (
+                    <div key={item.id} className="flex items-center gap-3 px-4 py-3 border-b last:border-b-0 border-outline-variant/20">
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-semibold text-on-surface truncate">
+                          {item.itemName === 'Other' && item.customItemName ? item.customItemName : item.itemName}
+                        </p>
+                        <p className="text-[11px] text-on-surface-variant">
+                          {item.quantity} {item.unit} · {item.category}
+                        </p>
+                      </div>
+                      <button
+                        onClick={() => removeInkindItem(item.id)}
+                        className="text-on-surface-variant hover:text-error transition-colors flex-shrink-0"
+                      >
+                        <span className="material-symbols-outlined text-[18px]">close</span>
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {/* Notes */}
+              <textarea
+                value={inkindNotes}
+                onChange={e => setInkindNotes(e.target.value)}
+                placeholder="Any additional notes for our team… (optional)"
+                rows={2}
+                className="w-full border border-outline-variant/30 rounded-xl px-3 py-2.5 text-sm text-on-surface placeholder:text-on-surface-variant bg-surface-container-lowest outline-none focus:border-primary/50 resize-none mb-4"
+              />
+
+              {inkindMsg && (
+                <div className={`text-xs font-semibold px-3 py-2 rounded-lg mb-4 ${inkindMsg.ok ? 'bg-secondary/10 text-secondary' : 'bg-error/10 text-error'}`}>
+                  {inkindMsg.text}
+                </div>
+              )}
+
+              <button
+                onClick={handleInkindSubmit}
+                disabled={submitting}
+                className="w-full aurora-gradient text-white font-bold py-3.5 rounded-xl text-sm hover:opacity-90 transition-opacity flex items-center justify-center gap-2 disabled:opacity-60"
+              >
+                {submitting ? 'Submitting…' : 'Submit Donation Request'}
+                {!submitting && <span className="material-symbols-outlined text-[18px]">send</span>}
+              </button>
+            </>
+          )}
+
+          {/* ── TIME / VOLUNTEER TAB ── */}
+          {giftTab === 'time' && (
+            <>
+              <div className="bg-primary/5 border border-primary/20 rounded-xl px-4 py-3 mb-4 flex gap-2">
+                <span className="material-symbols-outlined text-primary text-[18px] flex-shrink-0 mt-0.5">info</span>
+                <p className="text-xs text-on-surface-variant leading-relaxed">
+                  Submit a volunteer request and our team will review your availability and reach out with next steps.
+                </p>
+              </div>
+
+              <p className="text-[10px] font-bold text-on-surface-variant uppercase tracking-widest mb-2">Your Information</p>
+              <div className="space-y-2 mb-4">
+                <div>
+                  <label className="text-[10px] text-on-surface-variant font-semibold uppercase tracking-wide mb-1 block">Full Name *</label>
+                  <input
+                    type="text"
+                    placeholder="Jane Doe"
+                    value={timeFullName}
+                    onChange={e => {
+                      const v = e.target.value;
+                      setTimeFullName(v);
+                      setTimeNameErr(/\d/.test(v) ? 'Name cannot contain numbers.' : '');
+                    }}
+                    className={`w-full border rounded-xl px-3 py-2 text-sm text-on-surface bg-surface-container-lowest outline-none ${timeNameErr ? 'border-error focus:border-error' : 'border-outline-variant/30 focus:border-primary/50'}`}
+                  />
+                  {timeNameErr && <p className="text-[10px] text-error font-semibold mt-1">{timeNameErr}</p>}
+                </div>
+                <div className="grid grid-cols-2 gap-2">
+                  <div>
+                    <label className="text-[10px] text-on-surface-variant font-semibold uppercase tracking-wide mb-1 block">Email</label>
+                    <input
+                      type="email"
+                      placeholder="you@example.com"
+                      value={timeEmail}
+                      onChange={e => {
+                        const v = e.target.value;
+                        setTimeEmail(v);
+                        setTimeEmailErr(v.trim() && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v.trim()) ? 'Enter a valid email.' : '');
+                      }}
+                      className={`w-full border rounded-xl px-3 py-2 text-sm text-on-surface bg-surface-container-lowest outline-none ${timeEmailErr ? 'border-error focus:border-error' : 'border-outline-variant/30 focus:border-primary/50'}`}
+                    />
+                    {timeEmailErr && <p className="text-[10px] text-error font-semibold mt-1">{timeEmailErr}</p>}
+                  </div>
+                  <div>
+                    <label className="text-[10px] text-on-surface-variant font-semibold uppercase tracking-wide mb-1 block">Phone</label>
+                    <input
+                      type="tel"
+                      placeholder="+1 (555) 123-4567"
+                      value={timePhone}
+                      onChange={e => {
+                        const raw = e.target.value.replace(/[^\d+]/g, '');
+                        let formatted = raw;
+                        if (raw.startsWith('+')) {
+                          const cc = raw.slice(0, 2);
+                          const rest = raw.slice(2);
+                          if (rest.length <= 3) formatted = `${cc} (${rest}`;
+                          else if (rest.length <= 6) formatted = `${cc} (${rest.slice(0, 3)}) ${rest.slice(3)}`;
+                          else formatted = `${cc} (${rest.slice(0, 3)}) ${rest.slice(3, 6)}-${rest.slice(6, 10)}`;
+                        } else {
+                          const d = raw;
+                          if (d.length <= 3) formatted = `(${d}`;
+                          else if (d.length <= 6) formatted = `(${d.slice(0, 3)}) ${d.slice(3)}`;
+                          else formatted = `(${d.slice(0, 3)}) ${d.slice(3, 6)}-${d.slice(6, 10)}`;
+                        }
+                        setTimePhone(formatted);
+                        const digits = formatted.replace(/\D/g, '');
+                        setTimePhoneErr(digits.length > 0 && digits.length < 10 ? 'Enter a valid phone number.' : '');
+                      }}
+                      className={`w-full border rounded-xl px-3 py-2 text-sm text-on-surface bg-surface-container-lowest outline-none ${timePhoneErr ? 'border-error focus:border-error' : 'border-outline-variant/30 focus:border-primary/50'}`}
+                    />
+                    {timePhoneErr && <p className="text-[10px] text-error font-semibold mt-1">{timePhoneErr}</p>}
+                  </div>
+                </div>
+              </div>
+
+              <p className="text-[10px] font-bold text-on-surface-variant uppercase tracking-widest mb-2">Volunteer Details</p>
+              <div className="space-y-2 mb-4">
+                <div>
+                  <label className="text-[10px] text-on-surface-variant font-semibold uppercase tracking-wide mb-1 block">Program Area</label>
+                  <div className="relative">
+                    <select value={program} onChange={e => setProgram(e.target.value)} className={selectClass}>
+                      {PROGRAMS.map(p => <option key={p}>{p}</option>)}
+                    </select>
+                    <span className="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-on-surface-variant text-[18px] pointer-events-none">expand_more</span>
+                  </div>
+                </div>
+                <div>
+                  <label className="text-[10px] text-on-surface-variant font-semibold uppercase tracking-wide mb-1.5 block">Availability</label>
+                  <div className="grid grid-cols-2 gap-1.5">
+                    {[
+                      { value: 'Weekday Mornings', icon: 'wb_sunny' },
+                      { value: 'Weekday Afternoons', icon: 'wb_twilight' },
+                      { value: 'Weekday Evenings', icon: 'nights_stay' },
+                      { value: 'Saturdays', icon: 'calendar_today' },
+                      { value: 'Sundays', icon: 'calendar_today' },
+                      { value: 'Flexible', icon: 'event_available' },
+                    ].map(opt => {
+                      const checked = timeAvailability.includes(opt.value);
+                      return (
+                        <button
+                          key={opt.value}
+                          type="button"
+                          onClick={() => setTimeAvailability(prev =>
+                            checked ? prev.filter(v => v !== opt.value) : [...prev, opt.value]
+                          )}
+                          className={`flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-semibold transition-all border ${
+                            checked
+                              ? 'border-primary bg-primary/10 text-primary'
+                              : 'border-outline-variant/30 text-on-surface-variant hover:border-primary/40 hover:bg-surface-container-high/50'
+                          }`}
+                        >
+                          <span className="material-symbols-outlined text-[16px]" style={checked ? { fontVariationSettings: "'FILL' 1" } : undefined}>
+                            {checked ? 'check_circle' : opt.icon}
+                          </span>
+                          {opt.value}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+                <div>
+                  <label className="text-[10px] text-on-surface-variant font-semibold uppercase tracking-wide mb-1 block">Tell us about yourself</label>
+                  <textarea
+                    value={timeNotes}
+                    onChange={e => setTimeNotes(e.target.value)}
+                    placeholder="Skills, experience, or anything you'd like us to know…"
+                    rows={3}
+                    className="w-full border border-outline-variant/30 rounded-xl px-3 py-2.5 text-sm text-on-surface placeholder:text-on-surface-variant bg-surface-container-lowest outline-none focus:border-primary/50 resize-none"
+                  />
+                </div>
+              </div>
+
+              {timeMsg && (
+                <div className={`text-xs font-semibold px-3 py-2 rounded-lg mb-4 ${timeMsg.ok ? 'bg-secondary/10 text-secondary' : 'bg-error/10 text-error'}`}>
+                  {timeMsg.text}
+                </div>
+              )}
+
+              <button
+                onClick={handleTimeSubmit}
+                disabled={submitting}
+                className="w-full aurora-gradient text-white font-bold py-3.5 rounded-xl text-sm hover:opacity-90 transition-opacity flex items-center justify-center gap-2 disabled:opacity-60"
+              >
+                {submitting ? 'Submitting…' : 'Submit Volunteer Request'}
+                {!submitting && <span className="material-symbols-outlined text-[18px]">send</span>}
+              </button>
+            </>
+          )}
         </div>
 
         {/* Right column */}
@@ -208,6 +749,8 @@ export default function GivingPage() {
             </div>
             {loading ? (
               <p className="text-xs text-on-surface-variant py-4 text-center">Loading…</p>
+            ) : loadError ? (
+              <p className="text-xs text-error py-4 text-center font-semibold">{loadError}</p>
             ) : donations.length === 0 ? (
               <p className="text-xs text-on-surface-variant py-4 text-center">No donations recorded yet.</p>
             ) : (
@@ -225,14 +768,22 @@ export default function GivingPage() {
                     <tr key={d.donationId}>
                       <td className="py-2.5 text-on-surface-variant">{formatDate(d.donationDate)}</td>
                       <td className="py-2.5 font-bold text-on-surface">
-                        {d.amount != null ? `$${d.amount.toFixed(2)}` : `~$${d.estimatedValue.toFixed(2)}`}
+                        {d.donationType === 'InKind'
+                          ? 'In-Kind'
+                          : d.donationType === 'Time'
+                            ? 'Volunteer'
+                            : d.amount != null ? `$${d.amount.toFixed(2)}` : `~$${d.estimatedValue.toFixed(2)}`}
                       </td>
                       <td className="py-2.5 text-on-surface-variant">{d.campaignName ?? '—'}</td>
                       <td className="py-2.5">
                         <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
-                          d.isRecurring ? 'bg-secondary/10 text-secondary' : 'bg-surface-container-high text-on-surface-variant'
+                          d.donationType === 'InKind'
+                            ? 'bg-tertiary/10 text-tertiary'
+                            : d.donationType === 'Time'
+                              ? 'bg-primary/10 text-primary'
+                              : d.isRecurring ? 'bg-secondary/10 text-secondary' : 'bg-surface-container-high text-on-surface-variant'
                         }`}>
-                          {d.isRecurring ? 'Monthly' : 'One-time'}
+                          {d.donationType === 'InKind' ? 'In-Kind' : d.donationType === 'Time' ? 'Volunteer' : d.isRecurring ? 'Monthly' : 'One-time'}
                         </span>
                       </td>
                     </tr>
@@ -254,6 +805,38 @@ export default function GivingPage() {
           <p className="text-[10px] text-on-surface-variant mt-1">Maria Gonzalez · Regional Director, Guatemala</p>
         </div>
       </div>
+
+      {/* Monetary confirmation modal */}
+      {showConfirm && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
+          <div className="bg-surface rounded-2xl shadow-xl p-8 max-w-sm w-full mx-4">
+            <div className="flex items-center justify-center w-12 h-12 rounded-full bg-primary/10 mx-auto mb-4">
+              <span className="material-symbols-outlined text-primary text-[24px]" style={{ fontVariationSettings: "'FILL' 1" }}>volunteer_activism</span>
+            </div>
+            <h3 className="font-manrope text-lg font-extrabold text-on-surface text-center mb-1">Confirm Your Donation</h3>
+            <p className="text-sm text-on-surface-variant text-center mb-5">
+              You're about to make a{' '}
+              <strong className="text-on-surface">{isRecurring ? 'monthly' : 'one-time'}</strong> gift of{' '}
+              <strong className="text-primary">${baseAmount.toFixed(2)}</strong> to{' '}
+              <strong className="text-on-surface">{program}</strong> via {selectedMethodLabel}.
+            </p>
+            <div className="flex gap-3">
+              <button
+                onClick={() => setShowConfirm(false)}
+                className="flex-1 py-3 rounded-xl border-2 border-outline-variant/40 text-sm font-bold text-on-surface-variant hover:border-outline-variant transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleSubmit}
+                className="flex-1 py-3 rounded-xl aurora-gradient text-white text-sm font-bold hover:opacity-90 transition-opacity"
+              >
+                Confirm
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
