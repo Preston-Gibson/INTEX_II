@@ -1,4 +1,8 @@
+import { useLanguage } from '../context/LanguageContext'
+
 export default function HowWeWork() {
+  const { t } = useLanguage()
+
   return (
     <section className="bg-surface py-28 overflow-hidden">
       <div className="max-w-7xl mx-auto px-6 grid grid-cols-1 lg:grid-cols-[5fr_7fr] gap-12 lg:gap-20 items-center">
@@ -7,12 +11,10 @@ export default function HowWeWork() {
           <div className="absolute -top-12 -left-12 w-64 h-64 bg-secondary/[0.08] rounded-full blur-[3rem] pointer-events-none" />
 
           <h2 className="relative font-manrope text-[clamp(2rem,3.2vw,2.75rem)] font-extrabold text-primary mb-5">
-            The Buffer Against Exploitation
+            {t('how.heading')}
           </h2>
           <p className="relative text-[1.05rem] leading-[1.8] text-on-surface-variant mb-10">
-            We operate in the critical gap between vulnerability and assault. Our mission
-            is to create a multi-layered defense that protects children before the worst
-            can happen, and help heal them if it already has.
+            {t('how.subheading')}
           </p>
 
           <div className="relative flex flex-col gap-7">
@@ -21,9 +23,9 @@ export default function HowWeWork() {
                 <span className="material-symbols-outlined text-[1.3rem]">radar</span>
               </div>
               <div>
-                <h4 className="font-manrope text-base font-bold text-on-surface mb-1">Early Detection</h4>
+                <h4 className="font-manrope text-base font-bold text-on-surface mb-1">{t('how.detection.title')}</h4>
                 <p className="text-[0.9rem] leading-[1.65] text-on-surface-variant">
-                  Community-based monitoring systems to identify at-risk children before exploitation occurs.
+                  {t('how.detection.desc')}
                 </p>
               </div>
             </div>
@@ -33,9 +35,9 @@ export default function HowWeWork() {
                 <span className="material-symbols-outlined text-[1.3rem]">shield</span>
               </div>
               <div>
-                <h4 className="font-manrope text-base font-bold text-on-surface mb-1">Rapid Response</h4>
+                <h4 className="font-manrope text-base font-bold text-on-surface mb-1">{t('how.response.title')}</h4>
                 <p className="text-[0.9rem] leading-[1.65] text-on-surface-variant">
-                  Immediate legal and physical intervention protocols to remove survivors from harm's way.
+                  {t('how.response.desc')}
                 </p>
               </div>
             </div>
@@ -45,9 +47,9 @@ export default function HowWeWork() {
                 <span className="material-symbols-outlined text-[1.3rem]">favorite</span>
               </div>
               <div>
-                <h4 className="font-manrope text-base font-bold text-on-surface mb-1">Generational Healing</h4>
+                <h4 className="font-manrope text-base font-bold text-on-surface mb-1">{t('how.healing.title')}</h4>
                 <p className="text-[0.9rem] leading-[1.65] text-on-surface-variant">
-                  Working with families to break cycles of vulnerability and poverty through sustainable support.
+                  {t('how.healing.desc')}
                 </p>
               </div>
             </div>

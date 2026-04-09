@@ -1,7 +1,9 @@
 import { useNavigate } from 'react-router-dom'
+import { useLanguage } from '../context/LanguageContext'
 
 export default function Hero() {
   const navigate = useNavigate()
+  const { t } = useLanguage()
 
   return (
     <section className="relative overflow-hidden min-h-[calc(100svh-7.25rem)] flex items-center">
@@ -29,27 +31,26 @@ export default function Hero() {
             <span className="material-symbols-outlined" style={{ fontSize: '0.9rem' }}>
               location_on
             </span>
-            Santa Rosa de Copán, Honduras
+            {t('hero.badge')}
           </span>
 
           <h1 className="font-manrope text-[clamp(2.8rem,5vw,3.75rem)] font-extrabold text-primary tracking-tight mb-6">
-            A Radiant Shield for the <span className="text-secondary">Vulnerable.</span>
+            {t('hero.title')} <span className="text-secondary">{t('hero.title.accent')}</span>
           </h1>
 
           <p className="text-[1.15rem] leading-[1.75] text-on-surface-variant max-w-[520px] mb-10">
-            Lucera is a dedicated sanctuary providing recovery, advocacy, and a hopeful
-            future for children surviving exploitation in Central America.
+            {t('hero.subtitle')}
           </p>
 
           <div className="flex gap-4 flex-wrap">
             <button onClick={() => navigate('/donor-dashboard', { state: { tab: 'Giving' } })} className="aurora-gradient inline-flex items-center gap-2 px-8 py-3.5 text-white font-manrope font-bold text-base rounded-[0.75rem] shadow-[0_4px_16px_rgba(0,63,135,0.35)] hover:opacity-90 active:scale-[0.97] transition-all">
-              Donate Now
+              {t('hero.donate')}
               <span className="material-symbols-outlined" style={{ fontSize: '1.2rem' }}>
                 volunteer_activism
               </span>
             </button>
             <button onClick={() => navigate('/impact')} className="inline-flex items-center gap-2 px-8 py-3.5 bg-surface-container-lowest text-on-surface font-manrope font-bold text-base rounded-[0.75rem] border border-outline-variant/20 hover:bg-surface-container-low transition-colors">
-              Our Impact
+              {t('hero.impact')}
             </button>
           </div>
         </div>
@@ -64,7 +65,7 @@ export default function Hero() {
             />
             <div className="absolute -bottom-6 -left-12 bg-surface-container-lowest px-7 py-6 rounded-[1.25rem] max-w-[260px] shadow-[0_16px_48px_rgba(0,0,0,0.14)] -rotate-2 z-10">
               <p className="font-manrope text-[1.1rem] font-bold italic text-secondary leading-[1.45]">
-                "Hope is the first step toward healing."
+                {t('hero.quote')}
               </p>
             </div>
           </div>

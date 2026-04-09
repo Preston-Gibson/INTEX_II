@@ -1,7 +1,9 @@
 import { useState, useEffect } from 'react'
+import { useLanguage } from '../context/LanguageContext'
 
 export default function ImpactSection() {
   const [livesRestored, setLivesRestored] = useState<number | null>(null)
+  const { t } = useLanguage()
 
   useEffect(() => {
     fetch(`${import.meta.env.VITE_API_URL ?? 'http://localhost:5229'}/api/impact/stats`)
@@ -15,11 +17,10 @@ export default function ImpactSection() {
       <div className="max-w-7xl mx-auto px-6">
         <div className="mb-14">
           <h2 className="font-manrope text-[clamp(1.9rem,3vw,2.5rem)] font-extrabold text-primary mb-4">
-            Our Impact
+            {t('impact.heading')}
           </h2>
           <p className="text-[1.05rem] leading-[1.75] text-on-surface-variant max-w-[640px]">
-            Through direct intervention and long-term care, we are rewriting the stories
-            of those who have endured the unimaginable.
+            {t('impact.subheading')}
           </p>
         </div>
 
@@ -30,10 +31,9 @@ export default function ImpactSection() {
               <span className="material-symbols-outlined text-[2.25rem] text-secondary mb-2 block">
                 health_and_safety
               </span>
-              <h3 className="font-manrope text-[1.3rem] font-bold text-on-surface">Holistic Recovery</h3>
+              <h3 className="font-manrope text-[1.3rem] font-bold text-on-surface">{t('impact.holistic.title')}</h3>
               <p className="mt-3 text-[0.92rem] leading-[1.65] text-on-surface-variant">
-                Specialized trauma-informed therapy and medical care designed for the
-                unique needs of survivors.
+                {t('impact.holistic.desc')}
               </p>
             </div>
             <div className="mt-auto pt-6 border-t border-outline-variant/15">
@@ -41,7 +41,7 @@ export default function ImpactSection() {
                 {livesRestored !== null ? `${livesRestored.toLocaleString()}+` : '—'}
               </span>
               <span className="text-[0.7rem] font-bold tracking-[0.12em] uppercase text-on-surface-variant mt-1 block">
-                Lives Restored
+                {t('impact.holistic.stat')}
               </span>
             </div>
           </div>
@@ -49,18 +49,18 @@ export default function ImpactSection() {
           {/* Legal Advocacy — primary blue */}
           <div className="bg-primary rounded-[2rem] p-9 shadow-sm flex flex-col items-center justify-center gap-3 text-center hover:shadow-md hover:-translate-y-[3px] transition-all duration-300">
             <span className="material-symbols-outlined text-[3rem] text-white">gavel</span>
-            <h3 className="font-manrope text-[1.1rem] font-bold text-white">Legal Advocacy</h3>
+            <h3 className="font-manrope text-[1.1rem] font-bold text-white">{t('impact.legal.title')}</h3>
             <p className="text-[0.92rem] leading-[1.65] text-white/80">
-              Ensuring justice through proactive legal support and systemic reform.
+              {t('impact.legal.desc')}
             </p>
           </div>
 
           {/* Education — amber */}
           <div className="bg-tertiary-fixed rounded-[2rem] p-9 shadow-sm flex flex-col items-center justify-center gap-3 text-center hover:shadow-md hover:-translate-y-[3px] transition-all duration-300">
             <span className="material-symbols-outlined text-[3rem] text-on-tertiary-fixed">school</span>
-            <h3 className="font-manrope text-[1.1rem] font-bold text-on-tertiary-fixed">Education</h3>
+            <h3 className="font-manrope text-[1.1rem] font-bold text-on-tertiary-fixed">{t('impact.education.title')}</h3>
             <p className="text-[0.92rem] leading-[1.65] text-on-tertiary-fixed-variant">
-              Empowering survivors with skills for an independent, secure future.
+              {t('impact.education.desc')}
             </p>
           </div>
 
@@ -68,10 +68,9 @@ export default function ImpactSection() {
           <div className="sm:col-span-2 lg:col-span-4 bg-surface-container-lowest rounded-[2rem] shadow-sm flex flex-col md:flex-row items-stretch overflow-hidden hover:shadow-md hover:-translate-y-[3px] transition-all duration-300">
             <div className="p-9 md:p-12 flex-1 flex flex-col justify-center gap-4">
               <span className="material-symbols-outlined text-[2.25rem] text-secondary">home_pin</span>
-              <h3 className="font-manrope text-[1.3rem] font-bold text-on-surface">Safe Haven Housing</h3>
+              <h3 className="font-manrope text-[1.3rem] font-bold text-on-surface">{t('impact.housing.title')}</h3>
               <p className="text-[0.92rem] leading-[1.65] text-on-surface-variant">
-                Our residential facilities provide a secure, home-like environment where
-                survivors can heal without fear, supported every step of the way.
+                {t('impact.housing.desc')}
               </p>
             </div>
             <img
