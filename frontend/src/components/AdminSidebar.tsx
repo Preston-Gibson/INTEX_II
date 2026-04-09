@@ -16,7 +16,8 @@ export default function AdminSidebar() {
   return (
     <aside className="w-56 flex-shrink-0 flex flex-col bg-surface-container-lowest border-r border-outline-variant/20 py-6 px-4 relative z-10">
       <div className="mb-8 px-2">
-        <p className="text-primary font-headline font-extrabold text-lg leading-tight">Lucera Admin</p>
+        <img src="/logo.png" alt="Lucera" className="h-8 w-auto object-contain mb-1" />
+        <p className="text-on-surface-variant text-[10px] font-bold uppercase tracking-widest mt-0.5">Admin Portal</p>
       </div>
 
       <nav className="flex-1 space-y-1">

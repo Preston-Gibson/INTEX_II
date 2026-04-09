@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { downloadExport, authHeaders, getUser } from '../../utils/auth';
 import ImpactPage from './ImpactPage';
 import GivingPage from './GivingPage';
-import SettingsPage from './SettingsPage';
+import UserAvatar from '../../components/UserAvatar';
 
 const API = `${import.meta.env.VITE_API_URL ?? 'http://localhost:5229'}/api/donor-dashboard`;
 
@@ -20,7 +20,6 @@ const NAV_ITEMS = [
   { label: 'Overview', icon: 'dashboard' },
   { label: 'Impact', icon: 'auto_awesome' },
   { label: 'Giving', icon: 'volunteer_activism' },
-  { label: 'Settings', icon: 'settings' },
 ];
 
 interface Stats {
@@ -67,12 +66,6 @@ export default function DonorDashboard() {
   const [loading, setLoading] = useState(true);
 
   const user = getUser();
-  const displayName = user?.firstName && user?.lastName
-    ? `${user.firstName} ${user.lastName}`
-    : user?.email ?? 'Donor';
-  const initials = user?.firstName && user?.lastName
-    ? `${user.firstName[0]}${user.lastName[0]}`
-    : (user?.email?.[0] ?? 'D').toUpperCase();
 
   useEffect(() => {
     if (activeNav !== 'Overview') return;
@@ -115,7 +108,7 @@ export default function DonorDashboard() {
     <div className="flex h-screen bg-surface overflow-hidden font-body">
       <aside className="w-56 flex-shrink-0 flex flex-col bg-surface-container-lowest border-r border-outline-variant/20 py-6 px-4 relative z-10">
         <div className="mb-8 px-2">
-          <p className="text-primary font-manrope font-extrabold text-lg leading-tight">Guardian Portal</p>
+          <img src="/logo.png" alt="Lucera" className="h-8 w-auto object-contain mb-1" />
           <p className="text-on-surface-variant text-[10px] font-bold uppercase tracking-widest mt-0.5">Donor Command Center</p>
         </div>
         <nav className="flex-1 space-y-1">
@@ -150,23 +143,16 @@ export default function DonorDashboard() {
             />
           </div>
           <p className="flex-1 text-center text-sm font-bold text-on-surface">
-            {activeNav === 'Overview' ? 'Donor Dashboard' : activeNav === 'Impact' ? 'Impact Report' : activeNav === 'Giving' ? 'Giving Overview' : 'Settings'}
+            {activeNav === 'Overview' ? 'Donor Dashboard' : activeNav === 'Impact' ? 'Impact Report' : 'Giving Overview'}
           </p>
           <div className="flex items-center gap-3">
-            <div className="flex items-center gap-2">
-              <div className="w-8 h-8 rounded-full bg-primary-container flex items-center justify-center text-xs font-bold text-on-primary">{initials}</div>
-              <div className="text-right">
-                <p className="text-xs font-bold text-on-surface leading-tight">{displayName}</p>
-                <p className="text-[10px] text-secondary font-semibold">Donor</p>
-              </div>
-            </div>
+            <UserAvatar />
           </div>
         </header>
 
         <main className="flex-1 overflow-y-auto p-6">
           {activeNav === 'Impact' && <ImpactPage />}
           {activeNav === 'Giving' && <GivingPage />}
-          {activeNav === 'Settings' && <SettingsPage />}
           {activeNav !== 'Overview' ? null : <>
 
           <div className="mb-6">
