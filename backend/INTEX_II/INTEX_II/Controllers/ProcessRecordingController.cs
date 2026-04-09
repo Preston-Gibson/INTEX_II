@@ -51,6 +51,20 @@ public class ProcessRecordingController : ControllerBase
         return Ok(result);
     }
 
+    // GET /api/process-recordings/social-workers
+    [HttpGet("social-workers")]
+    public async Task<IActionResult> GetSocialWorkers()
+    {
+        var names = await _db.Residents
+            .Where(r => !string.IsNullOrEmpty(r.AssignedSocialWorker))
+            .Select(r => r.AssignedSocialWorker)
+            .Distinct()
+            .OrderBy(n => n)
+            .ToListAsync();
+
+        return Ok(names);
+    }
+
     // GET /api/process-recordings?residentId=X
     [HttpGet]
     public async Task<IActionResult> GetRecordings([FromQuery] int residentId)
