@@ -619,7 +619,6 @@ export default function GivingPage() {
                         const raw = e.target.value.replace(/[^\d+]/g, '');
                         let formatted = raw;
                         if (raw.startsWith('+')) {
-                          const countryEnd = raw.length > 2 && raw[1] === '1' ? 2 : raw.indexOf('', 2);
                           const cc = raw.slice(0, 2);
                           const rest = raw.slice(2);
                           if (rest.length <= 3) formatted = `${cc} (${rest}`;
