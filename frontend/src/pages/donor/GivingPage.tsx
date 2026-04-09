@@ -11,6 +11,29 @@ const PROGRAMS = [
   'Health Clinic',
 ];
 
+// Distinct values from in_kind_donation_items data
+const INKIND_ITEMS = [
+  'Bags', 'Blankets', 'Books', 'Furniture', 'Hygiene Kits',
+  'Medicines', 'Rice', 'School Supplies', 'Uniforms',
+];
+
+const INKIND_CATEGORIES = [
+  'Clothing', 'Food', 'Furniture', 'Hygiene',
+  'Medical', 'School Materials', 'Supplies',
+];
+
+const INKIND_UNITS = ['boxes', 'kg', 'packs', 'pcs', 'sets', 'units'];
+
+
+interface InKindItem {
+  id: number;
+  itemName: string;
+  customItemName?: string;
+  category: string;
+  quantity: string;
+  unit: string;
+}
+
 interface Donation {
   donationId: number;
   donationType: string;
@@ -40,24 +63,16 @@ const ApplePayLogo = () => (
 );
 
 const PAYMENT_METHODS = [
-  {
-    id: 'ach',
-    label: 'Bank Account (ACH)',
-    logo: <span className="material-symbols-outlined text-on-surface-variant text-[20px]">account_balance</span>,
-  },
-  {
-    id: 'paypal',
-    label: 'PayPal',
-    logo: <PayPalLogo />,
-  },
-  {
-    id: 'applepay',
-    label: 'Apple Pay',
-    logo: <ApplePayLogo />,
-  },
+  { id: 'ach', label: 'Bank Account (ACH)', logo: <span className="material-symbols-outlined text-on-surface-variant text-[20px]">account_balance</span> },
+  { id: 'paypal', label: 'PayPal', logo: <PayPalLogo /> },
+  { id: 'applepay', label: 'Apple Pay', logo: <ApplePayLogo /> },
 ];
 
 export default function GivingPage() {
+  // Tab: monetary vs in-kind
+  const [giftTab, setGiftTab] = useState<'monetary' | 'inkind'>('monetary');
+
+  // Monetary state
   const [isRecurring, setIsRecurring] = useState(false);
   const [selectedAmount, setSelectedAmount] = useState<number | null>(50);
   const [customAmount, setCustomAmount] = useState('');
@@ -67,6 +82,19 @@ export default function GivingPage() {
   const [submitting, setSubmitting] = useState(false);
   const [submitMsg, setSubmitMsg] = useState<{ ok: boolean; text: string } | null>(null);
 
+  // In-kind state
+  const [inkindItems, setInkindItems] = useState<InKindItem[]>([]);
+  const [inkindNotes, setInkindNotes] = useState('');
+  const [inkindMsg, setInkindMsg] = useState<{ ok: boolean; text: string } | null>(null);
+  const [newItem, setNewItem] = useState<Omit<InKindItem, 'id'>>({
+    itemName: INKIND_ITEMS[0],
+    customItemName: '',
+    category: INKIND_CATEGORIES[0],
+    quantity: '1',
+    unit: INKIND_UNITS[0],
+  });
+
+  // History
   const [donations, setDonations] = useState<Donation[]>([]);
   const [lifetimeTotal, setLifetimeTotal] = useState<number>(0);
   const [loading, setLoading] = useState(true);
@@ -95,6 +123,7 @@ export default function GivingPage() {
 
   const baseAmount = selectedAmount ?? (parseFloat(customAmount) || 0);
 
+  // Monetary flow
   const confirmAndSubmit = () => {
     if (!baseAmount || baseAmount <= 0) {
       setSubmitMsg({ ok: false, text: 'Please enter a valid amount.' });
@@ -129,12 +158,36 @@ export default function GivingPage() {
     }
   };
 
+  // In-kind flow
+  const addInkindItem = () => {
+    if (!newItem.quantity || parseInt(newItem.quantity) <= 0) return;
+    setInkindItems(prev => [...prev, { ...newItem, id: Date.now() }]);
+    setNewItem(prev => ({ ...prev, quantity: '1' }));
+  };
+
+  const removeInkindItem = (id: number) => {
+    setInkindItems(prev => prev.filter(i => i.id !== id));
+  };
+
+  const handleInkindSubmit = () => {
+    if (inkindItems.length === 0) {
+      setInkindMsg({ ok: false, text: 'Please add at least one item to your request.' });
+      return;
+    }
+    // UI only for now — simulate success
+    setInkindMsg({ ok: true, text: 'Your in-kind donation request has been submitted! Our team will be in touch.' });
+    setInkindItems([]);
+    setInkindNotes('');
+  };
+
   const formatDate = (d: string | null) => {
     if (!d) return '—';
     return new Date(d).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
   };
 
   const selectedMethodLabel = PAYMENT_METHODS.find(m => m.id === paymentMethod)?.label ?? '';
+
+  const selectClass = "w-full appearance-none border border-outline-variant/30 rounded-xl px-3 py-2 text-sm text-on-surface bg-surface-container-lowest outline-none focus:border-primary/50";
 
   return (
     <div className="space-y-6">
@@ -155,117 +208,276 @@ export default function GivingPage() {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
-        {/* Make a Gift */}
+        {/* Make a Gift card */}
         <div className="md:col-span-2 bg-surface-container-low rounded-xl p-6">
           <div className="flex items-center justify-between mb-5">
             <p className="font-manrope font-bold text-lg text-on-surface">Make a Gift</p>
             <span className="material-symbols-outlined text-secondary text-[22px]" style={{ fontVariationSettings: "'FILL' 1" }}>favorite</span>
           </div>
 
-          {/* One-time / Monthly toggle */}
-          <div className="flex items-center bg-primary/10 rounded-full p-1 mb-4">
+          {/* Monetary / In-Kind tab switcher */}
+          <div className="flex items-center bg-surface-container-high rounded-xl p-1 mb-5">
             <button
-              onClick={() => setIsRecurring(false)}
-              className={`flex-1 py-2 rounded-full text-sm font-bold transition-all ${
-                !isRecurring ? 'bg-primary text-white shadow-sm' : 'text-on-surface-variant hover:text-on-surface'
+              onClick={() => { setGiftTab('monetary'); setSubmitMsg(null); setInkindMsg(null); }}
+              className={`flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg text-sm font-bold transition-all ${
+                giftTab === 'monetary'
+                  ? 'bg-surface text-primary shadow-sm'
+                  : 'text-on-surface-variant hover:text-on-surface'
               }`}
             >
-              One-time
+              <span className="material-symbols-outlined text-[16px]">payments</span>
+              Monetary
             </button>
             <button
-              onClick={() => setIsRecurring(true)}
-              className={`flex-1 py-2 rounded-full text-sm font-bold transition-all ${
-                isRecurring ? 'bg-primary text-white shadow-sm' : 'text-on-surface-variant hover:text-on-surface'
+              onClick={() => { setGiftTab('inkind'); setSubmitMsg(null); setInkindMsg(null); }}
+              className={`flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg text-sm font-bold transition-all ${
+                giftTab === 'inkind'
+                  ? 'bg-surface text-primary shadow-sm'
+                  : 'text-on-surface-variant hover:text-on-surface'
               }`}
             >
-              Monthly
+              <span className="material-symbols-outlined text-[16px]">inventory_2</span>
+              In-Kind
             </button>
           </div>
 
-          <p className="text-center text-sm text-on-surface mb-4">
-            Choose a <strong>{isRecurring ? 'monthly' : 'one-time'}</strong> amount
-          </p>
+          {/* ── MONETARY TAB ── */}
+          {giftTab === 'monetary' && (
+            <>
+              {/* One-time / Monthly toggle */}
+              <div className="flex items-center bg-primary/10 rounded-full p-1 mb-4">
+                <button
+                  onClick={() => setIsRecurring(false)}
+                  className={`flex-1 py-2 rounded-full text-sm font-bold transition-all ${
+                    !isRecurring ? 'bg-primary text-white shadow-sm' : 'text-on-surface-variant hover:text-on-surface'
+                  }`}
+                >
+                  One-time
+                </button>
+                <button
+                  onClick={() => setIsRecurring(true)}
+                  className={`flex-1 py-2 rounded-full text-sm font-bold transition-all ${
+                    isRecurring ? 'bg-primary text-white shadow-sm' : 'text-on-surface-variant hover:text-on-surface'
+                  }`}
+                >
+                  Monthly
+                </button>
+              </div>
 
-          {/* Preset amounts */}
-          <div className="flex gap-2 mb-4">
-            {[25, 50, 100].map((amt) => (
+              <p className="text-center text-sm text-on-surface mb-4">
+                Choose a <strong>{isRecurring ? 'monthly' : 'one-time'}</strong> amount
+              </p>
+
+              <div className="flex gap-2 mb-4">
+                {[25, 50, 100].map((amt) => (
+                  <button
+                    key={amt}
+                    onClick={() => { setSelectedAmount(amt); setCustomAmount(''); }}
+                    className={`flex-1 py-2.5 rounded-xl text-sm font-bold border-2 transition-colors ${
+                      selectedAmount === amt
+                        ? 'border-primary text-white bg-primary'
+                        : 'border-outline-variant/30 text-on-surface hover:border-primary/40'
+                    }`}
+                  >
+                    ${amt}
+                  </button>
+                ))}
+              </div>
+
+              <div className="flex items-center gap-2 border border-outline-variant/30 rounded-xl px-3 py-2.5 mb-4 focus-within:border-primary/50">
+                <span className="material-symbols-outlined text-on-surface-variant text-[16px]">attach_money</span>
+                <input
+                  type="number"
+                  placeholder="Other amount"
+                  value={customAmount}
+                  onChange={(e) => { setCustomAmount(e.target.value); setSelectedAmount(null); }}
+                  className="bg-transparent text-sm text-on-surface placeholder:text-on-surface-variant outline-none w-full"
+                />
+              </div>
+
+              <p className="text-[10px] font-bold text-on-surface-variant uppercase tracking-widest mb-2">Designate Your Impact</p>
+              <div className="relative mb-4">
+                <select value={program} onChange={(e) => setProgram(e.target.value)} className={selectClass}>
+                  {PROGRAMS.map((p) => <option key={p}>{p}</option>)}
+                </select>
+                <span className="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-on-surface-variant text-[18px] pointer-events-none">expand_more</span>
+              </div>
+
+              <p className="text-[10px] font-bold text-on-surface-variant uppercase tracking-widest mb-2">Payment Method</p>
+              <div className="border border-outline-variant/30 rounded-xl overflow-hidden mb-5">
+                {PAYMENT_METHODS.map((method, i) => (
+                  <button
+                    key={method.id}
+                    onClick={() => setPaymentMethod(method.id)}
+                    className={`w-full flex items-center gap-3 px-4 py-3 text-sm text-left transition-colors ${
+                      i > 0 ? 'border-t border-outline-variant/20' : ''
+                    } ${paymentMethod === method.id ? 'bg-primary/5' : 'hover:bg-surface-container-high/50'}`}
+                  >
+                    <span className={`w-4 h-4 rounded-full border-2 flex items-center justify-center flex-shrink-0 ${
+                      paymentMethod === method.id ? 'border-primary' : 'border-outline-variant'
+                    }`}>
+                      {paymentMethod === method.id && <span className="w-2 h-2 rounded-full bg-primary block" />}
+                    </span>
+                    <span className="w-8 h-6 flex items-center justify-center flex-shrink-0">{method.logo}</span>
+                    <span className="font-medium text-on-surface">{method.label}</span>
+                  </button>
+                ))}
+              </div>
+
+              {submitMsg && (
+                <div className={`text-xs font-semibold px-3 py-2 rounded-lg mb-4 ${submitMsg.ok ? 'bg-secondary/10 text-secondary' : 'bg-error/10 text-error'}`}>
+                  {submitMsg.text}
+                </div>
+              )}
+
               <button
-                key={amt}
-                onClick={() => { setSelectedAmount(amt); setCustomAmount(''); }}
-                className={`flex-1 py-2.5 rounded-xl text-sm font-bold border-2 transition-colors ${
-                  selectedAmount === amt
-                    ? 'border-primary text-white bg-primary'
-                    : 'border-outline-variant/30 text-on-surface hover:border-primary/40'
-                }`}
+                onClick={confirmAndSubmit}
+                disabled={submitting}
+                className="w-full aurora-gradient text-white font-bold py-3.5 rounded-xl text-sm hover:opacity-90 transition-opacity flex items-center justify-center gap-2 disabled:opacity-60"
               >
-                ${amt}
+                {submitting ? 'Processing…' : 'Make Donation'}
+                {!submitting && <span className="material-symbols-outlined text-[18px]">arrow_forward</span>}
               </button>
-            ))}
-          </div>
-
-          {/* Custom amount */}
-          <div className="flex items-center gap-2 border border-outline-variant/30 rounded-xl px-3 py-2.5 mb-4 focus-within:border-primary/50">
-            <span className="material-symbols-outlined text-on-surface-variant text-[16px]">attach_money</span>
-            <input
-              type="number"
-              placeholder="Other amount"
-              value={customAmount}
-              onChange={(e) => { setCustomAmount(e.target.value); setSelectedAmount(null); }}
-              className="bg-transparent text-sm text-on-surface placeholder:text-on-surface-variant outline-none w-full"
-            />
-          </div>
-
-          {/* Program */}
-          <p className="text-[10px] font-bold text-on-surface-variant uppercase tracking-widest mb-2">Designate Your Impact</p>
-          <div className="relative mb-4">
-            <select
-              value={program}
-              onChange={(e) => setProgram(e.target.value)}
-              className="w-full appearance-none border border-outline-variant/30 rounded-xl px-3 py-2.5 text-sm text-on-surface bg-surface-container-lowest outline-none focus:border-primary/50 pr-8"
-            >
-              {PROGRAMS.map((p) => <option key={p}>{p}</option>)}
-            </select>
-            <span className="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-on-surface-variant text-[18px] pointer-events-none">expand_more</span>
-          </div>
-
-          {/* Payment method */}
-          <p className="text-[10px] font-bold text-on-surface-variant uppercase tracking-widest mb-2">Payment Method</p>
-          <div className="border border-outline-variant/30 rounded-xl overflow-hidden mb-5">
-            {PAYMENT_METHODS.map((method, i) => (
-              <button
-                key={method.id}
-                onClick={() => setPaymentMethod(method.id)}
-                className={`w-full flex items-center gap-3 px-4 py-3 text-sm text-left transition-colors ${
-                  i > 0 ? 'border-t border-outline-variant/20' : ''
-                } ${paymentMethod === method.id ? 'bg-primary/5' : 'hover:bg-surface-container-high/50'}`}
-              >
-                <span className={`w-4 h-4 rounded-full border-2 flex items-center justify-center flex-shrink-0 ${
-                  paymentMethod === method.id ? 'border-primary' : 'border-outline-variant'
-                }`}>
-                  {paymentMethod === method.id && <span className="w-2 h-2 rounded-full bg-primary block" />}
-                </span>
-                <span className="w-8 h-6 flex items-center justify-center flex-shrink-0">
-                  {method.logo}
-                </span>
-                <span className="font-medium text-on-surface">{method.label}</span>
-              </button>
-            ))}
-          </div>
-
-          {submitMsg && (
-            <div className={`text-xs font-semibold px-3 py-2 rounded-lg mb-4 ${submitMsg.ok ? 'bg-secondary/10 text-secondary' : 'bg-error/10 text-error'}`}>
-              {submitMsg.text}
-            </div>
+            </>
           )}
 
-          <button
-            onClick={confirmAndSubmit}
-            disabled={submitting}
-            className="w-full aurora-gradient text-white font-bold py-3.5 rounded-xl text-sm hover:opacity-90 transition-opacity flex items-center justify-center gap-2 disabled:opacity-60"
-          >
-            {submitting ? 'Processing…' : 'Make Donation'}
-            {!submitting && <span className="material-symbols-outlined text-[18px]">arrow_forward</span>}
-          </button>
+          {/* ── IN-KIND TAB ── */}
+          {giftTab === 'inkind' && (
+            <>
+              <div className="bg-primary/5 border border-primary/20 rounded-xl px-4 py-3 mb-4 flex gap-2">
+                <span className="material-symbols-outlined text-primary text-[18px] flex-shrink-0 mt-0.5">info</span>
+                <p className="text-xs text-on-surface-variant leading-relaxed">
+                  Submit a supply donation request and our team will coordinate pickup or delivery with you directly.
+                </p>
+              </div>
+
+              {/* Add item form */}
+              <p className="text-[10px] font-bold text-on-surface-variant uppercase tracking-widest mb-2">Add Items</p>
+              <div className="space-y-2 mb-3">
+                {/* Row 1: Item Name | Donation Item Type */}
+                <div className="grid grid-cols-2 gap-2">
+                  <div>
+                    <label className="text-[10px] text-on-surface-variant font-semibold uppercase tracking-wide mb-1 block">Item Name</label>
+                    <select
+                      value={newItem.itemName}
+                      onChange={e => setNewItem(p => ({ ...p, itemName: e.target.value, customItemName: '' }))}
+                      className={selectClass}
+                    >
+                      {INKIND_ITEMS.map(i => <option key={i}>{i}</option>)}
+                      <option value="Other">Other</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="text-[10px] text-on-surface-variant font-semibold uppercase tracking-wide mb-1 block">Item Type</label>
+                    <select
+                      value={newItem.category}
+                      onChange={e => setNewItem(p => ({ ...p, category: e.target.value }))}
+                      className={selectClass}
+                    >
+                      {INKIND_CATEGORIES.map(c => <option key={c}>{c}</option>)}
+                    </select>
+                  </div>
+                </div>
+                {/* Other item description */}
+                {newItem.itemName === 'Other' && (
+                  <div>
+                    <label className="text-[10px] text-on-surface-variant font-semibold uppercase tracking-wide mb-1 block">Describe the Item</label>
+                    <input
+                      type="text"
+                      placeholder="e.g. Sleeping bags, Canned food…"
+                      value={newItem.customItemName ?? ''}
+                      onChange={e => setNewItem(p => ({ ...p, customItemName: e.target.value }))}
+                      className="w-full border border-outline-variant/30 rounded-xl px-3 py-2 text-sm text-on-surface bg-surface-container-lowest outline-none focus:border-primary/50"
+                    />
+                  </div>
+                )}
+                {/* Row 2: Quantity | Shipment Type */}
+                <div className="grid grid-cols-2 gap-2">
+                  <div>
+                    <label className="text-[10px] text-on-surface-variant font-semibold uppercase tracking-wide mb-1 block">Quantity</label>
+                    <input
+                      type="number"
+                      min="1"
+                      value={newItem.quantity}
+                      onChange={e => setNewItem(p => ({ ...p, quantity: e.target.value }))}
+                      placeholder="e.g. 10"
+                      className="w-full border border-outline-variant/30 rounded-xl px-3 py-2 text-sm text-on-surface bg-surface-container-lowest outline-none focus:border-primary/50"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-[10px] text-on-surface-variant font-semibold uppercase tracking-wide mb-1 block">Shipment Type</label>
+                    <select
+                      value={newItem.unit}
+                      onChange={e => setNewItem(p => ({ ...p, unit: e.target.value }))}
+                      className={selectClass}
+                    >
+                      {INKIND_UNITS.map(u => <option key={u}>{u}</option>)}
+                    </select>
+                  </div>
+                </div>
+              </div>
+
+              <button
+                onClick={addInkindItem}
+                className="w-full py-2 mb-4 rounded-xl border-2 border-dashed border-primary/40 text-sm font-bold text-primary hover:border-primary hover:bg-primary/5 transition-colors flex items-center justify-center gap-1"
+              >
+                <span className="material-symbols-outlined text-[18px]">add</span>
+                Add Item
+              </button>
+
+              {/* Item list */}
+              {inkindItems.length > 0 && (
+                <div className="border border-outline-variant/30 rounded-xl overflow-hidden mb-4">
+                  <div className="px-4 py-2 bg-surface-container-high/50 border-b border-outline-variant/20">
+                    <p className="text-[10px] font-bold text-on-surface-variant uppercase tracking-widest">
+                      Your Request ({inkindItems.length} item{inkindItems.length > 1 ? 's' : ''})
+                    </p>
+                  </div>
+                  {inkindItems.map((item) => (
+                    <div key={item.id} className="flex items-center gap-3 px-4 py-3 border-b last:border-b-0 border-outline-variant/20">
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-semibold text-on-surface truncate">
+                          {item.itemName === 'Other' && item.customItemName ? item.customItemName : item.itemName}
+                        </p>
+                        <p className="text-[11px] text-on-surface-variant">
+                          {item.quantity} {item.unit} · {item.category}
+                        </p>
+                      </div>
+                      <button
+                        onClick={() => removeInkindItem(item.id)}
+                        className="text-on-surface-variant hover:text-error transition-colors flex-shrink-0"
+                      >
+                        <span className="material-symbols-outlined text-[18px]">close</span>
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {/* Notes */}
+              <textarea
+                value={inkindNotes}
+                onChange={e => setInkindNotes(e.target.value)}
+                placeholder="Any additional notes for our team… (optional)"
+                rows={2}
+                className="w-full border border-outline-variant/30 rounded-xl px-3 py-2.5 text-sm text-on-surface placeholder:text-on-surface-variant bg-surface-container-lowest outline-none focus:border-primary/50 resize-none mb-4"
+              />
+
+              {inkindMsg && (
+                <div className={`text-xs font-semibold px-3 py-2 rounded-lg mb-4 ${inkindMsg.ok ? 'bg-secondary/10 text-secondary' : 'bg-error/10 text-error'}`}>
+                  {inkindMsg.text}
+                </div>
+              )}
+
+              <button
+                onClick={handleInkindSubmit}
+                className="w-full aurora-gradient text-white font-bold py-3.5 rounded-xl text-sm hover:opacity-90 transition-opacity flex items-center justify-center gap-2"
+              >
+                Submit Donation Request
+                <span className="material-symbols-outlined text-[18px]">send</span>
+              </button>
+            </>
+          )}
         </div>
 
         {/* Right column */}
@@ -359,7 +571,7 @@ export default function GivingPage() {
         </div>
       </div>
 
-      {/* Confirmation modal */}
+      {/* Monetary confirmation modal */}
       {showConfirm && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
           <div className="bg-surface rounded-2xl shadow-xl p-8 max-w-sm w-full mx-4">
