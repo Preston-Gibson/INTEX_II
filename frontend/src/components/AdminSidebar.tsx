@@ -1,4 +1,4 @@
-import { NavLink, Link, useNavigate } from 'react-router-dom';
+import { NavLink, Link, useNavigate, useLocation } from 'react-router-dom';
 import { clearToken } from '../utils/auth';
 
 const NAV_ITEMS = [
@@ -13,6 +13,8 @@ const NAV_ITEMS = [
 
 export default function AdminSidebar() {
   const navigate = useNavigate();
+  const { pathname } = useLocation();
+  const isSocialMedia = pathname.includes('social-media');
 
   return (
     <aside className="w-56 flex-shrink-0 flex flex-col bg-surface-container-lowest border-r border-outline-variant/20 py-6 px-4 relative z-10">
@@ -40,19 +42,21 @@ export default function AdminSidebar() {
         ))}
       </nav>
 
-      <button
-        onClick={() => navigate('/admin-caseload-inventory')}
-        className="w-full py-3 rounded-xl font-bold text-sm flex items-center justify-center gap-2 hover:opacity-90 transition-opacity mb-2 shadow-sm"
-        style={{ backgroundColor: '#ffba38', color: '#281900' }}
-      >
-        <span
-          className="material-symbols-outlined text-[18px]"
-          style={{ fontVariationSettings: "'FILL' 1" }}
+      {!isSocialMedia && (
+        <button
+          onClick={() => navigate('/admin-caseload-inventory')}
+          className="w-full py-3 rounded-xl font-bold text-sm flex items-center justify-center gap-2 hover:opacity-90 transition-opacity mb-2 shadow-sm"
+          style={{ backgroundColor: '#ffba38', color: '#281900' }}
         >
-          add_circle
-        </span>
-        New Case
-      </button>
+          <span
+            className="material-symbols-outlined text-[18px]"
+            style={{ fontVariationSettings: "'FILL' 1" }}
+          >
+            add_circle
+          </span>
+          New Case
+        </button>
+      )}
 
       <button
         onClick={() => { clearToken(); navigate('/login'); }}

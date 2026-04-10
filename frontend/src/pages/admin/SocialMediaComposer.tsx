@@ -683,7 +683,7 @@ const PLATFORM_META: Record<Platform, { gradient: string; icon: ReactNode }> = {
   },
 };
 
-const SITE = 'https://intex-ii-eta.vercel.app';
+const SITE = 'https://intex-ii-eta.vercel.app/';
 
 // CTA scripts keyed by PostType → SentimentTone → CTAType
 type CTAKey = `${PostType}:${SentimentTone}`;
@@ -1218,9 +1218,24 @@ export default function SocialMediaComposer() {
                 })()}
               </div>
 
-              {/* Media upload */}
+              {/* Post format: Photo or Text */}
               <div>
-                <label className="text-[10px] font-bold text-on-surface-variant uppercase tracking-widest mb-1.5 block">Media</label>
+                <label className="text-[10px] font-bold text-on-surface-variant uppercase tracking-widest mb-1.5 block">Post Format</label>
+                <div className="grid grid-cols-2 gap-2">
+                  {(['Photo', 'Text'] as const).map(opt => (
+                    <button key={opt} onClick={() => update('mediaType', opt)}
+                      className={`flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-bold transition-colors border ${draft.mediaType === opt ? 'aurora-gradient text-white border-transparent' : 'bg-surface-container-low text-on-surface-variant border-outline-variant/30 hover:bg-surface-container'}`}>
+                      <span className="material-symbols-outlined text-[17px]">{opt === 'Photo' ? 'image' : 'notes'}</span>
+                      {opt}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Media upload — only shown for Photo */}
+              {draft.mediaType === 'Photo' && (
+              <div>
+                <label className="text-[10px] font-bold text-on-surface-variant uppercase tracking-widest mb-1.5 block">Photo</label>
                 <button onClick={() => fileRef.current?.click()} disabled={mediaUploading}
                   className="w-full border-2 border-dashed border-outline-variant rounded-xl py-3 flex flex-col items-center gap-1.5 hover:border-primary/40 hover:bg-primary/5 transition-colors disabled:opacity-60">
                   {mediaUploading
@@ -1230,11 +1245,12 @@ export default function SocialMediaComposer() {
                       : <span className="material-symbols-outlined text-[28px] text-on-surface-variant/50">upload</span>
                   }
                   <p className="text-xs font-semibold text-on-surface-variant">
-                    {mediaUploading ? 'Uploading…' : media ? 'Change media' : 'Upload image or video'}
+                    {mediaUploading ? 'Uploading…' : media ? 'Change photo' : 'Upload a photo'}
                   </p>
                 </button>
-                <input ref={fileRef} type="file" accept="image/*,video/*" className="hidden" onChange={handleMedia} />
+                <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={handleMedia} />
               </div>
+              )}
 
               {/* Toggles */}
               <div className="space-y-3">
