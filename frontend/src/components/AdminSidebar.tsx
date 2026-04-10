@@ -1,19 +1,31 @@
+import { useState } from 'react';
 import { NavLink, Link, useNavigate, useLocation } from 'react-router-dom';
 import { clearToken } from '../utils/auth';
 import { useState } from 'react';
 import { NavLink, Link, useNavigate } from 'react-router-dom';
 
 const NAV_ITEMS = [
+<<<<<<< HEAD
   { to: '/admin-dashboard',                      icon: 'dashboard',          label: 'Dashboard' },
   { to: '/admin-caseload-inventory',             icon: 'folder_shared',      label: 'Residents' },
   { to: '/admin-donors-contributions',           icon: 'volunteer_activism', label: 'Donors' },
   { to: '/admin-process-recording',              icon: 'history_edu',        label: 'Counseling' },
   { to: '/admin-home-visitation-case-conference',icon: 'home_pin',           label: 'Visits' },
   { to: '/admin-reports-analytics',             icon: 'analytics',          label: 'Analytics' },
+=======
+  { to: '/admin-dashboard',                       icon: 'dashboard',          label: 'Dashboard' },
+  { to: '/admin-caseload-inventory',              icon: 'folder_shared',      label: 'Residents' },
+  { to: '/admin-donors-contributions',            icon: 'volunteer_activism', label: 'Donors' },
+  { to: '/admin-process-recording',               icon: 'history_edu',        label: 'Counseling' },
+  { to: '/admin-home-visitation-case-conference', icon: 'home_pin',           label: 'Visits' },
+  { to: '/admin-reports-analytics',               icon: 'analytics',          label: 'Analytics' },
+  { to: '/admin-social-media',                    icon: 'campaign',           label: 'Social Media' },
+>>>>>>> post-gen
 ];
 
 export default function AdminSidebar() {
   const navigate = useNavigate();
+  const [open, setOpen] = useState(false);
   const { pathname } = useLocation();
   const isSocialMedia = pathname.includes('social-media');
   const [open, setOpen] = useState(false);
@@ -48,17 +60,14 @@ export default function AdminSidebar() {
 
       {!isSocialMedia && (
         <button
-          onClick={() => navigate('/admin-caseload-inventory')}
+          onClick={() => { navigate('/admin-caseload-inventory'); setOpen(false); }}
           className="w-full py-3 rounded-xl font-bold text-sm flex items-center justify-center gap-2 hover:opacity-90 transition-opacity mb-2 shadow-sm"
           style={{ backgroundColor: '#ffba38', color: '#281900' }}
         >
-          <span
-            className="material-symbols-outlined text-[18px]"
-            style={{ fontVariationSettings: "'FILL' 1" }}
-          >
+          <span className="material-symbols-outlined text-[18px]" style={{ fontVariationSettings: "'FILL' 1" }}>
             add_circle
           </span>
-          New Case
+          New Resident
         </button>
       )}
 
