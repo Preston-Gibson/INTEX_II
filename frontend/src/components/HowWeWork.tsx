@@ -3,21 +3,25 @@ const BOARD_MEMBERS = [
     name: 'Margaret L. Harmon',
     title: 'Chair, Board of Directors',
     photo: '/images/Woman Smiling at Camera.jpg',
+    cover: false,
   },
   {
     name: 'Dr. James K. Osei',
     title: 'Vice Chair',
     photo: '/images/SmilingDoctor.jpg',
+    cover: false,
   },
   {
-    name: 'Priya Nair-Chandran',
+    name: 'Catherine M. Wells',
     title: 'Treasurer',
     photo: '/images/Woman Hand Chin Smiling.jpg',
+    cover: false,
   },
   {
     name: 'Marco A. Rivera',
     title: 'Secretary',
-    photo: '/images/Man Wearing Blue T-shirt.jpg',
+    photo: '/images/ManWithGlasses.jpeg',
+    cover: true,
   },
 ]
 
@@ -40,8 +44,8 @@ export default function HowWeWork() {
               key={member.name}
               className="bg-surface-container-lowest border border-outline-variant/20 rounded-2xl overflow-hidden flex flex-col shadow-sm"
             >
-              <div className="w-full h-80 overflow-hidden">
-                <img src={member.photo} alt={member.name} className="w-full block" />
+              <div className="w-full h-[28rem] overflow-hidden">
+                <img src={member.photo} alt={member.name} className={member.cover ? 'w-full h-full object-cover object-top' : 'w-full block'} />
               </div>
               <div className="p-4 flex flex-col">
                 <h3 className="font-manrope font-bold text-on-surface text-sm mb-0.5">{member.name}</h3>
