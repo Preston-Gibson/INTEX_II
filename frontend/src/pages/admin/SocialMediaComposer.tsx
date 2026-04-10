@@ -7,7 +7,6 @@ const API = `${import.meta.env.VITE_API_URL ?? 'http://localhost:5229'}/api/soci
 
 const BRAND_LOGO_SRC = '/logo.png';
 const BRAND_INSTAGRAM_HANDLE = 'luceraofficial';
-const BRAND_SOCIAL_NAME = 'Lucera Safehouses & Support';
 const BRAND_TWITTER_HANDLE = '@LuceraSafehouses';
 
 function BrandAvatar({ size, borderWidth = 2 }: { size: number; borderWidth?: number }) {
@@ -547,108 +546,6 @@ function FacebookPreview({ caption, hashtags, media }: { caption: string; hashta
 
 // ─── LinkedIn Preview ─────────────────────────────────────────────────────────
 
-function LinkedInPreview({ caption, hashtags, media }: { caption: string; hashtags: string[]; media: string | null }) {
-  const text = adaptCaption(caption, hashtags, 'LinkedIn');
-  const [expanded, setExpanded] = useState(false);
-
-  return (
-    <IPhoneBlackShell statusDark={false}>
-      <div style={{ flex: 1, background: '#f3f2ef', overflowY: 'auto', display: 'flex', flexDirection: 'column' }}>
-
-        {/* LI top nav */}
-        <div style={{ background: '#fff', borderBottom: '1px solid #e0e0e0', padding: '8px 12px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexShrink: 0 }}>
-          <svg viewBox="0 0 24 24" fill="#0a66c2" style={{ width: 24, height: 24 }}><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
-          <div style={{ display: 'flex', gap: 14 }}>
-            <svg viewBox="0 0 24 24" fill="none" stroke="#666" strokeWidth="2" style={{ width: 20, height: 20 }}><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-            <svg viewBox="0 0 24 24" fill="none" stroke="#666" strokeWidth="2" style={{ width: 20, height: 20 }}><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-          </div>
-        </div>
-
-        {/* Post card */}
-        <div style={{ background: '#fff', marginTop: 8, flexShrink: 0 }}>
-          {/* Header */}
-          <div style={{ display: 'flex', alignItems: 'flex-start', gap: 8, padding: '10px 12px 6px' }}>
-            <img src={BRAND_LOGO_SRC} alt="" style={{ width: 38, height: 38, borderRadius: '50%', objectFit: 'contain', background: '#fff', border: '1px solid #e0e0e0', flexShrink: 0 }} />
-            <div style={{ flex: 1 }}>
-              <p style={{ color: '#000', fontSize: 13, fontWeight: 600, lineHeight: 1.2, margin: 0 }}>{BRAND_SOCIAL_NAME}</p>
-              <p style={{ color: '#666', fontSize: 10, lineHeight: 1.3, margin: 0 }}>Non-profit Organization · 2,841 followers</p>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 4, marginTop: 2 }}>
-                <span style={{ color: '#666', fontSize: 10 }}>2h ·</span>
-                <svg viewBox="0 0 24 24" fill="#666" style={{ width: 10, height: 10 }}><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/></svg>
-              </div>
-            </div>
-            <button style={{ display: 'flex', alignItems: 'center', gap: 3, color: '#0a66c2', fontSize: 11, fontWeight: 700, border: '1.5px solid #0a66c2', borderRadius: 20, padding: '3px 10px', background: 'transparent', cursor: 'default', flexShrink: 0 }}>
-              <svg viewBox="0 0 24 24" fill="#0a66c2" style={{ width: 12, height: 12 }}><path d="M19 11h-6V5h-2v6H5v2h6v6h2v-6h6z"/></svg>
-              Follow
-            </button>
-          </div>
-
-          {/* Caption */}
-          <div style={{ padding: '0 12px 8px' }}>
-            <p style={{ color: '#000', fontSize: 12, lineHeight: 1.5, margin: 0, whiteSpace: 'pre-wrap' }}>
-              {text
-                ? text.length > 120 && !expanded
-                  ? <>{text.slice(0, 120)}<button style={{ color: '#666', fontWeight: 600, background: 'none', border: 'none', cursor: 'pointer', fontSize: 12, padding: 0 }} onClick={() => setExpanded(true)}>…see more</button></>
-                  : text
-                : <span style={{ color: '#aaa', fontStyle: 'italic' }}>Your caption will appear here...</span>
-              }
-            </p>
-          </div>
-
-          {/* Media */}
-          {media ? (
-            <img src={media} alt="Post" style={{ width: '100%', maxHeight: 190, objectFit: 'cover', display: 'block' }} />
-          ) : (
-            <div style={{ width: '100%', height: 150, background: '#f3f2ef', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 6 }}>
-              <svg viewBox="0 0 24 24" fill="#c0bdb8" style={{ width: 32, height: 32 }}><path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"/></svg>
-              <span style={{ fontSize: 10, color: '#c0bdb8' }}>Upload media to preview</span>
-            </div>
-          )}
-
-          {/* Reactions */}
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '6px 12px', borderBottom: '1px solid #e0e0e0' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-              {[{ bg: '#378fe9', e: '👍' }, { bg: '#c0392b', e: '❤️' }, { bg: '#f39c12', e: '💡' }].map((r, i) => (
-                <div key={i} style={{ width: 16, height: 16, borderRadius: '50%', background: r.bg, border: '1.5px solid #fff', marginLeft: i > 0 ? -4 : 0, fontSize: 8, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>{r.e}</div>
-              ))}
-              <span style={{ color: '#666', fontSize: 10, marginLeft: 4 }}>842 · 94 comments</span>
-            </div>
-            <span style={{ color: '#666', fontSize: 10 }}>27 reposts</span>
-          </div>
-
-          {/* Actions */}
-          <div style={{ display: 'flex' }}>
-            {[
-              { icon: <svg viewBox="0 0 24 24" fill="none" stroke="#666" strokeWidth="1.8" style={{ width: 17, height: 17 }}><path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"/></svg>, label: 'Like' },
-              { icon: <svg viewBox="0 0 24 24" fill="none" stroke="#666" strokeWidth="1.8" style={{ width: 17, height: 17 }}><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>, label: 'Comment' },
-              { icon: <svg viewBox="0 0 24 24" fill="none" stroke="#666" strokeWidth="1.8" style={{ width: 17, height: 17 }}><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg>, label: 'Repost' },
-              { icon: <svg viewBox="0 0 24 24" fill="none" stroke="#666" strokeWidth="1.8" style={{ width: 17, height: 17 }}><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>, label: 'Send' },
-            ].map(({ icon, label }) => (
-              <div key={label} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 3, padding: '7px 0', cursor: 'default' }}>
-                {icon}
-                <span style={{ color: '#666', fontSize: 9, fontWeight: 600 }}>{label}</span>
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
-
-      {/* LI bottom tab bar */}
-      <div style={{ background: '#fff', borderTop: '1px solid #e0e0e0', display: 'flex', alignItems: 'center', justifyContent: 'space-around', padding: '6px 0 18px', flexShrink: 0 }}>
-        {[
-          <svg key="h" viewBox="0 0 24 24" fill="#0a66c2" style={{ width: 22, height: 22 }}><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>,
-          <svg key="n" viewBox="0 0 24 24" fill="none" stroke="#666" strokeWidth="2" style={{ width: 22, height: 22 }}><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>,
-          <svg key="p" viewBox="0 0 24 24" fill="none" stroke="#666" strokeWidth="2" style={{ width: 22, height: 22 }}><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>,
-          <svg key="j" viewBox="0 0 24 24" fill="none" stroke="#666" strokeWidth="2" style={{ width: 22, height: 22 }}><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/></svg>,
-          <svg key="m" viewBox="0 0 24 24" fill="none" stroke="#666" strokeWidth="2" style={{ width: 22, height: 22 }}><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>,
-        ].map((icon, i) => (
-          <div key={i} style={{ padding: '4px 8px', cursor: 'default' }}>{icon}</div>
-        ))}
-      </div>
-    </IPhoneBlackShell>
-  );
-}
-
 // ─── Twitter / X Preview ──────────────────────────────────────────────────────
 
 function TwitterPreview({ caption, hashtags, media }: { caption: string; hashtags: string[]; media: string | null }) {
@@ -914,8 +811,7 @@ export default function SocialMediaComposer() {
 
   const handlePublish = async () => {
     if (!draft.caption.trim()) { showToast('Caption is required'); return; }
-    const publishPlatforms = draft.platforms.filter(p => p === 'Instagram' || p === 'Facebook' || p === 'Twitter');
-    if (publishPlatforms.length === 0) { showToast('Select at least one platform to publish'); return; }
+    if (!draft.platforms.includes('Facebook')) { showToast('Select Facebook to publish'); return; }
     if (draft.mediaType !== 'Text' && media?.startsWith('blob:')) { showToast('Image still uploading — please wait'); return; }
     if (draft.mediaType !== 'Text' && !media) { showToast('Please upload an image first'); return; }
 
@@ -923,7 +819,7 @@ export default function SocialMediaComposer() {
     setPublishResults([]);
     try {
       const payload = {
-        platforms: draft.platforms,
+        platforms: ['Facebook'],
         caption: draft.caption,
         mediaType: draft.mediaType,
         mediaUrl: media ?? undefined,
@@ -969,7 +865,7 @@ export default function SocialMediaComposer() {
           <div className="flex items-center justify-between">
             <div>
               <h1 className="font-manrope text-2xl font-extrabold text-primary tracking-tight">Post Composer</h1>
-              <p className="text-on-surface-variant text-sm mt-0.5">Compose once, preview and publish across Instagram, Facebook, LinkedIn, and Twitter.</p>
+              <p className="text-on-surface-variant text-sm mt-0.5">Publish to Facebook · Draft & preview for Instagram and Twitter.</p>
             </div>
             <div className="flex items-center gap-2">
               <button onClick={() => showToast('Draft saved')} className="bg-surface-container-low text-on-surface px-4 py-2 rounded-xl text-sm font-bold hover:bg-surface-container transition-colors">
@@ -984,7 +880,7 @@ export default function SocialMediaComposer() {
                   ? <span className="material-symbols-outlined text-[16px] animate-spin">refresh</span>
                   : <span className="material-symbols-outlined text-[16px]">send</span>
                 }
-                {publishing ? 'Publishing…' : draft.scheduleLater ? 'Schedule' : 'Post Now'}
+                {publishing ? 'Publishing…' : draft.scheduleLater ? 'Schedule to Facebook' : 'Publish to Facebook'}
               </button>
             </div>
           </div>
@@ -1064,23 +960,6 @@ export default function SocialMediaComposer() {
                 )}
               </div>
 
-              {/* Media type */}
-              <div>
-                <label className="text-[10px] font-bold text-on-surface-variant uppercase tracking-widest mb-1.5 block">Media Type</label>
-                <div className="flex flex-wrap gap-1.5">
-                  {(['Reel','Video','Photo','Carousel','Text'] as MediaType[]).map(m => (
-                    <button key={m} onClick={() => update('mediaType', m)}
-                      className={`px-3 py-1 rounded-full text-xs font-bold transition-colors ${draft.mediaType === m ? 'aurora-gradient text-white' : 'bg-surface-container-low text-on-surface-variant hover:bg-surface-container'}`}>
-                      {m}
-                    </button>
-                  ))}
-                </div>
-                {insights && (
-                  <p className="text-[10px] text-on-surface-variant mt-1">
-                    Best: <span className="font-bold text-secondary">{insights.bestMediaType}</span> at {fmtPct(insights.bestMediaTypeRate)}
-                  </p>
-                )}
-              </div>
 
               {/* Caption */}
               <div>
@@ -1182,25 +1061,31 @@ export default function SocialMediaComposer() {
 
               {/* Platforms */}
               <div>
-                <label className="text-[10px] font-bold text-on-surface-variant uppercase tracking-widest mb-2 block">Post To</label>
+                <label className="text-[10px] font-bold text-on-surface-variant uppercase tracking-widest mb-2 block">Platforms</label>
                 <div className="space-y-2">
-                  {PLATFORMS.map(p => (
-                    <button key={p} onClick={() => togglePlatform(p)}
-                      className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl border transition-all text-sm font-semibold ${draft.platforms.includes(p) ? 'border-primary/30 bg-primary/5 text-primary' : 'border-outline-variant/30 bg-surface-container-low text-on-surface-variant hover:bg-surface-container'}`}>
-                      <div className={`w-7 h-7 rounded-lg bg-gradient-to-br ${PLATFORM_META[p].gradient} flex items-center justify-center flex-shrink-0`}>
-                        {PLATFORM_META[p].icon}
-                      </div>
-                      <span>{p}</span>
-                      {insights && (
-                        <span className="ml-auto text-[10px] text-on-surface-variant font-normal">
-                          {fmtPct(insights.platformRates[p] ?? 0)}
+                  {PLATFORMS.map(p => {
+                    const isDraftOnly = p === 'Instagram' || p === 'Twitter';
+                    return (
+                      <button key={p} onClick={() => togglePlatform(p)}
+                        className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl border transition-all text-sm font-semibold ${draft.platforms.includes(p) ? 'border-primary/30 bg-primary/5 text-primary' : 'border-outline-variant/30 bg-surface-container-low text-on-surface-variant hover:bg-surface-container'}`}>
+                        <div className={`w-7 h-7 rounded-lg bg-gradient-to-br ${PLATFORM_META[p].gradient} flex items-center justify-center flex-shrink-0`}>
+                          {PLATFORM_META[p].icon}
+                        </div>
+                        <span>{p}</span>
+                        <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded-full ml-1 ${isDraftOnly ? 'bg-surface-container text-on-surface-variant' : 'bg-secondary/10 text-secondary'}`}>
+                          {isDraftOnly ? 'Draft' : 'Publish'}
                         </span>
-                      )}
-                      {draft.platforms.includes(p) && (
-                        <span className="material-symbols-outlined text-[16px] text-secondary" style={{ fontVariationSettings: "'FILL' 1" }}>check_circle</span>
-                      )}
-                    </button>
-                  ))}
+                        {insights && (
+                          <span className="ml-auto text-[10px] text-on-surface-variant font-normal">
+                            {fmtPct(insights.platformRates[p] ?? 0)}
+                          </span>
+                        )}
+                        {draft.platforms.includes(p) && (
+                          <span className="material-symbols-outlined text-[16px] text-secondary" style={{ fontVariationSettings: "'FILL' 1" }}>check_circle</span>
+                        )}
+                      </button>
+                    );
+                  })}
                 </div>
                 <p className="text-[9px] text-on-surface-variant mt-1.5">% = donation conversion rate from your post history</p>
               </div>
@@ -1261,19 +1146,36 @@ export default function SocialMediaComposer() {
 
             {/* Preview area */}
             <div className="p-6">
+              {/* Draft banner for Instagram / Twitter */}
+              {(activeTab === 'Instagram' || activeTab === 'Twitter') && (
+                <div className="max-w-[500px] mx-auto mb-4 flex items-center gap-3 px-4 py-3 rounded-xl bg-surface-container-lowest border border-outline-variant/20">
+                  <span className="material-symbols-outlined text-[18px] text-on-surface-variant">edit_note</span>
+                  <div className="flex-1">
+                    <p className="text-xs font-bold text-on-surface">{activeTab} — Draft Preview</p>
+                    <p className="text-[10px] text-on-surface-variant mt-0.5">Copy the caption below and paste it when posting manually.</p>
+                  </div>
+                  <button onClick={() => copyCaption(activeTab)}
+                    className="flex items-center gap-1.5 bg-primary text-white px-3 py-1.5 rounded-lg text-xs font-bold hover:opacity-90 transition-opacity">
+                    <span className="material-symbols-outlined text-[13px]">{copied === activeTab ? 'check' : 'content_copy'}</span>
+                    {copied === activeTab ? 'Copied!' : 'Copy Caption'}
+                  </button>
+                </div>
+              )}
+
               {activeTab === 'Instagram' && <InstagramPreview caption={draft.caption} hashtags={draft.hashtags} media={media} />}
               {activeTab === 'Facebook' && <FacebookPreview caption={draft.caption} hashtags={draft.hashtags} media={media} />}
-              {activeTab === 'LinkedIn' && <LinkedInPreview caption={draft.caption} hashtags={draft.hashtags} media={media} />}
               {activeTab === 'Twitter' && <TwitterPreview caption={draft.caption} hashtags={draft.hashtags} media={media} />}
 
-              {/* Copy button */}
-              <div className="flex justify-center mt-5">
-                <button onClick={() => copyCaption(activeTab)}
-                  className="flex items-center gap-2 bg-surface-container-lowest text-on-surface px-5 py-2.5 rounded-xl text-sm font-bold shadow-sm hover:bg-surface-container-low transition-colors border border-outline-variant/20">
-                  <span className="material-symbols-outlined text-[16px]">{copied === activeTab ? 'check' : 'content_copy'}</span>
-                  {copied === activeTab ? 'Copied!' : `Copy ${activeTab} Caption`}
-                </button>
-              </div>
+              {/* Copy button for Facebook too */}
+              {activeTab === 'Facebook' && (
+                <div className="flex justify-center mt-5">
+                  <button onClick={() => copyCaption(activeTab)}
+                    className="flex items-center gap-2 bg-surface-container-lowest text-on-surface px-5 py-2.5 rounded-xl text-sm font-bold shadow-sm hover:bg-surface-container-low transition-colors border border-outline-variant/20">
+                    <span className="material-symbols-outlined text-[16px]">{copied === activeTab ? 'check' : 'content_copy'}</span>
+                    {copied === activeTab ? 'Copied!' : 'Copy Facebook Caption'}
+                  </button>
+                </div>
+              )}
 
               {/* Char limit bars */}
               <div className="mt-4 bg-surface-container-lowest rounded-xl p-4 border border-outline-variant/20 max-w-[500px] mx-auto">
