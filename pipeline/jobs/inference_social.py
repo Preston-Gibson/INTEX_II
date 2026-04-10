@@ -1,6 +1,6 @@
 """
 Inference: engagement_model.sav + donation_model.sav
-           → predictions → operational.social_media_predictions
+           → predictions → public.social_media_predictions
 
 Loads both saved pipelines, rebuilds the feature matrix from
 operational.social_media_posts (no joins needed — single table),
@@ -172,12 +172,13 @@ def run_inference():
             ts,
         ))
 
-    ensure_social_predictions_table(OPERATIONAL_SCHEMA)
+    PREDICTIONS_SCHEMA = "public"
+    ensure_social_predictions_table(PREDICTIONS_SCHEMA)
 
-    with pg_conn(OPERATIONAL_SCHEMA) as conn:
+    with pg_conn(PREDICTIONS_SCHEMA) as conn:
         with conn.cursor() as cur:
-            cur.executemany("""
-                INSERT INTO operational.social_media_predictions
+            cur.executemany(f"""
+                INSERT INTO {PREDICTIONS_SCHEMA}.social_media_predictions
                     (post_id, predicted_engagement_tier,
                      prob_engagement_low, prob_engagement_medium, prob_engagement_high,
                      predicted_has_donations, prob_has_donations, prediction_ts)

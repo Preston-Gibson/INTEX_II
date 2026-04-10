@@ -13,7 +13,7 @@ Two machine learning models are trained on 812 historical social media posts:
 | Engagement Tier | Low / Medium / High engagement | 63.5% |
 | Donation Conversion | Will this post drive donations? (Yes/No + probability) | 78.8% | 
 
-Results are stored in `operational.social_media_predictions` and queried by the backend API.
+Results are stored in `public.social_media_predictions` (same table as EF migrations / the API) and queried by the backend API.
 
 ---
 

@@ -39,14 +39,15 @@ public class SocialMediaController : ControllerBase
         if (p is null) return NotFound();
         return Ok(new
         {
-            postId              = p.PostId,
-            probHasDonations    = p.ProbHasDonations,
-            donationTier        = p.DonationTier,
-            probEngagementLow   = p.ProbEngagementLow,
-            probEngagementMedium = p.ProbEngagementMedium,
-            probEngagementHigh  = p.ProbEngagementHigh,
-            predictedEngagementTier = p.PredictedEngagementTier,
-            scoredAt            = p.ScoredAt,
+            postId                   = p.PostId,
+            probHasDonations         = p.ProbHasDonations,
+            donationTier             = p.DonationTier,
+            predictedHasDonations    = p.PredictedHasDonations,
+            probEngagementLow        = p.ProbEngagementLow,
+            probEngagementMedium     = p.ProbEngagementMedium,
+            probEngagementHigh       = p.ProbEngagementHigh,
+            predictedEngagementTier  = p.PredictedEngagementTier,
+            predictionTs             = p.PredictionTs,
         });
     }
 

@@ -37,6 +37,11 @@ public class AppDbContext : IdentityDbContext<ApplicationUser>
         modelBuilder.Entity<HomeVisitation>().HasKey(e => e.VisitationId);
         modelBuilder.Entity<SocialMediaPost>().HasKey(e => e.PostId);
         modelBuilder.Entity<SocialMediaPrediction>().HasKey(e => e.PostId);
+        modelBuilder.Entity<SocialMediaPrediction>()
+            .HasOne<SocialMediaPost>()
+            .WithOne()
+            .HasForeignKey<SocialMediaPrediction>(p => p.PostId)
+            .OnDelete(DeleteBehavior.Cascade);
         modelBuilder.Entity<DonationAllocation>().HasKey(e => e.AllocationId);
         modelBuilder.Entity<InKindDonationItem>().HasKey(e => e.ItemId);
         modelBuilder.Entity<HealthWellbeingRecord>().HasKey(e => e.HealthRecordId);

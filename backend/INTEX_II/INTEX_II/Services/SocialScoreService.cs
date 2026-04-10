@@ -7,7 +7,7 @@ namespace INTEX_II.Services;
 /// <summary>
 /// Computes a donation-probability score for a newly published social media post
 /// using empirical donation rates from historical post data (Naive Bayes-style).
-/// Writes/upserts the result to social_media_predictions immediately after publish.
+/// Writes/upserts the result to <c>social_media_predictions</c> (managed by EF migrations).
 /// </summary>
 public class SocialScoreService
 {
@@ -34,8 +34,6 @@ public class SocialScoreService
             await using var scope = _scopeFactory.CreateAsyncScope();
             var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
 
-            await EnsureTableAsync(db);
-
             var post = await db.SocialMediaPosts.AsNoTracking()
                 .FirstOrDefaultAsync(p => p.PostId == postId);
             if (post is null) return;
@@ -49,14 +47,15 @@ public class SocialScoreService
 
             var prediction = new SocialMediaPrediction
             {
-                PostId            = postId,
-                ProbHasDonations  = probDonation,
-                DonationTier      = donationTier,
-                ProbEngagementLow    = probLow,
-                ProbEngagementMedium = probMed,
-                ProbEngagementHigh   = probHigh,
-                PredictedEngagementTier = engTier,
-                ScoredAt          = DateTime.UtcNow,
+                PostId                    = postId,
+                ProbHasDonations          = probDonation,
+                DonationTier              = donationTier,
+                ProbEngagementLow         = probLow,
+                ProbEngagementMedium      = probMed,
+                ProbEngagementHigh        = probHigh,
+                PredictedEngagementTier   = engTier,
+                PredictedHasDonations     = probDonation >= 0.5 ? 1 : 0,
+                PredictionTs              = DateTime.UtcNow,
             };
 
             var existing = await db.SocialMediaPredictions.FindAsync(postId);
@@ -64,13 +63,14 @@ public class SocialScoreService
                 db.SocialMediaPredictions.Add(prediction);
             else
             {
-                existing.ProbHasDonations        = prediction.ProbHasDonations;
-                existing.DonationTier            = prediction.DonationTier;
-                existing.ProbEngagementLow       = prediction.ProbEngagementLow;
-                existing.ProbEngagementMedium    = prediction.ProbEngagementMedium;
-                existing.ProbEngagementHigh      = prediction.ProbEngagementHigh;
-                existing.PredictedEngagementTier = prediction.PredictedEngagementTier;
-                existing.ScoredAt                = prediction.ScoredAt;
+                existing.ProbHasDonations          = prediction.ProbHasDonations;
+                existing.DonationTier              = prediction.DonationTier;
+                existing.ProbEngagementLow         = prediction.ProbEngagementLow;
+                existing.ProbEngagementMedium      = prediction.ProbEngagementMedium;
+                existing.ProbEngagementHigh        = prediction.ProbEngagementHigh;
+                existing.PredictedEngagementTier   = prediction.PredictedEngagementTier;
+                existing.PredictedHasDonations     = prediction.PredictedHasDonations;
+                existing.PredictionTs            = prediction.PredictionTs;
             }
 
             await db.SaveChangesAsync();
@@ -185,22 +185,4 @@ public class SocialScoreService
 
     private static int EmojiCount(string text) =>
         text.Count(c => c > '\uF000' || (c >= '\u2600' && c <= '\u27BF'));
-
-    // ── Table bootstrap ──────────────────────────────────────────────────────
-
-    private static async Task EnsureTableAsync(AppDbContext db)
-    {
-        await db.Database.ExecuteSqlRawAsync("""
-            CREATE TABLE IF NOT EXISTS social_media_predictions (
-                post_id                   INT PRIMARY KEY,
-                prob_has_donations        DOUBLE PRECISION NOT NULL,
-                donation_tier             TEXT NOT NULL,
-                prob_engagement_low       DOUBLE PRECISION NOT NULL,
-                prob_engagement_medium    DOUBLE PRECISION NOT NULL,
-                prob_engagement_high      DOUBLE PRECISION NOT NULL,
-                predicted_engagement_tier TEXT NOT NULL,
-                scored_at                 TIMESTAMPTZ NOT NULL
-            );
-            """);
-    }
 }
