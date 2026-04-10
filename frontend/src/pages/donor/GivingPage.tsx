@@ -68,6 +68,17 @@ const PAYMENT_METHODS = [
   { id: 'applepay', label: 'Apple Pay', logo: <ApplePayLogo /> },
 ];
 
+async function extractErrorMessage(res: Response): Promise<string> {
+  const text = await res.text().catch(() => '');
+  if (!text) return `Error ${res.status}: ${res.statusText || 'Request failed'}`;
+  try {
+    const json = JSON.parse(text);
+    return json.detail ?? json.title ?? json.message ?? text;
+  } catch {
+    return text;
+  }
+}
+
 export default function GivingPage() {
   // Tab: monetary vs in-kind vs time
   const [giftTab, setGiftTab] = useState<'monetary' | 'inkind' | 'time'>('monetary');
@@ -117,8 +128,8 @@ export default function GivingPage() {
     fetch(`${API}/my-donations`, { headers: authHeaders() })
       .then(async r => {
         if (!r.ok) {
-          const text = await r.text().catch(() => r.statusText);
-          throw new Error(`${r.status}: ${text}`);
+          const msg = await extractErrorMessage(r);
+          throw new Error(msg);
         }
         return r.json();
       })
@@ -159,7 +170,7 @@ export default function GivingPage() {
         setCustomAmount('');
         loadDonations();
       } else {
-        const msg = await res.text().catch(() => 'Submission failed.');
+        const msg = await extractErrorMessage(res);
         setSubmitMsg({ ok: false, text: msg });
       }
     } catch {
@@ -209,7 +220,7 @@ export default function GivingPage() {
         setInkindNotes('');
         loadDonations();
       } else {
-        const msg = await res.text().catch(() => 'Submission failed.');
+        const msg = await extractErrorMessage(res);
         setInkindMsg({ ok: false, text: msg });
       }
     } catch {
@@ -257,7 +268,7 @@ export default function GivingPage() {
         setTimePhoneErr('');
         loadDonations();
       } else {
-        const msg = await res.text().catch(() => 'Submission failed.');
+        const msg = await extractErrorMessage(res);
         setTimeMsg({ ok: false, text: msg });
       }
     } catch {

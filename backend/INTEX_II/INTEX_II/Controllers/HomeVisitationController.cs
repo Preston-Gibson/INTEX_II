@@ -18,6 +18,19 @@ public class HomeVisitationController : ControllerBase
         _db = db;
     }
 
+    // GET /api/home-visitation/stats
+    [HttpGet("stats")]
+    public async Task<IActionResult> GetStats()
+    {
+        var today = DateOnly.FromDateTime(DateTime.UtcNow);
+
+        var upcomingCount = await _db.HomeVisitations.CountAsync(v => v.VisitDate > today);
+        var followUpCount = await _db.HomeVisitations.CountAsync(v => v.FollowUpNeeded);
+        var safetyCount = await _db.HomeVisitations.CountAsync(v => v.SafetyConcernsNoted);
+
+        return Ok(new { upcomingCount, followUpCount, safetyCount });
+    }
+
     // GET /api/home-visitation/upcoming-visits
     [HttpGet("upcoming-visits")]
     public async Task<IActionResult> GetUpcomingVisits()
