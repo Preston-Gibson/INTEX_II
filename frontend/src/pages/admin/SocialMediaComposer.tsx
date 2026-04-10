@@ -634,8 +634,8 @@ export default function SocialMediaComposer() {
           <p className="text-[10px] font-bold text-on-surface-variant uppercase tracking-widest mb-1">Admin · Social Media</p>
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="font-manrope text-2xl font-extrabold text-primary tracking-tight">Post Composer</h1>
-              <p className="text-on-surface-variant text-sm mt-0.5">Compose once, preview and publish across Instagram, Facebook, LinkedIn, and Twitter.</p>
+              <h1 className="font-manrope text-4xl font-extrabold text-primary tracking-tight mb-2">Post Composer</h1>
+              <p className="text-on-surface-variant text-sm leading-relaxed">Compose once, preview and publish across Instagram, Facebook, LinkedIn, and Twitter.</p>
             </div>
             <div className="flex items-center gap-2">
               <button onClick={() => showToast('Draft saved')} className="bg-surface-container-low text-on-surface px-4 py-2 rounded-xl text-sm font-bold hover:bg-surface-container transition-colors">

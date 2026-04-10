@@ -1,7 +1,6 @@
 import { NavLink, useNavigate } from 'react-router-dom';
 import { isAuthenticated, getRole, clearToken } from '../utils/auth';
 import { useLanguage } from '../context/LanguageContext';
-import type { Language } from '../i18n/translations';
 
 const activeClass =
   'text-blue-700 dark:text-blue-300 border-b-2 border-blue-700 pb-1 transition-colors';
@@ -13,7 +12,7 @@ const navClass = ({ isActive }: { isActive: boolean }) =>
 
 export default function NavBar() {
   const navigate = useNavigate();
-  const { language, setLanguage, t } = useLanguage();
+  const { t } = useLanguage();
   const loggedIn = isAuthenticated();
   const dashboardPath = getRole() === 'Admin' ? '/admin-dashboard' : '/donor-dashboard';
 
@@ -22,13 +21,9 @@ export default function NavBar() {
     navigate('/');
   }
 
-  function toggleLanguage() {
-    setLanguage(language === 'en' ? 'es' : ('en' as Language));
-  }
-
   return (
     <nav className="fixed top-9 w-full z-[1001] bg-white/90 backdrop-blur-xl shadow-sm border-b border-slate-200/60">
-      <div className="grid grid-cols-3 items-center max-w-7xl mx-auto px-6 h-20">
+      <div className="grid grid-cols-3 max-w-7xl mx-auto px-6 h-20">
 
         {/* Left — logo + wordmark + language toggle */}
         <div className="flex items-center gap-3">
@@ -36,14 +31,6 @@ export default function NavBar() {
             <img src="/logo.png" alt="Lucera" className="h-10 w-auto object-contain" />
             <span className="text-2xl font-bold text-primary">Lucera</span>
           </NavLink>
-          <button
-            onClick={toggleLanguage}
-            className="flex items-center gap-1 px-2.5 py-1.5 text-xs font-bold text-slate-500 border border-slate-200 rounded-lg hover:bg-slate-50 transition-colors tracking-wider"
-            aria-label="Toggle language"
-          >
-            <span className="material-symbols-outlined text-slate-400" style={{ fontSize: '1rem' }}>language</span>
-            {language === 'en' ? 'ES' : 'EN'}
-          </button>
         </div>
 
         {/* Center — nav links */}

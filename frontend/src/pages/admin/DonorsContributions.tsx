@@ -562,6 +562,10 @@ export default function DonorsContributions() {
 
         {/* ── Main content ── */}
         <main className="flex-1 overflow-y-auto p-6">
+          <div className="mb-6">
+            <h1 className="font-manrope text-4xl font-extrabold text-primary tracking-tight mb-2">Donors & Contributions</h1>
+            <p className="text-on-surface-variant text-sm leading-relaxed">Manage supporter profiles and track donation history across all campaigns.</p>
+          </div>
 
           {/* ── Supporters Tab ── */}
           {activeTab === 'supporters' && (

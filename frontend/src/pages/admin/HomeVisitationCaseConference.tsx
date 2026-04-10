@@ -311,7 +311,7 @@ export default function HomeVisitationCaseConference() {
         {/* Main */}
         <main className="flex-1 overflow-y-auto p-6 lg:px-12">
           <header className="mb-10">
-            <h1 className="text-4xl font-extrabold text-on-surface tracking-tight mb-2 font-manrope">
+            <h1 className="font-manrope text-4xl font-extrabold text-primary tracking-tight mb-2">
               Visitations &amp; Conferences
             </h1>
             <p className="text-on-surface-variant font-body">
@@ -319,11 +319,7 @@ export default function HomeVisitationCaseConference() {
             </p>
           </header>
 
-          {/* Page title */}
-          <div className="mb-6">
-            <h1 className="font-manrope text-2xl font-extrabold text-on-surface tracking-tight">Home Visitation</h1>
-            <p className="text-sm text-on-surface-variant mt-0.5">Schedule visits, log outcomes, and review field history.</p>
-          </div>
+
 
           {/* Stats strip */}
           <div className="grid grid-cols-3 gap-4 mb-6">
@@ -360,12 +356,12 @@ export default function HomeVisitationCaseConference() {
           <div className="grid grid-cols-2 gap-6 mb-6">
 
             {/* Upcoming visits */}
-            <div className="bg-surface-container-lowest border border-outline-variant/20 rounded-2xl overflow-hidden">
-              <div className="flex items-center justify-between px-5 py-4 border-b border-outline-variant/20">
+            <div className="bg-surface-container-lowest border border-outline-variant/20 rounded-2xl overflow-hidden flex flex-col">
+              <div className="flex items-center justify-between px-5 py-4 border-b border-outline-variant/20 flex-shrink-0">
                 <h2 className="font-bold text-on-surface text-sm">Scheduled Visits</h2>
                 <span className="text-[10px] font-bold text-primary bg-primary/10 px-2 py-0.5 rounded-full uppercase tracking-wide">Upcoming</span>
               </div>
-              <div className="divide-y divide-outline-variant/10 max-h-80 overflow-y-auto">
+              <div className="divide-y divide-outline-variant/10 flex-1 overflow-y-auto">
                 {loading ? (
                   <div className="p-5 space-y-3">
                     <div className="animate-pulse bg-surface-container-high rounded-lg h-16" />

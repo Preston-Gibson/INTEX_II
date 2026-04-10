@@ -795,17 +795,6 @@ export default function GivingPage() {
         </div>
       </div>
 
-      {/* Quote banner */}
-      <div className="rounded-2xl bg-surface-container-high px-6 py-5 flex items-center gap-4">
-        <div className="w-8 h-8 rounded-full bg-tertiary flex-shrink-0 flex items-center justify-center text-white text-[10px] font-bold">MG</div>
-        <div>
-          <p className="text-sm text-on-surface italic leading-relaxed">
-            "Donor support isn't just money — it's a real promise of hope for the families we serve."
-          </p>
-          <p className="text-[10px] text-on-surface-variant mt-1">Maria Gonzalez · Regional Director, Guatemala</p>
-        </div>
-      </div>
-
       {/* Monetary confirmation modal */}
       {showConfirm && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
