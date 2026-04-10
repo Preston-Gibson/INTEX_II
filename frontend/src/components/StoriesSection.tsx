@@ -6,7 +6,7 @@ const stories = [
     imageSrc: '/elena-story-cover.png',
     imageAlt: 'Illustration for Elena\'s story',
     imageBorderColor: 'border-primary-fixed',
-    tagBg: 'bg-secondary-container text-on-secondary-container',
+    tagBg: 'bg-primary-fixed text-on-primary-fixed',
     tagText: 'Case Highlight: Reintegration',
     title: "Elena's Journey to Independence",
     quote: 'After three years in our transition program, Elena graduated from her nursing vocational course and has been safely reunited with her extended family.',
@@ -56,8 +56,18 @@ export default function StoriesSection() {
   const [activeStory, setActiveStory] = useState<typeof stories[0] | null>(null)
 
   useEffect(() => {
-    document.body.style.overflow = activeStory ? 'hidden' : ''
-    return () => { document.body.style.overflow = '' }
+    if (activeStory) {
+      const scrollbarWidth = window.innerWidth - document.documentElement.clientWidth
+      document.body.style.overflow = 'hidden'
+      document.body.style.paddingRight = `${scrollbarWidth}px`
+    } else {
+      document.body.style.overflow = ''
+      document.body.style.paddingRight = ''
+    }
+    return () => {
+      document.body.style.overflow = ''
+      document.body.style.paddingRight = ''
+    }
   }, [activeStory])
 
   return (

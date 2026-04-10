@@ -28,7 +28,7 @@ export default function StoryCard({
   return (
     <div
       onClick={onClick}
-      className="group relative bg-white p-8 rounded-xl overflow-hidden border border-outline-variant/10 hover:shadow-xl transition-shadow cursor-pointer"
+      className="group relative bg-white p-8 rounded-xl overflow-hidden border border-outline-variant/30 shadow-[0_2px_12px_rgba(0,0,0,0.08)] hover:shadow-[0_6px_24px_rgba(0,0,0,0.14)] transition-shadow cursor-pointer"
     >
       <div className="flex gap-6 items-start">
         <div className={`w-24 h-24 rounded-full overflow-hidden flex-shrink-0 border-4 ${imageBorderColor}`}>
