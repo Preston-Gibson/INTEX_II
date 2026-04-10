@@ -4,6 +4,31 @@ import { authHeaders } from '../../utils/auth';
 
 const API = `${import.meta.env.VITE_API_URL ?? 'http://localhost:5229'}/api/social-media`;
 
+const BRAND_LOGO_SRC = '/lucera-logo.png';
+const BRAND_INSTAGRAM_HANDLE = 'luceraofficial';
+const BRAND_SOCIAL_NAME = 'Lucera Safehouses & Support';
+const BRAND_TWITTER_HANDLE = '@LuceraSafehouses';
+
+function BrandAvatar({ size, borderWidth = 2 }: { size: number; borderWidth?: number }) {
+  return (
+    <img
+      src={BRAND_LOGO_SRC}
+      alt=""
+      width={size}
+      height={size}
+      style={{
+        width: size,
+        height: size,
+        borderRadius: '50%',
+        objectFit: 'contain',
+        background: '#fff',
+        border: `${borderWidth}px solid #fff`,
+        display: 'block',
+      }}
+    />
+  );
+}
+
 // ─── Types ────────────────────────────────────────────────────────────────────
 
 type Platform = 'Instagram' | 'Facebook' | 'LinkedIn' | 'Twitter';
@@ -30,6 +55,14 @@ interface DraftPost {
 }
 
 interface Suggestion { text: string; type: 'warning' | 'tip' | 'good' }
+
+interface PlatformResult {
+  platform: string;
+  status: 'published' | 'failed' | 'preview_only';
+  externalPostId?: string | null;
+  permalink?: string | null;
+  errorMessage?: string | null;
+}
 
 interface Insights {
   totalPosts: number;
@@ -177,100 +210,170 @@ function adaptCaption(caption: string, hashtags: string[], platform: Platform): 
 
 function InstagramPreview({ caption, hashtags, media }: { caption: string; hashtags: string[]; media: string | null }) {
   const text = adaptCaption(caption, hashtags, 'Instagram');
+
+  // iPhone 16 Pro dimensions: 393 × 852 logical pixels (screen), aspect ~2.167:1
+  // We render at 320px wide phone body → screen width ≈ 294px
+  const phoneW = 320;
+  const phoneH = 680;
+  // Black Titanium (Space Black) — iPhone 16 Pro
+  const titaniumOuter = 'linear-gradient(165deg,#3a3a3c 0%,#1c1c1e 22%,#0a0a0a 48%,#252528 72%,#141416 100%)';
+  const titaniumInner = 'linear-gradient(165deg,#2c2c2e 0%,#161618 45%,#0c0c0d 100%)';
+
   return (
-    <div className="flex justify-center">
-      {/* Phone shell */}
-      <div className="w-[320px] bg-black rounded-[48px] border-[8px] border-gray-900 shadow-2xl overflow-hidden relative" style={{ boxShadow: '0 0 0 2px #333, 0 25px 60px rgba(0,0,0,0.5)' }}>
-        {/* Dynamic island */}
-        <div className="absolute top-2 left-1/2 -translate-x-1/2 w-24 h-6 bg-black rounded-full z-10" />
-        {/* Screen */}
-        <div className="bg-white overflow-hidden">
-          {/* Status bar */}
-          <div className="flex items-center justify-between px-6 pt-3 pb-1 bg-white">
-            <span className="text-[11px] font-bold text-black">9:41</span>
-            <div className="w-24" />
-            <div className="flex items-center gap-1.5">
-              <svg className="w-4 h-3" viewBox="0 0 18 12" fill="black"><rect x="0" y="4" width="3" height="8" rx="0.5"/><rect x="5" y="2" width="3" height="10" rx="0.5"/><rect x="10" y="0" width="3" height="12" rx="0.5"/><rect x="15" y="0" width="3" height="12" rx="0.5" opacity="0.25"/></svg>
-              <svg className="w-4 h-3" viewBox="0 0 18 12" fill="black"><path d="M9 2.5C5.8 2.5 3 3.8 1 5.9l2 2C4.5 6.2 6.6 5.2 9 5.2s4.5 1 6 2.7l2-2C15 3.8 12.2 2.5 9 2.5Z" opacity="0.3"/><path d="M9 7c-2 0-3.8.8-5.1 2.1L5.8 11C6.9 9.8 8 9.3 9 9.3s2.1.5 3.2 1.7L14.1 9C12.8 7.8 11 7 9 7Z"/><circle cx="9" cy="12" r="1.5"/></svg>
-              <svg className="w-6 h-3" viewBox="0 0 24 12" fill="black"><rect x="0" y="1" width="20" height="10" rx="2" stroke="black" strokeWidth="1" fill="none"/><rect x="1.5" y="2.5" width="15" height="7" rx="1"/><path d="M21.5 4.5v3a1.5 1.5 0 0 0 0-3Z"/></svg>
-            </div>
-          </div>
-          {/* IG top nav */}
-          <div className="flex items-center justify-between px-4 py-2 border-b border-gray-100">
-            <span className="font-bold text-lg text-black tracking-tight" style={{ fontFamily: 'Georgia, serif', fontStyle: 'italic' }}>Instagram</span>
-            <div className="flex items-center gap-4">
-              <svg className="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="black" strokeWidth="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
-              <svg className="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="black" strokeWidth="2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
-            </div>
-          </div>
-          {/* Stories */}
-          <div className="flex gap-3 px-3 py-2.5 overflow-x-auto border-b border-gray-100">
-            {[{ label: 'Your story', add: true }, { label: 'hope', add: false }, { label: 'relief', add: false }, { label: 'giving', add: false }, { label: 'impact', add: false }].map((s) => (
-              <div key={s.label} className="flex flex-col items-center gap-1 flex-shrink-0">
-                <div className={`w-[52px] h-[52px] rounded-full flex items-center justify-center ${s.add ? 'border-2 border-dashed border-gray-300' : 'p-[2px]'}`}
-                  style={!s.add ? { background: 'linear-gradient(45deg,#f09433,#e6683c,#dc2743,#cc2366,#bc1888)' } : {}}>
-                  {s.add
-                    ? <div className="w-full h-full rounded-full bg-gray-100 flex items-center justify-center"><svg className="w-5 h-5 text-blue-500" viewBox="0 0 24 24" fill="currentColor"><path d="M12 5v14M5 12h14"/></svg></div>
-                    : <div className="w-full h-full rounded-full bg-gradient-to-br from-primary/30 to-secondary/30 border-2 border-white" />
-                  }
+    <div style={{ display: 'flex', justifyContent: 'center', fontFamily: '-apple-system,system-ui,sans-serif' }}>
+      {/* Outer titanium frame */}
+      <div style={{
+        width: phoneW, height: phoneH,
+        borderRadius: 54, padding: 4,
+        background: titaniumOuter,
+        boxShadow: '0 0 0 1px rgba(255,255,255,0.06), 0 28px 80px rgba(0,0,0,0.72), inset 0 1px 0 rgba(255,255,255,0.14)',
+        position: 'relative', flexShrink: 0,
+      }}>
+        {/* Side buttons – Volume up */}
+        <div style={{ position: 'absolute', left: -3, top: 128, width: 3, height: 32, borderRadius: '2px 0 0 2px', background: titaniumOuter }} />
+        {/* Volume down */}
+        <div style={{ position: 'absolute', left: -3, top: 172, width: 3, height: 32, borderRadius: '2px 0 0 2px', background: titaniumOuter }} />
+        {/* Action button */}
+        <div style={{ position: 'absolute', left: -3, top: 92, width: 3, height: 28, borderRadius: '2px 0 0 2px', background: titaniumOuter }} />
+        {/* Power/Sleep button */}
+        <div style={{ position: 'absolute', right: -3, top: 148, width: 3, height: 64, borderRadius: '0 2px 2px 0', background: titaniumOuter }} />
+
+        {/* Inner frame edge (slightly recessed) */}
+        <div style={{
+          width: '100%', height: '100%',
+          borderRadius: 51, padding: 2,
+          background: titaniumInner,
+        }}>
+          {/* Screen bezel (black gap between frame and screen) */}
+          <div style={{
+            width: '100%', height: '100%',
+            borderRadius: 49, background: '#000',
+            overflow: 'hidden', position: 'relative',
+          }}>
+            {/* Screen content — white Instagram light mode */}
+            <div style={{ width: '100%', height: '100%', background: '#fff', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+
+              {/* ── Status bar ── */}
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '14px 20px 0', flexShrink: 0, minHeight: 44 }}>
+                <span style={{ fontSize: 13, fontWeight: 700, color: '#000', letterSpacing: -0.3 }}>9:41</span>
+                {/* Dynamic Island */}
+                <div style={{
+                  position: 'absolute', top: 10, left: '50%', transform: 'translateX(-50%)',
+                  width: 112, height: 34, borderRadius: 20, background: '#000',
+                  zIndex: 10,
+                }} />
+                <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                  {/* Signal bars */}
+                  <svg width="17" height="12" viewBox="0 0 17 12" fill="#000"><rect x="0" y="5" width="3" height="7" rx="0.5"/><rect x="4.5" y="3" width="3" height="9" rx="0.5"/><rect x="9" y="1" width="3" height="11" rx="0.5"/><rect x="13.5" y="0" width="3" height="12" rx="0.5" opacity="0.25"/></svg>
+                  {/* WiFi */}
+                  <svg width="16" height="12" viewBox="0 0 16 12" fill="#000"><path d="M8 9.5a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3z"/><path d="M3.5 5.8A6.5 6.5 0 0 1 8 4a6.5 6.5 0 0 1 4.5 1.8l1.3-1.3A8.3 8.3 0 0 0 8 2.2a8.3 8.3 0 0 0-5.8 2.3l1.3 1.3z" opacity="0.4"/><path d="M5.6 7.6A3.5 3.5 0 0 1 8 6.6a3.5 3.5 0 0 1 2.4 1l1.3-1.3A5.3 5.3 0 0 0 8 4.8a5.3 5.3 0 0 0-3.7 1.5l1.3 1.3z"/></svg>
+                  {/* Battery */}
+                  <svg width="25" height="12" viewBox="0 0 25 12" fill="none"><rect x="0.5" y="0.5" width="21" height="11" rx="3.5" stroke="#000" strokeOpacity="0.35"/><rect x="2" y="2" width="17" height="8" rx="2" fill="#000"/><path d="M23 4v4a2 2 0 0 0 0-4z" fill="#000" fillOpacity="0.4"/></svg>
                 </div>
-                <p className="text-[10px] text-gray-700 truncate w-[52px] text-center leading-tight">{s.label}</p>
               </div>
-            ))}
-          </div>
-          {/* Post */}
-          <div className="overflow-y-auto" style={{ maxHeight: '480px' }}>
-            {/* Post header */}
-            <div className="flex items-center justify-between px-3 py-2.5">
-              <div className="flex items-center gap-2.5">
-                <div className="w-8 h-8 rounded-full flex items-center justify-center text-white text-[9px] font-black" style={{ background: 'linear-gradient(135deg,#003f87,#0056b3)' }}>LS</div>
-                <div>
-                  <p className="text-[12px] font-semibold text-black leading-tight">lighthousesanctuary</p>
-                  <p className="text-[10px] text-gray-500 leading-tight">Cebu City, Philippines</p>
+
+              {/* ── IG top nav ── */}
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '8px 14px 6px', flexShrink: 0 }}>
+                <span style={{ fontSize: 22, fontWeight: 700, color: '#000', fontFamily: 'Georgia,serif', fontStyle: 'italic', letterSpacing: -0.5 }}>Instagram</span>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 18 }}>
+                  {/* Heart */}
+                  <svg viewBox="0 0 24 24" fill="none" stroke="#000" strokeWidth="2" style={{ width: 24, height: 24 }}><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+                  {/* Messenger */}
+                  <svg viewBox="0 0 24 24" fill="none" stroke="#000" strokeWidth="2" style={{ width: 24, height: 24 }}><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
                 </div>
               </div>
-              <div className="flex items-center gap-3">
-                <button className="text-[11px] font-bold text-blue-500">Following</button>
-                <svg className="w-5 h-5" viewBox="0 0 24 24" fill="black"><circle cx="5" cy="12" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="19" cy="12" r="2"/></svg>
+
+              {/* ── Stories ── */}
+              <div style={{ display: 'flex', gap: 10, padding: '4px 12px 10px', overflowX: 'hidden', borderBottom: '1px solid #efefef', flexShrink: 0 }}>
+                {/* Your story */}
+                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 3, flexShrink: 0 }}>
+                  <div style={{ width: 56, height: 56, borderRadius: '50%', border: '1.5px dashed #dbdbdb', display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative' }}>
+                    <div style={{ width: 50, height: 50, borderRadius: '50%', background: '#f0f0f0' }} />
+                    <div style={{ position: 'absolute', bottom: 0, right: 0, width: 18, height: 18, borderRadius: '50%', background: '#0095f6', border: '2px solid #fff', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <svg viewBox="0 0 10 10" fill="white" style={{ width: 10, height: 10 }}><path d="M5 1v8M1 5h8"/></svg>
+                    </div>
+                  </div>
+                  <span style={{ fontSize: 9, color: '#262626', maxWidth: 56, textAlign: 'center', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>Your story</span>
+                </div>
+                {[{ label: 'hope' }, { label: 'relief' }, { label: 'giving' }, { label: 'impact' }].map((s) => (
+                  <div key={s.label} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 3, flexShrink: 0 }}>
+                    <div style={{ padding: 2, borderRadius: '50%', background: 'linear-gradient(45deg,#f09433,#e6683c,#dc2743,#cc2366,#bc1888)' }}>
+                      <div style={{ width: 50, height: 50, borderRadius: '50%', background: '#e0dcd8', border: '2px solid #fff' }} />
+                    </div>
+                    <span style={{ fontSize: 9, color: '#262626', maxWidth: 56, textAlign: 'center', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{s.label}</span>
+                  </div>
+                ))}
               </div>
-            </div>
-            {/* Image */}
-            {media ? (
-              <img src={media} alt="Post" className="w-full aspect-square object-cover" />
-            ) : (
-              <div className="w-full aspect-square flex flex-col items-center justify-center gap-2" style={{ background: 'linear-gradient(135deg,rgba(0,63,135,0.07),rgba(0,106,106,0.07))' }}>
-                <svg className="w-12 h-12 text-gray-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
-                <p className="text-[10px] text-gray-400">Upload media to preview</p>
+
+              {/* ── Feed (scrollable) ── */}
+              <div style={{ flex: 1, overflowY: 'auto' }}>
+                {/* Post header */}
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '10px 12px 6px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                    <div style={{ padding: 2, borderRadius: '50%', background: 'linear-gradient(45deg,#f09433,#e6683c,#dc2743,#cc2366,#bc1888)' }}>
+                      <BrandAvatar size={30} borderWidth={2} />
+                    </div>
+                    <div>
+                      <p style={{ color: '#262626', fontSize: 12, fontWeight: 600, lineHeight: 1.2, margin: 0 }}>{BRAND_INSTAGRAM_HANDLE}</p>
+                      <p style={{ color: '#8e8e8e', fontSize: 10, lineHeight: 1.2, margin: 0 }}>Sponsored · 1h</p>
+                    </div>
+                  </div>
+                  <svg viewBox="0 0 24 24" fill="#262626" style={{ width: 18, height: 18 }}><circle cx="5" cy="12" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="19" cy="12" r="2"/></svg>
+                </div>
+
+                {/* Media */}
+                {media ? (
+                  <img src={media} alt="Post" style={{ width: '100%', aspectRatio: '1/1', objectFit: 'cover', display: 'block' }} />
+                ) : (
+                  <div style={{ width: '100%', aspectRatio: '1/1', background: '#fafafa', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 8, borderTop: '1px solid #efefef', borderBottom: '1px solid #efefef' }}>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="#c7c7c7" strokeWidth="1.5" style={{ width: 36, height: 36 }}><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+                    <span style={{ fontSize: 10, color: '#c7c7c7' }}>Upload media to preview</span>
+                  </div>
+                )}
+
+                {/* Action icons */}
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '8px 12px 4px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="#262626" strokeWidth="2" style={{ width: 22, height: 22 }}><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="#262626" strokeWidth="2" style={{ width: 22, height: 22 }}><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="#262626" strokeWidth="2" style={{ width: 22, height: 22 }}><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+                  </div>
+                  <svg viewBox="0 0 24 24" fill="none" stroke="#262626" strokeWidth="2" style={{ width: 22, height: 22 }}><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
+                </div>
+
+                {/* Likes */}
+                <p style={{ padding: '0 12px 3px', color: '#262626', fontSize: 12, fontWeight: 600, margin: 0 }}>1,247 likes</p>
+
+                {/* Caption */}
+                <div style={{ padding: '2px 12px 4px' }}>
+                  <p style={{ color: '#262626', fontSize: 12, lineHeight: 1.5, margin: 0 }}>
+                    <span style={{ fontWeight: 700 }}>{BRAND_INSTAGRAM_HANDLE} </span>
+                    {text
+                      ? text.length > 100
+                        ? <>{text.slice(0, 100)}<span style={{ color: '#8e8e8e' }}> ...more</span></>
+                        : text
+                      : <span style={{ color: '#c7c7c7', fontStyle: 'italic' }}>Your caption will appear here...</span>
+                    }
+                  </p>
+                </div>
+                <p style={{ padding: '0 12px 8px', color: '#8e8e8e', fontSize: 11, margin: 0 }}>View all 4 comments</p>
               </div>
-            )}
-            {/* Actions */}
-            <div className="flex items-center justify-between px-3 py-2">
-              <div className="flex items-center gap-4">
-                <svg className="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="black" strokeWidth="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
-                <svg className="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="black" strokeWidth="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-                <svg className="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="black" strokeWidth="2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+
+              {/* ── Bottom tab bar ── */}
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-around', padding: '8px 0 20px', borderTop: '1px solid #efefef', background: '#fff', flexShrink: 0 }}>
+                {/* Home (active) */}
+                <svg viewBox="0 0 24 24" fill="#262626" style={{ width: 24, height: 24 }}><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22" fill="none" stroke="#262626" strokeWidth="2"/></svg>
+                {/* Search */}
+                <svg viewBox="0 0 24 24" fill="none" stroke="#262626" strokeWidth="1.8" style={{ width: 24, height: 24 }}><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                {/* Reels */}
+                <svg viewBox="0 0 24 24" fill="none" stroke="#262626" strokeWidth="1.8" style={{ width: 24, height: 24 }}><rect x="2" y="2" width="20" height="20" rx="2.18"/><path d="M7 2v20M17 2v20M2 12h20M2 7h5M17 7h5M2 17h5M17 17h5"/></svg>
+                {/* Shop */}
+                <svg viewBox="0 0 24 24" fill="none" stroke="#262626" strokeWidth="1.8" style={{ width: 24, height: 24 }}><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
+                {/* Profile */}
+                <div style={{ width: 24, height: 24, borderRadius: '50%', border: '1.5px solid #262626', overflow: 'hidden', background: '#fff' }}>
+                  <img src={BRAND_LOGO_SRC} alt="" style={{ width: '100%', height: '100%', objectFit: 'contain', display: 'block' }} />
+                </div>
               </div>
-              <svg className="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="black" strokeWidth="2"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
-            </div>
-            {/* Likes */}
-            <p className="px-3 text-[12px] font-semibold text-black">1,247 likes</p>
-            {/* Caption */}
-            <div className="px-3 py-1">
-              <p className="text-[12px] leading-relaxed text-black">
-                <span className="font-semibold">lighthousesanctuary </span>
-                {text
-                  ? text.length > 120
-                    ? <>{text.slice(0, 120)}<span className="text-gray-400"> ...more</span></>
-                    : text
-                  : <span className="text-gray-300 italic">Your caption will appear here...</span>
-                }
-              </p>
-            </div>
-            <p className="px-3 text-[11px] text-gray-400 pb-1">View all 48 comments</p>
-            {/* Add comment bar */}
-            <div className="flex items-center gap-2 px-3 py-2 border-t border-gray-100">
-              <div className="w-6 h-6 rounded-full bg-gray-200 flex-shrink-0" />
-              <p className="text-[11px] text-gray-400">Add a comment…</p>
             </div>
           </div>
         </div>
@@ -279,221 +382,366 @@ function InstagramPreview({ caption, hashtags, media }: { caption: string; hasht
   );
 }
 
-function FacebookPreview({ caption, hashtags, media }: { caption: string; hashtags: string[]; media: string | null }) {
-  const text = adaptCaption(caption, hashtags, 'Facebook');
+// ─── Shared iPhone 16 Pro Black Shell ────────────────────────────────────────
+
+function IPhoneBlackShell({ children, statusDark = false }: { children: React.ReactNode; statusDark?: boolean }) {
+  const phoneW = 320;
+  const phoneH = 680;
+  // Black Titanium: deep charcoal with subtle cold-gray highlights
+  const frame = 'linear-gradient(160deg,#3a3a3c 0%,#1c1c1e 20%,#2c2c2e 45%,#111113 70%,#28282a 100%)';
+  const innerRim = 'linear-gradient(160deg,#111113 0%,#222224 50%,#0a0a0c 100%)';
+  const statusColor = statusDark ? '#fff' : '#000';
+
   return (
-    <div className="max-w-[500px] mx-auto bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden font-sans">
-      {/* Post header */}
-      <div className="flex items-start justify-between p-3 pb-2">
-        <div className="flex items-center gap-2.5">
-          <div className="w-10 h-10 rounded-full flex items-center justify-center text-white text-[11px] font-black flex-shrink-0" style={{ background: 'linear-gradient(135deg,#003f87,#0056b3)' }}>LS</div>
-          <div>
-            <p className="text-[14px] font-semibold text-black leading-tight hover:underline cursor-pointer">Lighthouse Sanctuary</p>
-            <div className="flex items-center gap-1.5 mt-0.5">
-              <p className="text-[12px] text-gray-500">2h ·</p>
-              <svg className="w-3.5 h-3.5 text-gray-500" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/></svg>
+    <div style={{ display: 'flex', justifyContent: 'center', fontFamily: '-apple-system,system-ui,sans-serif' }}>
+      <div style={{
+        width: phoneW, height: phoneH, borderRadius: 54, padding: 4,
+        background: frame,
+        boxShadow: '0 0 0 1px rgba(255,255,255,0.08), 0 0 0 1.5px rgba(0,0,0,0.6), 0 30px 80px rgba(0,0,0,0.7), inset 0 1px 0 rgba(255,255,255,0.12)',
+        position: 'relative', flexShrink: 0,
+      }}>
+        {/* Action button */}
+        <div style={{ position: 'absolute', left: -3, top: 92, width: 3, height: 28, borderRadius: '2px 0 0 2px', background: frame }} />
+        {/* Volume up */}
+        <div style={{ position: 'absolute', left: -3, top: 134, width: 3, height: 32, borderRadius: '2px 0 0 2px', background: frame }} />
+        {/* Volume down */}
+        <div style={{ position: 'absolute', left: -3, top: 178, width: 3, height: 32, borderRadius: '2px 0 0 2px', background: frame }} />
+        {/* Power */}
+        <div style={{ position: 'absolute', right: -3, top: 148, width: 3, height: 64, borderRadius: '0 2px 2px 0', background: frame }} />
+
+        {/* Inner recessed rim */}
+        <div style={{ width: '100%', height: '100%', borderRadius: 51, padding: 2, background: innerRim }}>
+          {/* Screen bezel */}
+          <div style={{ width: '100%', height: '100%', borderRadius: 49, background: '#000', overflow: 'hidden', position: 'relative' }}>
+            {/* Dynamic Island */}
+            <div style={{ position: 'absolute', top: 10, left: '50%', transform: 'translateX(-50%)', width: 112, height: 34, borderRadius: 20, background: '#000', zIndex: 20 }} />
+
+            {/* Status bar */}
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '14px 20px 0', minHeight: 44, position: 'relative', zIndex: 5, background: statusDark ? '#000' : '#fff' }}>
+              <span style={{ fontSize: 13, fontWeight: 700, color: statusColor, letterSpacing: -0.3 }}>9:41</span>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                <svg width="17" height="12" viewBox="0 0 17 12"><rect x="0" y="5" width="3" height="7" rx="0.5" fill={statusColor}/><rect x="4.5" y="3" width="3" height="9" rx="0.5" fill={statusColor}/><rect x="9" y="1" width="3" height="11" rx="0.5" fill={statusColor}/><rect x="13.5" y="0" width="3" height="12" rx="0.5" fill={statusColor} fillOpacity="0.3"/></svg>
+                <svg width="16" height="12" viewBox="0 0 16 12"><path d="M8 9.5a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3z" fill={statusColor}/><path d="M5.6 7.6A3.5 3.5 0 0 1 8 6.6a3.5 3.5 0 0 1 2.4 1l1.3-1.3A5.3 5.3 0 0 0 8 4.8a5.3 5.3 0 0 0-3.7 1.5l1.3 1.3z" fill={statusColor}/><path d="M3.5 5.8A6.5 6.5 0 0 1 8 4a6.5 6.5 0 0 1 4.5 1.8l1.3-1.3A8.3 8.3 0 0 0 8 2.2a8.3 8.3 0 0 0-5.8 2.3l1.3 1.3z" fill={statusColor} fillOpacity="0.35"/></svg>
+                <svg width="25" height="12" viewBox="0 0 25 12" fill="none"><rect x="0.5" y="0.5" width="21" height="11" rx="3.5" stroke={statusColor} strokeOpacity="0.35"/><rect x="2" y="2" width="17" height="8" rx="2" fill={statusColor}/><path d="M23 4v4a2 2 0 0 0 0-4z" fill={statusColor} fillOpacity="0.4"/></svg>
+              </div>
+            </div>
+
+            {/* Screen content */}
+            <div style={{ height: 'calc(100% - 44px)', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
+              {children}
             </div>
           </div>
         </div>
-        <div className="flex items-center gap-2">
-          <button className="w-8 h-8 rounded-full hover:bg-gray-100 flex items-center justify-center">
-            <svg className="w-5 h-5 text-gray-600" viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="19" cy="12" r="2"/></svg>
-          </button>
-          <button className="w-8 h-8 rounded-full hover:bg-gray-100 flex items-center justify-center">
-            <svg className="w-4 h-4 text-gray-600" viewBox="0 0 24 24" fill="currentColor"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
-          </button>
-        </div>
-      </div>
-      {/* Caption */}
-      <div className="px-4 pb-2">
-        <p className="text-[14px] text-black leading-relaxed whitespace-pre-wrap">
-          {text || <span className="text-gray-400 italic">Your caption will appear here...</span>}
-        </p>
-      </div>
-      {/* Media */}
-      {media ? (
-        <img src={media} alt="Post" className="w-full object-cover" style={{ maxHeight: 400 }} />
-      ) : (
-        <div className="w-full h-52 flex flex-col items-center justify-center gap-2" style={{ background: '#e4e6eb' }}>
-          <svg className="w-10 h-10 text-gray-400" viewBox="0 0 24 24" fill="currentColor"><path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"/></svg>
-          <p className="text-[12px] text-gray-500">Upload media to preview</p>
-        </div>
-      )}
-      {/* Reactions row */}
-      <div className="px-4 py-2 flex items-center justify-between border-b border-gray-100">
-        <div className="flex items-center gap-1.5">
-          <div className="flex -space-x-0.5">
-            {['#1877F2', '#F02849', '#F5C518'].map((c, i) => (
-              <div key={i} className="w-[18px] h-[18px] rounded-full border-2 border-white flex items-center justify-center text-[9px]" style={{ background: c }}>
-                {i === 0 ? '👍' : i === 1 ? '❤️' : '😮'}
-              </div>
-            ))}
-          </div>
-          <p className="text-[13px] text-gray-600">1.2K</p>
-        </div>
-        <div className="flex items-center gap-3 text-[13px] text-gray-500">
-          <span className="hover:underline cursor-pointer">142 comments</span>
-          <span className="hover:underline cursor-pointer">38 shares</span>
-        </div>
-      </div>
-      {/* Action buttons */}
-      <div className="flex items-center divide-x divide-gray-100 px-2 py-1">
-        {[
-          { icon: <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"/></svg>, label: 'Like', color: 'text-gray-600 hover:text-[#1877F2]' },
-          { icon: <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>, label: 'Comment', color: 'text-gray-600 hover:text-gray-900' },
-          { icon: <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>, label: 'Share', color: 'text-gray-600 hover:text-gray-900' },
-        ].map(({ icon, label, color }) => (
-          <button key={label} className={`flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg text-[13px] font-medium transition-colors ${color}`}>
-            {icon}
-            {label}
-          </button>
-        ))}
       </div>
     </div>
   );
 }
+
+// ─── Facebook Preview ─────────────────────────────────────────────────────────
+
+function FacebookPreview({ caption, hashtags, media }: { caption: string; hashtags: string[]; media: string | null }) {
+  const text = adaptCaption(caption, hashtags, 'Facebook');
+  const bg = '#fff';
+  const border = '1px solid #e4e6eb';
+
+  return (
+    <IPhoneBlackShell statusDark={false}>
+      <div style={{ flex: 1, background: '#f0f2f5', overflowY: 'auto', display: 'flex', flexDirection: 'column' }}>
+
+        {/* FB top nav */}
+        <div style={{ background: bg, borderBottom: border, padding: '8px 12px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexShrink: 0 }}>
+          <span style={{ fontSize: 22, fontWeight: 800, color: '#1877f2', letterSpacing: -0.5 }}>f</span>
+          <div style={{ display: 'flex', gap: 8 }}>
+            {[
+              <svg key="s" viewBox="0 0 24 24" fill="#050505" style={{ width: 22, height: 22 }}><circle cx="11" cy="11" r="8" fill="none" stroke="#050505" strokeWidth="2"/><line x1="21" y1="21" x2="16.65" y2="16.65" stroke="#050505" strokeWidth="2"/></svg>,
+              <svg key="m" viewBox="0 0 24 24" style={{ width: 22, height: 22 }}><path d="M12 2C6.477 2 2 6.145 2 11.243c0 3.025 1.517 5.716 3.878 7.472V22l3.547-1.945c.947.261 1.949.4 2.975.4 5.523 0 10-4.145 10-9.243C22 6.145 17.523 2 12 2z" fill="#1877f2"/><path d="M13.07 14.4l-2.56-2.73-4.99 2.73 5.49-5.83 2.63 2.73 4.92-2.73-5.49 5.83z" fill="#fff"/></svg>,
+            ]}
+          </div>
+        </div>
+
+        {/* Stories strip */}
+        <div style={{ background: bg, borderBottom: border, padding: '10px 12px', display: 'flex', gap: 8, overflowX: 'hidden', flexShrink: 0 }}>
+          {[{ label: 'Create', isCreate: true }, { label: 'hope' }, { label: 'giving' }, { label: 'impact' }].map((s) => (
+            <div key={s.label} style={{ flexShrink: 0, width: 60, height: 100, borderRadius: 10, overflow: 'hidden', position: 'relative', background: s.isCreate ? '#e4e6eb' : 'linear-gradient(180deg,rgba(0,0,0,0) 40%,rgba(0,0,0,0.7))', border: '1px solid #e4e6eb' }}>
+              {!s.isCreate && <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(135deg,#1877f2,#a855f7)' }} />}
+              <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, padding: '4px 4px 5px', textAlign: 'center' }}>
+                <span style={{ fontSize: 8, fontWeight: 700, color: s.isCreate ? '#050505' : '#fff' }}>{s.label}</span>
+              </div>
+              {s.isCreate && (
+                <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%,-60%)', width: 28, height: 28, borderRadius: '50%', background: '#1877f2', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <svg viewBox="0 0 10 10" fill="white" style={{ width: 14, height: 14 }}><path d="M5 1v8M1 5h8"/></svg>
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+
+        {/* Post card */}
+        <div style={{ background: bg, marginTop: 8, flexShrink: 0 }}>
+          {/* Post header */}
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '10px 12px 6px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              <img src={BRAND_LOGO_SRC} alt="" style={{ width: 36, height: 36, borderRadius: '50%', objectFit: 'contain', background: '#fff', border: '1px solid #e4e6eb' }} />
+              <div>
+                <p style={{ color: '#050505', fontSize: 13, fontWeight: 600, lineHeight: 1.2, margin: 0 }}>{BRAND_SOCIAL_NAME}</p>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                  <span style={{ color: '#65676b', fontSize: 10 }}>2h ·</span>
+                  <svg viewBox="0 0 24 24" fill="#65676b" style={{ width: 10, height: 10 }}><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/></svg>
+                </div>
+              </div>
+            </div>
+            <svg viewBox="0 0 24 24" fill="#65676b" style={{ width: 18, height: 18 }}><circle cx="5" cy="12" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="19" cy="12" r="2"/></svg>
+          </div>
+
+          {/* Caption */}
+          {text && (
+            <p style={{ color: '#050505', fontSize: 13, lineHeight: 1.5, margin: '0 12px 8px', whiteSpace: 'pre-wrap' }}>
+              {text.length > 120 ? <>{text.slice(0, 120)}<span style={{ color: '#65676b' }}> ...See more</span></> : text}
+            </p>
+          )}
+
+          {/* Media */}
+          {media ? (
+            <img src={media} alt="Post" style={{ width: '100%', maxHeight: 200, objectFit: 'cover', display: 'block' }} />
+          ) : (
+            <div style={{ width: '100%', height: 160, background: '#e4e6eb', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 6 }}>
+              <svg viewBox="0 0 24 24" fill="#bec3c9" style={{ width: 32, height: 32 }}><path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"/></svg>
+              <span style={{ fontSize: 10, color: '#bec3c9' }}>Upload media to preview</span>
+            </div>
+          )}
+
+          {/* Reactions bar */}
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '6px 12px', borderBottom: border }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+              {['#1877F2','#F02849','#F5C518'].map((c, i) => (
+                <div key={i} style={{ width: 16, height: 16, borderRadius: '50%', background: c, border: '1.5px solid #fff', marginLeft: i > 0 ? -4 : 0, fontSize: 8, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  {i === 0 ? '👍' : i === 1 ? '❤️' : '😮'}
+                </div>
+              ))}
+              <span style={{ color: '#65676b', fontSize: 11, marginLeft: 4 }}>1.2K</span>
+            </div>
+            <span style={{ color: '#65676b', fontSize: 11 }}>142 comments · 38 shares</span>
+          </div>
+
+          {/* Action buttons */}
+          <div style={{ display: 'flex', borderBottom: border }}>
+            {[
+              { icon: <svg viewBox="0 0 24 24" fill="none" stroke="#65676b" strokeWidth="2" style={{ width: 18, height: 18 }}><path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"/></svg>, label: 'Like' },
+              { icon: <svg viewBox="0 0 24 24" fill="none" stroke="#65676b" strokeWidth="2" style={{ width: 18, height: 18 }}><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>, label: 'Comment' },
+              { icon: <svg viewBox="0 0 24 24" fill="none" stroke="#65676b" strokeWidth="2" style={{ width: 18, height: 18 }}><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>, label: 'Share' },
+            ].map(({ icon, label }) => (
+              <div key={label} style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 5, padding: '8px 0', cursor: 'default' }}>
+                {icon}
+                <span style={{ color: '#65676b', fontSize: 12, fontWeight: 600 }}>{label}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* FB bottom tab bar */}
+      <div style={{ background: bg, borderTop: border, display: 'flex', alignItems: 'center', justifyContent: 'space-around', padding: '6px 0 18px', flexShrink: 0 }}>
+        {[
+          <svg key="h" viewBox="0 0 24 24" fill="#1877f2" style={{ width: 22, height: 22 }}><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>,
+          <svg key="f" viewBox="0 0 24 24" fill="none" stroke="#65676b" strokeWidth="2" style={{ width: 22, height: 22 }}><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>,
+          <svg key="w" viewBox="0 0 24 24" fill="none" stroke="#65676b" strokeWidth="2" style={{ width: 22, height: 22 }}><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>,
+          <svg key="b" viewBox="0 0 24 24" fill="none" stroke="#65676b" strokeWidth="2" style={{ width: 22, height: 22 }}><path d="M18 8h1a4 4 0 0 1 0 8h-1"/><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/><line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/></svg>,
+          <svg key="m" viewBox="0 0 24 24" fill="none" stroke="#65676b" strokeWidth="2" style={{ width: 22, height: 22 }}><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>,
+        ].map((icon, i) => (
+          <div key={i} style={{ padding: '4px 8px', cursor: 'default' }}>{icon}</div>
+        ))}
+      </div>
+    </IPhoneBlackShell>
+  );
+}
+
+// ─── LinkedIn Preview ─────────────────────────────────────────────────────────
 
 function LinkedInPreview({ caption, hashtags, media }: { caption: string; hashtags: string[]; media: string | null }) {
   const text = adaptCaption(caption, hashtags, 'LinkedIn');
   const [expanded, setExpanded] = useState(false);
-  const fold = 200;
+
   return (
-    <div className="max-w-[500px] mx-auto bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden" style={{ fontFamily: '-apple-system,system-ui,sans-serif' }}>
-      {/* Post header */}
-      <div className="flex items-start gap-3 p-4 pb-3">
-        <div className="w-12 h-12 rounded-full flex-shrink-0 flex items-center justify-center text-white text-sm font-black" style={{ background: 'linear-gradient(135deg,#003f87,#0056b3)' }}>LS</div>
-        <div className="flex-1 min-w-0">
-          <p className="text-[14px] font-semibold text-black leading-tight hover:text-[#0a66c2] cursor-pointer">Lighthouse Sanctuary</p>
-          <p className="text-[12px] text-gray-500 leading-tight mt-0.5">Non-profit Organization · 2,841 followers</p>
-          <div className="flex items-center gap-1.5 mt-0.5">
-            <p className="text-[12px] text-gray-500">2h ·</p>
-            <svg className="w-3.5 h-3.5 text-gray-500" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/></svg>
+    <IPhoneBlackShell statusDark={false}>
+      <div style={{ flex: 1, background: '#f3f2ef', overflowY: 'auto', display: 'flex', flexDirection: 'column' }}>
+
+        {/* LI top nav */}
+        <div style={{ background: '#fff', borderBottom: '1px solid #e0e0e0', padding: '8px 12px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexShrink: 0 }}>
+          <svg viewBox="0 0 24 24" fill="#0a66c2" style={{ width: 24, height: 24 }}><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
+          <div style={{ display: 'flex', gap: 14 }}>
+            <svg viewBox="0 0 24 24" fill="none" stroke="#666" strokeWidth="2" style={{ width: 20, height: 20 }}><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            <svg viewBox="0 0 24 24" fill="none" stroke="#666" strokeWidth="2" style={{ width: 20, height: 20 }}><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
           </div>
         </div>
-        <button className="flex items-center gap-1.5 text-[#0a66c2] text-[14px] font-semibold border border-[#0a66c2] rounded-full px-4 py-1.5 hover:bg-blue-50 transition-colors flex-shrink-0">
-          <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor"><path d="M19 11h-6V5h-2v6H5v2h6v6h2v-6h6z"/></svg>
-          Follow
-        </button>
-      </div>
-      {/* Caption */}
-      <div className="px-4 pb-3">
-        <p className="text-[14px] text-black leading-relaxed whitespace-pre-wrap">
-          {text
-            ? (text.length > fold && !expanded)
-              ? <>{text.slice(0, fold)}<button className="text-gray-500 font-semibold" onClick={() => setExpanded(true)}>…see more</button></>
-              : text
-            : <span className="text-gray-400 italic">Your caption will appear here...</span>
-          }
-        </p>
-      </div>
-      {/* Media */}
-      {media ? (
-        <img src={media} alt="Post" className="w-full object-cover" style={{ maxHeight: 350 }} />
-      ) : (
-        <div className="w-full h-44 flex flex-col items-center justify-center gap-2" style={{ background: '#f3f2ef' }}>
-          <svg className="w-10 h-10 text-gray-400" viewBox="0 0 24 24" fill="currentColor"><path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"/></svg>
-          <p className="text-[12px] text-gray-500">Upload media to preview</p>
-        </div>
-      )}
-      {/* Reactions */}
-      <div className="px-4 py-2 flex items-center justify-between border-b border-gray-100">
-        <div className="flex items-center gap-1.5">
-          <div className="flex -space-x-0.5">
-            {[{ bg: '#378fe9', emoji: '👍' }, { bg: '#c0392b', emoji: '❤️' }, { bg: '#f39c12', emoji: '💡' }].map((r, i) => (
-              <div key={i} className="w-[18px] h-[18px] rounded-full border-2 border-white flex items-center justify-center text-[9px]" style={{ background: r.bg }}>{r.emoji}</div>
+
+        {/* Post card */}
+        <div style={{ background: '#fff', marginTop: 8, flexShrink: 0 }}>
+          {/* Header */}
+          <div style={{ display: 'flex', alignItems: 'flex-start', gap: 8, padding: '10px 12px 6px' }}>
+            <img src={BRAND_LOGO_SRC} alt="" style={{ width: 38, height: 38, borderRadius: '50%', objectFit: 'contain', background: '#fff', border: '1px solid #e0e0e0', flexShrink: 0 }} />
+            <div style={{ flex: 1 }}>
+              <p style={{ color: '#000', fontSize: 13, fontWeight: 600, lineHeight: 1.2, margin: 0 }}>{BRAND_SOCIAL_NAME}</p>
+              <p style={{ color: '#666', fontSize: 10, lineHeight: 1.3, margin: 0 }}>Non-profit Organization · 2,841 followers</p>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 4, marginTop: 2 }}>
+                <span style={{ color: '#666', fontSize: 10 }}>2h ·</span>
+                <svg viewBox="0 0 24 24" fill="#666" style={{ width: 10, height: 10 }}><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/></svg>
+              </div>
+            </div>
+            <button style={{ display: 'flex', alignItems: 'center', gap: 3, color: '#0a66c2', fontSize: 11, fontWeight: 700, border: '1.5px solid #0a66c2', borderRadius: 20, padding: '3px 10px', background: 'transparent', cursor: 'default', flexShrink: 0 }}>
+              <svg viewBox="0 0 24 24" fill="#0a66c2" style={{ width: 12, height: 12 }}><path d="M19 11h-6V5h-2v6H5v2h6v6h2v-6h6z"/></svg>
+              Follow
+            </button>
+          </div>
+
+          {/* Caption */}
+          <div style={{ padding: '0 12px 8px' }}>
+            <p style={{ color: '#000', fontSize: 12, lineHeight: 1.5, margin: 0, whiteSpace: 'pre-wrap' }}>
+              {text
+                ? text.length > 120 && !expanded
+                  ? <>{text.slice(0, 120)}<button style={{ color: '#666', fontWeight: 600, background: 'none', border: 'none', cursor: 'pointer', fontSize: 12, padding: 0 }} onClick={() => setExpanded(true)}>…see more</button></>
+                  : text
+                : <span style={{ color: '#aaa', fontStyle: 'italic' }}>Your caption will appear here...</span>
+              }
+            </p>
+          </div>
+
+          {/* Media */}
+          {media ? (
+            <img src={media} alt="Post" style={{ width: '100%', maxHeight: 190, objectFit: 'cover', display: 'block' }} />
+          ) : (
+            <div style={{ width: '100%', height: 150, background: '#f3f2ef', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 6 }}>
+              <svg viewBox="0 0 24 24" fill="#c0bdb8" style={{ width: 32, height: 32 }}><path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"/></svg>
+              <span style={{ fontSize: 10, color: '#c0bdb8' }}>Upload media to preview</span>
+            </div>
+          )}
+
+          {/* Reactions */}
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '6px 12px', borderBottom: '1px solid #e0e0e0' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+              {[{ bg: '#378fe9', e: '👍' }, { bg: '#c0392b', e: '❤️' }, { bg: '#f39c12', e: '💡' }].map((r, i) => (
+                <div key={i} style={{ width: 16, height: 16, borderRadius: '50%', background: r.bg, border: '1.5px solid #fff', marginLeft: i > 0 ? -4 : 0, fontSize: 8, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>{r.e}</div>
+              ))}
+              <span style={{ color: '#666', fontSize: 10, marginLeft: 4 }}>842 · 94 comments</span>
+            </div>
+            <span style={{ color: '#666', fontSize: 10 }}>27 reposts</span>
+          </div>
+
+          {/* Actions */}
+          <div style={{ display: 'flex' }}>
+            {[
+              { icon: <svg viewBox="0 0 24 24" fill="none" stroke="#666" strokeWidth="1.8" style={{ width: 17, height: 17 }}><path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"/></svg>, label: 'Like' },
+              { icon: <svg viewBox="0 0 24 24" fill="none" stroke="#666" strokeWidth="1.8" style={{ width: 17, height: 17 }}><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>, label: 'Comment' },
+              { icon: <svg viewBox="0 0 24 24" fill="none" stroke="#666" strokeWidth="1.8" style={{ width: 17, height: 17 }}><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg>, label: 'Repost' },
+              { icon: <svg viewBox="0 0 24 24" fill="none" stroke="#666" strokeWidth="1.8" style={{ width: 17, height: 17 }}><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>, label: 'Send' },
+            ].map(({ icon, label }) => (
+              <div key={label} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 3, padding: '7px 0', cursor: 'default' }}>
+                {icon}
+                <span style={{ color: '#666', fontSize: 9, fontWeight: 600 }}>{label}</span>
+              </div>
             ))}
           </div>
-          <p className="text-[12px] text-gray-500 hover:text-[#0a66c2] hover:underline cursor-pointer">842 · 94 comments</p>
         </div>
-        <p className="text-[12px] text-gray-500 hover:text-[#0a66c2] hover:underline cursor-pointer">27 reposts</p>
       </div>
-      {/* Actions */}
-      <div className="flex items-center px-2 py-1">
+
+      {/* LI bottom tab bar */}
+      <div style={{ background: '#fff', borderTop: '1px solid #e0e0e0', display: 'flex', alignItems: 'center', justifyContent: 'space-around', padding: '6px 0 18px', flexShrink: 0 }}>
         {[
-          { icon: <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"/></svg>, label: 'Like' },
-          { icon: <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>, label: 'Comment' },
-          { icon: <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg>, label: 'Repost' },
-          { icon: <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>, label: 'Send' },
-        ].map(({ icon, label }) => (
-          <button key={label} className="flex-1 flex flex-col items-center gap-0.5 py-2 rounded text-[12px] font-medium text-gray-600 hover:bg-gray-100 hover:text-black transition-colors">
-            {icon}
-            {label}
-          </button>
+          <svg key="h" viewBox="0 0 24 24" fill="#0a66c2" style={{ width: 22, height: 22 }}><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>,
+          <svg key="n" viewBox="0 0 24 24" fill="none" stroke="#666" strokeWidth="2" style={{ width: 22, height: 22 }}><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>,
+          <svg key="p" viewBox="0 0 24 24" fill="none" stroke="#666" strokeWidth="2" style={{ width: 22, height: 22 }}><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>,
+          <svg key="j" viewBox="0 0 24 24" fill="none" stroke="#666" strokeWidth="2" style={{ width: 22, height: 22 }}><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/></svg>,
+          <svg key="m" viewBox="0 0 24 24" fill="none" stroke="#666" strokeWidth="2" style={{ width: 22, height: 22 }}><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>,
+        ].map((icon, i) => (
+          <div key={i} style={{ padding: '4px 8px', cursor: 'default' }}>{icon}</div>
         ))}
       </div>
-    </div>
+    </IPhoneBlackShell>
   );
 }
 
+// ─── Twitter / X Preview ──────────────────────────────────────────────────────
+
 function TwitterPreview({ caption, hashtags, media }: { caption: string; hashtags: string[]; media: string | null }) {
   const text = adaptCaption(caption, hashtags, 'Twitter');
+  const bg = '#000';
+  const sep = '#2f3336';
+  const sub = '#71767b';
+  const blue = '#1d9bf0';
+
+  const toolbarIcons = [
+    <svg key="img" viewBox="0 0 24 24" fill={blue} style={{ width: 19, height: 19 }}><path d="M3 5c0-1.1.9-2 2-2h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5zm16 9.59l-3-3-4.5 4.5-3-3L5 16.5V19h14v-4.41zM8.5 11a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3z"/></svg>,
+    <svg key="gif" viewBox="0 0 24 24" fill={blue} style={{ width: 19, height: 19 }}><rect x="2" y="6" width="20" height="12" rx="2" fill="none" stroke={blue} strokeWidth="1.8"/><text x="5" y="15" fontSize="7" fontWeight="800" fill={blue} fontFamily="sans-serif">GIF</text></svg>,
+    <svg key="poll" viewBox="0 0 24 24" fill={blue} style={{ width: 19, height: 19 }}><rect x="3" y="14" width="4" height="7" rx="1"/><rect x="10" y="9" width="4" height="12" rx="1"/><rect x="17" y="3" width="4" height="18" rx="1"/></svg>,
+    <svg key="emoji" viewBox="0 0 24 24" fill="none" stroke={blue} strokeWidth="1.8" style={{ width: 19, height: 19 }}><circle cx="12" cy="12" r="9"/><path d="M8.5 14s1.5 2 3.5 2 3.5-2 3.5-2"/><circle cx="9" cy="10" r="1" fill={blue}/><circle cx="15" cy="10" r="1" fill={blue}/></svg>,
+    <svg key="sched" viewBox="0 0 24 24" fill="none" stroke={blue} strokeWidth="1.8" style={{ width: 19, height: 19 }}><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15 15"/></svg>,
+    <svg key="loc" viewBox="0 0 24 24" fill="none" stroke={blue} strokeWidth="1.8" style={{ width: 19, height: 19 }}><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/><circle cx="12" cy="9" r="2.5"/></svg>,
+  ];
+
+  const charsLeft = 280 - text.length;
+  const pct = Math.min(text.length / 280, 1);
+  const circleR = 9;
+  const circleC = 2 * Math.PI * circleR;
+  const circleDash = pct * circleC;
+
   return (
-    <div className="max-w-[500px] mx-auto rounded-2xl overflow-hidden border border-gray-800" style={{ background: '#000', fontFamily: '-apple-system,system-ui,sans-serif' }}>
-      {/* X Top bar */}
-      <div className="flex items-center justify-between px-4 py-3 border-b border-gray-800">
-        <button className="text-gray-500">
-          <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>
-        </button>
-        <svg className="w-6 h-6" viewBox="0 0 24 24" fill="white"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.746l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
-        <button className="text-white text-[14px] font-bold bg-gray-800 hover:bg-gray-700 px-4 py-1.5 rounded-full">Subscribe</button>
-      </div>
-      {/* Post */}
-      <div className="p-4">
-        <div className="flex gap-3">
-          {/* Avatar */}
-          <div className="flex-shrink-0">
-            <div className="w-10 h-10 rounded-full flex items-center justify-center text-white text-[11px] font-black" style={{ background: 'linear-gradient(135deg,#003f87,#0056b3)' }}>LS</div>
+    <IPhoneBlackShell statusDark={true}>
+      <div style={{ flex: 1, background: bg, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+
+        {/* Top bar: × | Drafts */}
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '10px 14px 6px', flexShrink: 0 }}>
+          <svg viewBox="0 0 24 24" fill={sub} style={{ width: 20, height: 20 }}><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+          <span style={{ color: blue, fontSize: 14, fontWeight: 700 }}>Drafts</span>
+        </div>
+
+        {/* Compose area */}
+        <div style={{ flex: 1, padding: '4px 14px 0', display: 'flex', gap: 10, overflowY: 'auto' }}>
+          <div style={{ flexShrink: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4 }}>
+            <img src={BRAND_LOGO_SRC} alt="" style={{ width: 36, height: 36, borderRadius: '50%', objectFit: 'contain', background: '#fff', border: `1px solid ${sep}` }} />
+            <div style={{ width: 2, flex: 1, background: sep, borderRadius: 1, minHeight: 20 }} />
           </div>
-          {/* Content */}
-          <div className="flex-1 min-w-0">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-1 flex-wrap">
-                <span className="text-[15px] font-bold text-white">Lighthouse Sanctuary</span>
-                <svg className="w-4 h-4 text-[#1d9bf0] flex-shrink-0" viewBox="0 0 24 24" fill="currentColor"><path d="M22.25 12c0-1.43-.88-2.67-2.19-3.34.46-1.39.2-2.9-.81-3.91-1.01-1-2.52-1.26-3.91-.8C14.67 2.88 13.43 2 12 2c-1.43 0-2.67.88-3.34 2.19-1.39-.46-2.9-.2-3.91.81-1 1.01-1.26 2.52-.8 3.91C2.88 9.33 2 10.57 2 12c0 1.43.88 2.67 2.19 3.34-.46 1.39-.2 2.9.81 3.91 1.01 1 2.52 1.26 3.91.8C9.33 21.12 10.57 22 12 22c1.43 0 2.67-.88 3.34-2.19 1.39.46 2.9.2 3.91-.81 1-1.01 1.26-2.52.8-3.91 1.31-.67 2.19-1.91 2.19-3.34z"/></svg>
-                <span className="text-[15px] text-gray-500">@LighthousePH · 2h</span>
-              </div>
-              <button className="text-gray-500 hover:text-white">
-                <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="19" cy="12" r="2"/></svg>
-              </button>
-            </div>
-            <p className="text-[15px] text-white leading-relaxed mt-1 whitespace-pre-wrap">
-              {text || <span className="text-gray-600 italic">Your caption will appear here...</span>}
+
+          <div style={{ flex: 1, minWidth: 0, paddingBottom: 8 }}>
+            <span style={{ color: '#fff', fontSize: 14, fontWeight: 700 }}>{BRAND_TWITTER_HANDLE} </span>
+            <p style={{ color: text ? '#fff' : sub, fontSize: 15, lineHeight: 1.5, margin: '6px 0 10px', whiteSpace: 'pre-wrap' }}>
+              {text || "What's happening?"}
             </p>
-            {/* Char meter */}
-            <div className="flex items-center gap-2 mt-1.5">
-              <div className="flex-1 h-0.5 bg-gray-800 rounded-full overflow-hidden">
-                <div className="h-full bg-[#1d9bf0] rounded-full transition-all" style={{ width: `${Math.min(text.length / 280, 1) * 100}%`, background: text.length > 280 ? '#f4212e' : '#1d9bf0' }} />
-              </div>
-              <span className={`text-[12px] font-medium ${text.length > 280 ? 'text-[#f4212e]' : 'text-gray-500'}`}>{280 - text.length}</span>
-            </div>
-            {/* Media */}
-            {media ? (
-              <img src={media} alt="Post" className="mt-3 w-full rounded-2xl object-cover" style={{ maxHeight: 300 }} />
-            ) : (
-              <div className="mt-3 w-full h-36 rounded-2xl flex flex-col items-center justify-center gap-2 border border-gray-800">
-                <svg className="w-8 h-8 text-gray-700" viewBox="0 0 24 24" fill="currentColor"><path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"/></svg>
-                <p className="text-[11px] text-gray-600">Upload media to preview</p>
-              </div>
+            {media && (
+              <img src={media} alt="Post" style={{ width: '100%', borderRadius: 14, objectFit: 'cover', maxHeight: 160, display: 'block', marginBottom: 8 }} />
             )}
-            {/* Action row */}
-            <div className="flex items-center justify-between mt-3 text-gray-500">
-              {[
-                { icon: <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>, count: '84' },
-                { icon: <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg>, count: '231' },
-                { icon: <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>, count: '1.2K' },
-                { icon: <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>, count: '42K' },
-                { icon: <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>, count: '' },
-              ].map(({ icon, count }, i) => (
-                <button key={i} className="flex items-center gap-1.5 hover:text-[#1d9bf0] transition-colors group">
-                  <span className="group-hover:bg-[#1d9bf0]/10 rounded-full p-1.5 transition-colors">{icon}</span>
-                  {count && <span className="text-[13px]">{count}</span>}
-                </button>
-              ))}
+            <div style={{ display: 'inline-flex', alignItems: 'center', gap: 5, border: `1px solid ${blue}`, borderRadius: 20, padding: '3px 10px', marginBottom: 4 }}>
+              <svg viewBox="0 0 24 24" fill={blue} style={{ width: 13, height: 13 }}><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/></svg>
+              <span style={{ color: blue, fontSize: 11, fontWeight: 600 }}>Everyone can reply</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Bottom toolbar */}
+        <div style={{ borderTop: `1px solid ${sep}`, padding: '8px 14px 16px', flexShrink: 0 }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
+              {toolbarIcons.map((icon, i) => <div key={i} style={{ cursor: 'default', opacity: 0.9 }}>{icon}</div>)}
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+              <svg width="22" height="22" viewBox="0 0 22 22">
+                <circle cx="11" cy="11" r={circleR} fill="none" stroke={sep} strokeWidth="2"/>
+                <circle cx="11" cy="11" r={circleR} fill="none"
+                  stroke={charsLeft < 0 ? '#f4212e' : charsLeft < 20 ? '#ffd400' : blue}
+                  strokeWidth="2" strokeDasharray={`${circleDash} ${circleC}`}
+                  strokeLinecap="round" transform="rotate(-90 11 11)"
+                  style={{ transition: 'stroke-dasharray 0.2s' }}/>
+                {charsLeft <= 20 && (
+                  <text x="11" y="15" textAnchor="middle" fontSize="7" fill={charsLeft < 0 ? '#f4212e' : sub} fontFamily="sans-serif">{charsLeft}</text>
+                )}
+              </svg>
+              <div style={{ width: 1, height: 22, background: sep }} />
+              <div style={{ background: '#fff', borderRadius: 20, padding: '6px 14px', cursor: 'default' }}>
+                <span style={{ color: '#000', fontSize: 13, fontWeight: 800 }}>Post</span>
+              </div>
             </div>
           </div>
         </div>
       </div>
-    </div>
+    </IPhoneBlackShell>
   );
 }
 
@@ -548,6 +796,32 @@ const PLATFORM_META: Record<Platform, { gradient: string; icon: ReactNode }> = {
   },
 };
 
+const SITE = 'https://intex-ii-eta.vercel.app';
+
+const CTA_SCRIPTS: Record<CTAType, { label: string; text: string }[]> = {
+  DonateNow: [
+    { label: 'Shelter a survivor', text: `Every dollar you give today shelters a survivor. Donate now → ${SITE}/donate 💙` },
+    { label: 'Double your impact', text: `This month, every donation is doubled. Help us reach our goal — give at ${SITE}/donate` },
+    { label: 'Gift of safety', text: `Your gift provides safety, healing, and hope. Donate now → ${SITE}/donate` },
+    { label: 'Urgent need', text: `Right now, women need a safe place to sleep. Your donation makes that possible. Give today at ${SITE}/donate` },
+  ],
+  LearnMore: [
+    { label: 'See our impact', text: `Learn how your community is making a difference → ${SITE}/impact` },
+    { label: 'Our mission', text: `Discover the work we do every day to protect survivors → ${SITE}/about` },
+    { label: 'The facts', text: `Human trafficking affects thousands in our region. Here's what we're doing about it → ${SITE}/about` },
+  ],
+  SignUp: [
+    { label: 'Join us', text: `Join our community of change-makers. Sign up for updates at ${SITE} 💌` },
+    { label: 'Get involved', text: `Stay connected to the mission — learn how to get involved → ${SITE}/get-involved` },
+    { label: 'Volunteer', text: `Want to make a hands-on difference? Sign up to volunteer → ${SITE}/volunteer` },
+  ],
+  ShareStory: [
+    { label: 'Spread hope', text: `Know someone whose life could be changed? Share this post and spread hope 🙏 ${SITE}` },
+    { label: 'Reach someone', text: 'Every share reaches someone who needs to know help is available. Please repost.' },
+    { label: 'Tag a friend', text: `Tag someone who believes in this mission. Together we're stronger. 💜 ${SITE}` },
+  ],
+};
+
 const tierColors = { High: 'bg-secondary/10 text-secondary', Medium: 'bg-tertiary-fixed text-on-tertiary-fixed', Low: 'bg-error-container text-error' };
 const suggestionIcon = { good: 'check_circle', warning: 'warning', tip: 'lightbulb' };
 const suggestionColor = { good: 'text-secondary', warning: 'text-error', tip: 'text-primary' };
@@ -568,6 +842,8 @@ export default function SocialMediaComposer() {
   const [toast, setToast] = useState<string | null>(null);
   const [insights, setInsights] = useState<Insights | null>(null);
   const [insightsLoading, setInsightsLoading] = useState(true);
+  const [publishing, setPublishing] = useState(false);
+  const [publishResults, setPublishResults] = useState<PlatformResult[]>([]);
   const fileRef = useRef<HTMLInputElement>(null);
 
   // Fetch real insights from backend
@@ -619,6 +895,45 @@ export default function SocialMediaComposer() {
 
   const showToast = (msg: string) => { setToast(msg); setTimeout(() => setToast(null), 3000); };
 
+  const handlePublish = async () => {
+    if (!draft.caption.trim()) { showToast('Caption is required'); return; }
+    const publishPlatforms = draft.platforms.filter(p => p === 'Instagram' || p === 'Facebook' || p === 'Twitter');
+    if (publishPlatforms.length === 0) { showToast('Select at least one platform to publish'); return; }
+
+    setPublishing(true);
+    setPublishResults([]);
+    try {
+      const payload = {
+        platforms: draft.platforms,
+        caption: draft.caption,
+        mediaType: draft.mediaType,
+        mediaUrl: media ?? undefined,
+        hashtags: draft.hashtags,
+        postType: draft.postType,
+        sentimentTone: draft.sentimentTone,
+        hasCallToAction: draft.hasCallToAction,
+        callToActionType: draft.callToActionType,
+        featuresResidentStory: draft.featuresResidentStory,
+        campaignName: undefined,
+      };
+      const res = await fetch(`${API}/publish`, {
+        method: 'POST',
+        headers: { ...authHeaders(), 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+      const data = await res.json();
+      if (data.results) {
+        setPublishResults(data.results);
+      } else {
+        setPublishResults([{ platform: 'All', status: 'failed', errorMessage: data.error ?? 'Unknown error' }]);
+      }
+    } catch (err) {
+      setPublishResults([{ platform: 'All', status: 'failed', errorMessage: 'Network error — could not reach backend' }]);
+    } finally {
+      setPublishing(false);
+    }
+  };
+
   const fmtPct = (n: number) => `${Math.round(n * 100)}%`;
   const fmtHour = (h: number) => h === 0 ? '12am' : h < 12 ? `${h}am` : h === 12 ? '12pm' : `${h - 12}pm`;
 
@@ -642,15 +957,54 @@ export default function SocialMediaComposer() {
                 Save Draft
               </button>
               <button
-                onClick={() => { if (!draft.caption.trim()) { showToast('Add a caption first'); return; } showToast('Connect platform API tokens to publish live'); }}
-                className="aurora-gradient text-white px-5 py-2 rounded-xl text-sm font-bold hover:opacity-90 transition-opacity flex items-center gap-2 shadow-sm"
+                onClick={handlePublish}
+                disabled={publishing}
+                className="aurora-gradient text-white px-5 py-2 rounded-xl text-sm font-bold hover:opacity-90 transition-opacity flex items-center gap-2 shadow-sm disabled:opacity-60"
               >
-                <span className="material-symbols-outlined text-[16px]">send</span>
-                {draft.scheduleLater ? 'Schedule' : 'Post Now'}
+                {publishing
+                  ? <span className="material-symbols-outlined text-[16px] animate-spin">refresh</span>
+                  : <span className="material-symbols-outlined text-[16px]">send</span>
+                }
+                {publishing ? 'Publishing…' : draft.scheduleLater ? 'Schedule' : 'Post Now'}
               </button>
             </div>
           </div>
         </div>
+
+        {/* Publish results banner */}
+        {publishResults.length > 0 && (
+          <div className="px-6 py-3 border-b border-outline-variant/20 bg-surface-container-lowest flex flex-wrap items-center gap-2">
+            <span className="text-[10px] font-bold text-on-surface-variant uppercase tracking-widest mr-1">Publish Results</span>
+            {publishResults.map((r, i) => {
+              const chip =
+                r.status === 'published' ? 'bg-secondary/10 text-secondary border-secondary/20' :
+                r.status === 'failed'    ? 'bg-error-container text-error border-error/20' :
+                                           'bg-surface-container text-on-surface-variant border-outline-variant/30';
+              const icon =
+                r.status === 'published' ? 'check_circle' :
+                r.status === 'failed'    ? 'cancel' :
+                                           'visibility';
+              return (
+                <div key={i} className={`flex items-center gap-1.5 px-3 py-1 rounded-full border text-[12px] font-semibold ${chip}`}>
+                  <span className="material-symbols-outlined text-[14px]" style={{ fontVariationSettings: r.status === 'published' ? "'FILL' 1" : "'FILL' 0" }}>{icon}</span>
+                  <span>{r.platform}</span>
+                  {r.status === 'published' && r.permalink && (
+                    <a href={r.permalink} target="_blank" rel="noopener noreferrer" className="underline opacity-70 hover:opacity-100 text-[11px]">view</a>
+                  )}
+                  {r.status === 'failed' && r.errorMessage && (
+                    <span className="opacity-70 text-[11px]">— {r.errorMessage}</span>
+                  )}
+                  {r.status === 'preview_only' && (
+                    <span className="opacity-60 text-[11px]">preview only</span>
+                  )}
+                </div>
+              );
+            })}
+            <button onClick={() => setPublishResults([])} className="ml-auto text-on-surface-variant hover:text-on-surface">
+              <span className="material-symbols-outlined text-[16px]">close</span>
+            </button>
+          </div>
+        )}
 
         {/* 3-column layout */}
         <div className="flex h-[calc(100vh-89px)]">
@@ -719,6 +1073,24 @@ export default function SocialMediaComposer() {
                   placeholder="Start with your most important message in the first 125 characters..."
                   rows={5} maxLength={2200}
                   className="w-full bg-surface-container-low rounded-xl px-3 py-2 text-sm text-on-surface outline-none focus:ring-2 focus:ring-primary/20 resize-none leading-relaxed placeholder:text-on-surface-variant/40" />
+              </div>
+
+              {/* CTA Scripts */}
+              <div>
+                <label className="text-[10px] font-bold text-on-surface-variant uppercase tracking-widest mb-2 block">CTA Scripts</label>
+                <div className="space-y-2">
+                  {(CTA_SCRIPTS[draft.callToActionType] ?? CTA_SCRIPTS.DonateNow).map((script) => (
+                    <button
+                      key={script.label}
+                      onClick={() => update('caption', draft.caption ? `${draft.caption}\n\n${script.text}` : script.text)}
+                      className="w-full text-left px-3 py-2 rounded-xl bg-surface-container-low hover:bg-primary/8 border border-outline-variant/20 hover:border-primary/30 transition-all group"
+                    >
+                      <p className="text-[11px] font-bold text-primary mb-0.5 group-hover:text-primary">{script.label}</p>
+                      <p className="text-[10px] text-on-surface-variant leading-snug line-clamp-2">{script.text}</p>
+                    </button>
+                  ))}
+                </div>
+                <p className="text-[9px] text-on-surface-variant/50 mt-1.5">Click any script to append it to your caption</p>
               </div>
 
               {/* Hashtags */}
