@@ -685,28 +685,203 @@ const PLATFORM_META: Record<Platform, { gradient: string; icon: ReactNode }> = {
 
 const SITE = 'https://intex-ii-eta.vercel.app';
 
-const CTA_SCRIPTS: Record<CTAType, { label: string; text: string }[]> = {
+// CTA scripts keyed by PostType → SentimentTone → CTAType
+type CTAKey = `${PostType}:${SentimentTone}`;
+const CTA_MATRIX: Partial<Record<CTAKey, Partial<Record<CTAType, { label: string; text: string }[]>>>> = {
+  'ImpactStory:Emotional': {
+    DonateNow: [
+      { label: 'Her story changed everything', text: `Stories like this remind us why we fight. Help us shelter the next survivor → ${SITE}/donate` },
+      { label: 'Give her safety tonight', text: `Behind every statistic is a person who deserves safety. Your donation changes that tonight → ${SITE}/donate` },
+    ],
+    ShareStory: [
+      { label: 'Share her story', text: `This story deserves to be heard. Share it so more people know help exists 💙 ${SITE}` },
+      { label: 'Reach one more person', text: `One share could reach someone who needs this right now. Please repost 🙏` },
+    ],
+  },
+  'ImpactStory:Hopeful': {
+    DonateNow: [
+      { label: 'Keep hope alive', text: `Hope is possible because of donors like you. Keep it going → ${SITE}/donate` },
+      { label: 'Fund the next chapter', text: `Every survivor deserves a hopeful next chapter. Help write it → ${SITE}/donate` },
+    ],
+    ShareStory: [
+      { label: 'Spread hope', text: `Know someone who needs to hear this? Share this story of hope 💜 ${SITE}` },
+    ],
+  },
+  'ImpactStory:Grateful': {
+    DonateNow: [
+      { label: 'Gratitude in action', text: `Gratitude turns into hope when you give. Thank you for making this possible → ${SITE}/donate` },
+    ],
+    LearnMore: [
+      { label: 'See full story', text: `Read the full story of impact and healing → ${SITE}/impact` },
+    ],
+  },
+  'Campaign:Urgent': {
+    DonateNow: [
+      { label: 'Campaign closing soon', text: `We're almost at our goal — but we need you NOW. Donate before midnight → ${SITE}/donate` },
+      { label: 'Match deadline', text: `Every dollar matched until midnight. Don't let this opportunity pass → ${SITE}/donate` },
+      { label: 'Gap to close', text: `We're $X short of our goal. Close the gap today → ${SITE}/donate` },
+    ],
+    ShareStory: [
+      { label: 'Rally your network', text: `We need everyone. Share this campaign and help us cross the finish line 🏁 ${SITE}` },
+    ],
+  },
+  'Campaign:Celebratory': {
+    DonateNow: [
+      { label: 'Celebrate by giving', text: `We hit a milestone — now let's set a new one. Celebrate by donating → ${SITE}/donate` },
+      { label: 'Keep the momentum', text: `The momentum is real. Keep it going — donate today and be part of the movement → ${SITE}/donate` },
+    ],
+    ShareStory: [
+      { label: 'Celebrate together', text: `We did it — and we're not done. Share the win and keep building 🎉 ${SITE}` },
+    ],
+  },
+  'Campaign:Hopeful': {
+    DonateNow: [
+      { label: 'Build toward the goal', text: `Every donation brings us closer to the world we're working for. Join us → ${SITE}/donate` },
+    ],
+    SignUp: [
+      { label: 'Follow the journey', text: `Want to stay in the loop as we hit milestones? Sign up for updates → ${SITE}` },
+    ],
+  },
+  'FundraisingAppeal:Urgent': {
+    DonateNow: [
+      { label: 'Tonight only', text: `We need to raise $X by midnight to keep our doors open. Give now → ${SITE}/donate` },
+      { label: 'Beds at risk', text: `Without your help, we may not be able to shelter survivors this week. Please donate → ${SITE}/donate` },
+      { label: 'Match window closing', text: `A generous donor is matching every gift — but only until midnight. Act now → ${SITE}/donate` },
+    ],
+  },
+  'FundraisingAppeal:Emotional': {
+    DonateNow: [
+      { label: 'She needs you', text: `Somewhere tonight, a woman is searching for safety. Your donation answers that call → ${SITE}/donate` },
+      { label: 'Real people, real need', text: `This isn't hypothetical. Right now, women need shelter. Donate today → ${SITE}/donate` },
+    ],
+  },
+  'FundraisingAppeal:Hopeful': {
+    DonateNow: [
+      { label: 'Hope is a gift you give', text: `Hope isn't just a feeling — it's a bed, a meal, a safe door. Give it today → ${SITE}/donate` },
+    ],
+    SignUp: [
+      { label: 'Join the giving community', text: `Become a monthly donor and be hope every single month → ${SITE}/donate` },
+    ],
+  },
+  'ThankYou:Grateful': {
+    ShareStory: [
+      { label: 'Pass it on', text: `Because of YOU, survivors have hope. Share this thank-you so others can join in 💜 ${SITE}` },
+      { label: 'Tag a donor', text: `Know someone who made this possible? Tag them and say thank you 🙏` },
+    ],
+    DonateNow: [
+      { label: 'Keep giving', text: `Your generosity made an impact. Give again to keep the momentum going → ${SITE}/donate` },
+    ],
+  },
+  'ThankYou:Celebratory': {
+    ShareStory: [
+      { label: 'Celebrate the community', text: `This community showed UP. Share the win and let everyone know what we built together 🎉 ${SITE}` },
+    ],
+    SignUp: [
+      { label: 'Stay connected', text: `Want to be part of every celebration? Sign up for updates → ${SITE}` },
+    ],
+  },
+  'Educational:Informative': {
+    LearnMore: [
+      { label: 'Go deeper', text: `Want to learn more about how trafficking affects our region? Read the full breakdown → ${SITE}/about` },
+      { label: 'Share the facts', text: `Most people don't know this. Share so they do. ${SITE}/about` },
+      { label: 'Resources', text: `Know someone who needs help? Share these resources → ${SITE}` },
+    ],
+    SignUp: [
+      { label: 'Stay informed', text: `Follow us for weekly insights on how we're fighting trafficking in our community → ${SITE}` },
+    ],
+  },
+  'Educational:Hopeful': {
+    LearnMore: [
+      { label: 'The progress is real', text: `Change is possible — and it's already happening. See the evidence → ${SITE}/impact` },
+    ],
+    DonateNow: [
+      { label: 'Fund the education', text: `Awareness saves lives. Help us reach more people with resources → ${SITE}/donate` },
+    ],
+  },
+  'Educational:Urgent': {
+    LearnMore: [
+      { label: 'Know the signs', text: `This information could save a life. Read and share → ${SITE}/about` },
+    ],
+    SignUp: [
+      { label: 'Get trained', text: `Sign up for our next awareness training — spots are limited → ${SITE}` },
+    ],
+  },
+  'EventPromotion:Celebratory': {
+    SignUp: [
+      { label: 'Reserve your spot', text: `Spots are filling up fast! Join us at the event → ${SITE}` },
+      { label: 'Bring a friend', text: `The more the merrier — bring someone who cares about the mission. RSVP → ${SITE}` },
+    ],
+    ShareStory: [
+      { label: 'Spread the word', text: `Know someone who'd love this event? Share it with them 🎉 ${SITE}` },
+    ],
+  },
+  'EventPromotion:Hopeful': {
+    SignUp: [
+      { label: 'Be part of the change', text: `Join us for an evening of hope, community, and action. RSVP today → ${SITE}` },
+    ],
+    DonateNow: [
+      { label: 'Sponsor the event', text: `Help us make this event possible for every survivor who attends → ${SITE}/donate` },
+    ],
+  },
+  'EventPromotion:Urgent': {
+    SignUp: [
+      { label: 'Last chance to register', text: `Registration closes soon — secure your spot now → ${SITE}` },
+    ],
+  },
+};
+
+// Fallback scripts when no matrix match
+const CTA_FALLBACK: Record<CTAType, { label: string; text: string }[]> = {
   DonateNow: [
-    { label: 'Shelter a survivor', text: `Every dollar you give today shelters a survivor. Donate now → ${SITE}/donate 💙` },
-    { label: 'Double your impact', text: `This month, every donation is doubled. Help us reach our goal — give at ${SITE}/donate` },
-    { label: 'Gift of safety', text: `Your gift provides safety, healing, and hope. Donate now → ${SITE}/donate` },
-    { label: 'Urgent need', text: `Right now, women need a safe place to sleep. Your donation makes that possible. Give today at ${SITE}/donate` },
+    { label: 'Shelter a survivor', text: `Every dollar you give today shelters a survivor. Donate now → ${SITE}/donate` },
+    { label: 'Gift of safety', text: `Your gift provides safety, healing, and hope → ${SITE}/donate` },
   ],
   LearnMore: [
     { label: 'See our impact', text: `Learn how your community is making a difference → ${SITE}/impact` },
     { label: 'Our mission', text: `Discover the work we do every day to protect survivors → ${SITE}/about` },
-    { label: 'The facts', text: `Human trafficking affects thousands in our region. Here's what we're doing about it → ${SITE}/about` },
   ],
   SignUp: [
-    { label: 'Join us', text: `Join our community of change-makers. Sign up for updates at ${SITE} 💌` },
-    { label: 'Get involved', text: `Stay connected to the mission — learn how to get involved → ${SITE}/get-involved` },
+    { label: 'Join us', text: `Join our community of change-makers. Sign up for updates → ${SITE}` },
     { label: 'Volunteer', text: `Want to make a hands-on difference? Sign up to volunteer → ${SITE}/volunteer` },
   ],
   ShareStory: [
-    { label: 'Spread hope', text: `Know someone whose life could be changed? Share this post and spread hope 🙏 ${SITE}` },
-    { label: 'Reach someone', text: 'Every share reaches someone who needs to know help is available. Please repost.' },
-    { label: 'Tag a friend', text: `Tag someone who believes in this mission. Together we're stronger. 💜 ${SITE}` },
+    { label: 'Spread hope', text: `Share this post and spread hope 🙏 ${SITE}` },
+    { label: 'Tag a friend', text: `Tag someone who believes in this mission. Together we're stronger 💜 ${SITE}` },
   ],
+};
+
+function getDynamicCTAs(postType: PostType, tone: SentimentTone, ctaType: CTAType): { label: string; text: string }[] {
+  const key: CTAKey = `${postType}:${tone}`;
+  return CTA_MATRIX[key]?.[ctaType] ?? CTA_FALLBACK[ctaType] ?? [];
+}
+
+// Hashtag suggestions keyed by PostType → SentimentTone
+const HASHTAG_SUGGESTIONS: Partial<Record<CTAKey, string[]>> & { _base: Record<PostType, string[]> } = {
+  _base: {
+    ImpactStory:       ['survivorstrong', 'lucera', 'humantraffickingawareness', 'safehouses', 'endtrafficking'],
+    Campaign:          ['lucera', 'givingseason', 'fundraising', 'makeadifference', 'communityimpact'],
+    FundraisingAppeal: ['donate', 'lucera', 'shelter', 'safehouse', 'givingtuesday'],
+    ThankYou:          ['grateful', 'community', 'thankful', 'lucera', 'togetherwecan'],
+    Educational:       ['awareness', 'humantrafficking', 'knowthesigns', 'education', 'lucera'],
+    EventPromotion:    ['event', 'lucera', 'community', 'joinus', 'networking'],
+  },
+  'ImpactStory:Emotional':    ['emotionalstory', 'survivorvoice', 'healingjourney', 'hopeforsurvivors', 'livechanged'],
+  'ImpactStory:Hopeful':      ['hopeful', 'newbeginnings', 'survivorstrong', 'bettertomorrow', 'hopeisreal'],
+  'ImpactStory:Grateful':     ['grateful', 'thankful', 'blessed', 'communitycare', 'thankyoudonors'],
+  'Campaign:Urgent':          ['urgent', 'actNow', 'deadline', 'helpnow', 'lastchance'],
+  'Campaign:Celebratory':     ['milestone', 'wegothere', 'celebrate', 'wedidit', 'progress'],
+  'Campaign:Hopeful':         ['togetherwecan', 'buildingbetter', 'makingprogress', 'impact', 'hope'],
+  'FundraisingAppeal:Urgent': ['urgent', 'donate', 'helpnow', 'needyou', 'emergency'],
+  'FundraisingAppeal:Emotional': ['compassion', 'helpothers', 'sheltersurvivors', 'kindness', 'humanity'],
+  'FundraisingAppeal:Hopeful':   ['hopeful', 'givetoday', 'changelife', 'monthlygiver', 'impact'],
+  'ThankYou:Grateful':        ['thankyou', 'donors', 'community', 'grateful', 'youmadethishappen'],
+  'ThankYou:Celebratory':     ['winning', 'celebrate', 'wedidit', 'community', 'milestone'],
+  'Educational:Informative':  ['didyouknow', 'awareness', 'humantrafficking', 'education', 'spreadawareness'],
+  'Educational:Hopeful':      ['changeispossible', 'progress', 'awareness', 'hope', 'impact'],
+  'Educational:Urgent':       ['knowthesigns', 'critical', 'awareness', 'actfast', 'urgent'],
+  'EventPromotion:Celebratory': ['event', 'comejoin', 'celebrate', 'community', 'fun'],
+  'EventPromotion:Hopeful':   ['event', 'togetherwegrow', 'community', 'jointhechange', 'hopeful'],
+  'EventPromotion:Urgent':    ['lastchance', 'rsvpnow', 'event', 'registernow', 'limited'],
 };
 
 const tierColors = { High: 'bg-secondary/10 text-secondary', Medium: 'bg-tertiary-fixed text-on-tertiary-fixed', Low: 'bg-error-container text-error' };
@@ -769,6 +944,11 @@ export default function SocialMediaComposer() {
   };
 
   const [mediaUploading, setMediaUploading] = useState(false);
+  const [now, setNow] = useState(() => new Date());
+  useEffect(() => {
+    const id = setInterval(() => setNow(new Date()), 1000);
+    return () => clearInterval(id);
+  }, []);
 
   const handleMedia = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const f = e.target.files?.[0];
@@ -880,7 +1060,7 @@ export default function SocialMediaComposer() {
                   ? <span className="material-symbols-outlined text-[16px] animate-spin">refresh</span>
                   : <span className="material-symbols-outlined text-[16px]">send</span>
                 }
-                {publishing ? 'Publishing…' : draft.scheduleLater ? 'Schedule to Facebook' : 'Publish to Facebook'}
+                {publishing ? 'Publishing…' : 'Publish to Facebook'}
               </button>
             </div>
           </div>
@@ -975,15 +1155,18 @@ export default function SocialMediaComposer() {
 
               {/* CTA Scripts */}
               <div>
-                <label className="text-[10px] font-bold text-on-surface-variant uppercase tracking-widest mb-2 block">CTA Scripts</label>
+                <div className="flex items-center gap-1.5 mb-2">
+                  <label className="text-[10px] font-bold text-on-surface-variant uppercase tracking-widest">CTA Scripts</label>
+                  <span className="text-[9px] text-on-surface-variant/50 normal-case tracking-normal">— for {draft.postType.replace(/([A-Z])/g,' $1').trim()} · {draft.sentimentTone}</span>
+                </div>
                 <div className="space-y-2">
-                  {(CTA_SCRIPTS[draft.callToActionType] ?? CTA_SCRIPTS.DonateNow).map((script) => (
+                  {getDynamicCTAs(draft.postType, draft.sentimentTone, draft.callToActionType).map((script) => (
                     <button
                       key={script.label}
                       onClick={() => update('caption', draft.caption ? `${draft.caption}\n\n${script.text}` : script.text)}
                       className="w-full text-left px-3 py-2 rounded-xl bg-surface-container-low hover:bg-primary/8 border border-outline-variant/20 hover:border-primary/30 transition-all group"
                     >
-                      <p className="text-[11px] font-bold text-primary mb-0.5 group-hover:text-primary">{script.label}</p>
+                      <p className="text-[11px] font-bold text-primary mb-0.5">{script.label}</p>
                       <p className="text-[10px] text-on-surface-variant leading-snug line-clamp-2">{script.text}</p>
                     </button>
                   ))}
@@ -1012,6 +1195,27 @@ export default function SocialMediaComposer() {
                     placeholder={!draft.hashtags.length ? 'Type a tag, press Enter' : ''}
                     className="flex-1 min-w-[80px] bg-transparent text-sm text-on-surface outline-none placeholder:text-on-surface-variant/40" />
                 </div>
+                {/* Dynamic suggestions */}
+                {(() => {
+                  const key: CTAKey = `${draft.postType}:${draft.sentimentTone}`;
+                  const toneSpecific = HASHTAG_SUGGESTIONS[key] ?? [];
+                  const base = HASHTAG_SUGGESTIONS._base[draft.postType] ?? [];
+                  const suggestions = [...new Set([...toneSpecific, ...base])].filter(t => !draft.hashtags.includes(t));
+                  if (!suggestions.length) return null;
+                  return (
+                    <div className="mt-2">
+                      <p className="text-[9px] text-on-surface-variant/60 mb-1.5 uppercase tracking-widest font-bold">Suggested</p>
+                      <div className="flex flex-wrap gap-1.5">
+                        {suggestions.slice(0, 10).map(tag => (
+                          <button key={tag} onClick={() => update('hashtags', [...draft.hashtags, tag])}
+                            className="inline-flex items-center gap-0.5 px-2 py-0.5 rounded-full text-[11px] font-semibold bg-surface-container border border-outline-variant/30 text-on-surface-variant hover:bg-primary/10 hover:text-primary hover:border-primary/30 transition-colors">
+                            <span className="text-[10px]">+</span> #{tag}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  );
+                })()}
               </div>
 
               {/* Media upload */}
@@ -1093,37 +1297,75 @@ export default function SocialMediaComposer() {
               {/* Timing */}
               <div>
                 <label className="text-[10px] font-bold text-on-surface-variant uppercase tracking-widest mb-2 block">Posting Time</label>
-                {insights && (
-                  <p className="text-[10px] text-on-surface-variant mb-2">
-                    Best: <span className="font-bold text-secondary">{insights.bestDay} {fmtHour(insights.bestHour)}</span>
-                  </p>
-                )}
-                <div className="grid grid-cols-2 gap-2 mb-2">
-                  <div>
-                    <p className="text-[10px] text-on-surface-variant mb-1">Hour (0–23)</p>
-                    <input type="number" min={0} max={23} value={draft.postHour} onChange={e => update('postHour', parseInt(e.target.value) || 0)}
-                      className="w-full bg-surface-container-low rounded-xl px-3 py-2 text-sm text-on-surface outline-none focus:ring-2 focus:ring-primary/20" />
-                  </div>
-                  <div>
-                    <p className="text-[10px] text-on-surface-variant mb-1">Day</p>
-                    <select value={draft.dayOfWeek} onChange={e => update('dayOfWeek', e.target.value as DayOfWeek)}
-                      className="w-full bg-surface-container-low rounded-xl px-3 py-2 text-sm text-on-surface outline-none focus:ring-2 focus:ring-primary/20">
-                      {DAYS.map(d => <option key={d} value={d}>{d.slice(0,3)}</option>)}
-                    </select>
-                  </div>
-                </div>
-                <div className="flex items-center gap-2">
-                  {(['Post Now', 'Schedule'] as const).map(opt => (
-                    <button key={opt} onClick={() => update('scheduleLater', opt === 'Schedule')}
-                      className={`flex-1 py-2 rounded-xl text-xs font-bold transition-colors ${(opt === 'Schedule') === draft.scheduleLater ? 'aurora-gradient text-white' : 'bg-surface-container-low text-on-surface-variant'}`}>
-                      {opt}
-                    </button>
-                  ))}
-                </div>
-                {draft.scheduleLater && (
-                  <input type="datetime-local" value={draft.scheduledAt} onChange={e => update('scheduledAt', e.target.value)}
-                    className="w-full mt-2 bg-surface-container-low rounded-xl px-3 py-2 text-sm text-on-surface outline-none focus:ring-2 focus:ring-primary/20" />
-                )}
+                {(() => {
+                  const currentHour = now.getHours();
+                  const currentMinute = now.getMinutes();
+                  const currentSecond = now.getSeconds();
+                  const currentDay = DAYS[(now.getDay() + 6) % 7];
+                  const pad = (n: number) => String(n).padStart(2, '0');
+                  const ampm = currentHour < 12 ? 'AM' : 'PM';
+                  const displayHour = currentHour % 12 || 12;
+                  const clockDisplay = `${displayHour}:${pad(currentMinute)}:${pad(currentSecond)} ${ampm}`;
+                  const isNearPeak = insights && (currentHour === insights.bestHour || (insights.hourRates?.[currentHour] ?? 0) >= (insights.bestHourRate ?? 0) * 0.9);
+                  const isPeakDay = insights && currentDay === insights.bestDay;
+                  const suggestion = !insights ? null
+                    : isNearPeak && isPeakDay ? { icon: 'star', color: 'bg-secondary/10 text-secondary', msg: 'Great time to post — peak hour and best day' }
+                    : isNearPeak ? { icon: 'schedule', color: 'bg-primary/10 text-primary', msg: `Good hour, but ${insights.bestDay} tends to perform better` }
+                    : isPeakDay ? { icon: 'schedule', color: 'bg-primary/10 text-primary', msg: `Good day, but ${fmtHour(insights.bestHour)} tends to get more donations` }
+                    : { icon: 'info', color: 'bg-surface-container text-on-surface-variant', msg: `Consider posting ${insights.bestDay} at ${fmtHour(insights.bestHour)} for best results` };
+                  return (
+                    <div className="space-y-2">
+                      {/* Live clock */}
+                      <div className="rounded-xl bg-surface-container-low px-3 py-2.5 flex items-center justify-between">
+                        <div>
+                          <p className="text-[10px] text-on-surface-variant mb-0.5">Right now</p>
+                          <p className="text-sm font-bold text-on-surface tabular-nums">{clockDisplay}</p>
+                          <p className="text-[11px] text-on-surface-variant">{currentDay}</p>
+                        </div>
+                        {suggestion && (
+                          <div className={`flex items-center gap-1 px-2 py-1 rounded-lg text-[10px] font-semibold ${suggestion.color}`}>
+                            <span className="material-symbols-outlined text-[13px]">{suggestion.icon}</span>
+                            {isNearPeak && isPeakDay ? 'Peak now' : isNearPeak ? 'Good hour' : isPeakDay ? 'Good day' : 'Off-peak'}
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Best time banner */}
+                      {insights && (
+                        <div className="rounded-xl overflow-hidden border border-secondary/20">
+                          <div className="bg-secondary/10 px-3 py-1.5 flex items-center gap-1.5">
+                            <span className="material-symbols-outlined text-[13px] text-secondary">trending_up</span>
+                            <p className="text-[10px] font-bold text-secondary uppercase tracking-widest">Best time to post · from your history</p>
+                          </div>
+                          <div className="bg-surface-container-low px-3 py-2.5 flex items-center justify-between">
+                            <div className="flex items-center gap-3">
+                              <div>
+                                <p className="text-base font-bold text-on-surface">{fmtHour(insights.bestHour)}</p>
+                                <p className="text-[11px] text-on-surface-variant">{insights.bestDay}</p>
+                              </div>
+                              <div className="w-px h-8 bg-outline-variant/30" />
+                              <div>
+                                <p className="text-base font-bold text-secondary">{fmtPct(insights.bestHourRate)}</p>
+                                <p className="text-[11px] text-on-surface-variant">donation rate</p>
+                              </div>
+                            </div>
+                            <div className="text-right">
+                              <p className="text-[10px] text-on-surface-variant">vs. overall avg</p>
+                              <p className="text-xs font-bold text-secondary">
+                                +{Math.round((insights.bestHourRate - insights.overallDonationRate) * 100)}pp
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Full suggestion text */}
+                      {suggestion && !(isNearPeak && isPeakDay) && (
+                        <p className="text-[10px] text-on-surface-variant px-1">{suggestion.msg}</p>
+                      )}
+                    </div>
+                  );
+                })()}
               </div>
 
             </div>
