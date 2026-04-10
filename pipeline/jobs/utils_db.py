@@ -124,8 +124,12 @@ def ensure_risk_predictions_table(schema: str = "operational"):
             """)
 
 
-def ensure_social_predictions_table(schema: str = "operational"):
-    """Create the social media predictions table if it doesn't exist."""
+def ensure_social_predictions_table(schema: str = "public"):
+    """
+    Create social_media_predictions in the given schema (default public — matches EF / ASP.NET).
+
+    donation_tier is filled by the API heuristic scorer after publish; batch inference leaves it null.
+    """
     with pg_conn(schema) as conn:
         with conn.cursor() as cur:
             cur.execute(f"""
@@ -137,6 +141,7 @@ def ensure_social_predictions_table(schema: str = "operational"):
                     prob_engagement_high       DOUBLE PRECISION,
                     predicted_has_donations    INTEGER,
                     prob_has_donations         DOUBLE PRECISION,
-                    prediction_ts              TIMESTAMPTZ
+                    prediction_ts              TIMESTAMPTZ,
+                    donation_tier              TEXT
                 )
             """)

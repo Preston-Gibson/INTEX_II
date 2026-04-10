@@ -13,6 +13,7 @@ public class AppDbContext : IdentityDbContext<ApplicationUser>
     public DbSet<ProcessRecording> ProcessRecordings => Set<ProcessRecording>();
     public DbSet<HomeVisitation> HomeVisitations => Set<HomeVisitation>();
     public DbSet<SocialMediaPost> SocialMediaPosts => Set<SocialMediaPost>();
+    public DbSet<SocialMediaPrediction> SocialMediaPredictions => Set<SocialMediaPrediction>();
     public DbSet<Supporter> Supporters => Set<Supporter>();
     public DbSet<Donation> Donations => Set<Donation>();
     public DbSet<DonationAllocation> DonationAllocations => Set<DonationAllocation>();
@@ -36,6 +37,12 @@ public class AppDbContext : IdentityDbContext<ApplicationUser>
         modelBuilder.Entity<ProcessRecording>().HasKey(e => e.RecordingId);
         modelBuilder.Entity<HomeVisitation>().HasKey(e => e.VisitationId);
         modelBuilder.Entity<SocialMediaPost>().HasKey(e => e.PostId);
+        modelBuilder.Entity<SocialMediaPrediction>().HasKey(e => e.PostId);
+        modelBuilder.Entity<SocialMediaPrediction>()
+            .HasOne<SocialMediaPost>()
+            .WithOne()
+            .HasForeignKey<SocialMediaPrediction>(p => p.PostId)
+            .OnDelete(DeleteBehavior.Cascade);
         modelBuilder.Entity<DonationAllocation>().HasKey(e => e.AllocationId);
         modelBuilder.Entity<InKindDonationItem>().HasKey(e => e.ItemId);
         modelBuilder.Entity<HealthWellbeingRecord>().HasKey(e => e.HealthRecordId);

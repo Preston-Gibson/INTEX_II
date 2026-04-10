@@ -22,6 +22,7 @@ import AdminProcessRecording from './pages/admin/ProcessRecording.tsx';
 import AdminHomeVisitationCaseConference from './pages/admin/HomeVisitationCaseConference.tsx';
 import AdminReportsAnalytics from './pages/admin/ReportsAnalytics.tsx';
 import AdminUserManagement from './pages/admin/UserManagement.tsx';
+import AdminSocialMediaComposer from './pages/admin/SocialMediaComposer.tsx';
 
 // Page Elements
 import NavBar from './components/NavBar.tsx';
@@ -31,7 +32,7 @@ import CookieBanner from './components/CookieBanner.tsx';
 import ScrollToTop from './components/ScrollToTop.tsx';
 import ProtectedRoute from './components/ProtectedRoute.tsx';
 
-const DASHBOARD_PATHS = ['/donor-dashboard', '/admin-dashboard', '/admin-donors-contributions', '/admin-caseload-inventory', '/admin-process-recording', '/admin-home-visitation-case-conference', '/admin-reports-analytics', '/admin-user-management'];
+const DASHBOARD_PATHS = ['/donor-dashboard', '/admin-dashboard', '/admin-donors-contributions', '/admin-caseload-inventory', '/admin-process-recording', '/admin-home-visitation-case-conference', '/admin-reports-analytics', '/admin-user-management', '/admin-social-media'];
 const NO_CHROME_PATHS = ['/login', '/register', '/oauth-callback'];
 
 function Layout() {
@@ -61,6 +62,7 @@ function Layout() {
           <Route path="/admin-home-visitation-case-conference" element={<ProtectedRoute requiredRole="Admin"><AdminHomeVisitationCaseConference /></ProtectedRoute>} />
           <Route path="/admin-reports-analytics" element={<ProtectedRoute requiredRole="Admin"><AdminReportsAnalytics /></ProtectedRoute>} />
           <Route path="/admin-user-management" element={<ProtectedRoute requiredRole="Admin"><AdminUserManagement /></ProtectedRoute>} />
+          <Route path="/admin-social-media" element={<ProtectedRoute requiredRole="Admin"><AdminSocialMediaComposer /></ProtectedRoute>} />
         </Routes>
       </div>
       {!isDashboard && !isNoChrome && <Footer />}

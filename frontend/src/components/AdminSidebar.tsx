@@ -1,18 +1,22 @@
 import { useState } from 'react';
-import { NavLink, Link, useNavigate } from 'react-router-dom';
+import { NavLink, Link, useNavigate, useLocation } from 'react-router-dom';
+import { clearToken } from '../utils/auth';
 
 const NAV_ITEMS = [
-  { to: '/admin-dashboard',                      icon: 'dashboard',          label: 'Dashboard' },
-  { to: '/admin-caseload-inventory',             icon: 'folder_shared',      label: 'Residents' },
-  { to: '/admin-donors-contributions',           icon: 'volunteer_activism', label: 'Donors' },
-  { to: '/admin-process-recording',              icon: 'history_edu',        label: 'Counseling' },
-  { to: '/admin-home-visitation-case-conference',icon: 'home_pin',           label: 'Visits' },
-  { to: '/admin-reports-analytics',             icon: 'analytics',          label: 'Analytics' },
+  { to: '/admin-dashboard',                       icon: 'dashboard',          label: 'Dashboard' },
+  { to: '/admin-caseload-inventory',              icon: 'folder_shared',      label: 'Residents' },
+  { to: '/admin-donors-contributions',            icon: 'volunteer_activism', label: 'Donors' },
+  { to: '/admin-process-recording',               icon: 'history_edu',        label: 'Counseling' },
+  { to: '/admin-home-visitation-case-conference', icon: 'home_pin',           label: 'Visits' },
+  { to: '/admin-reports-analytics',               icon: 'analytics',          label: 'Analytics' },
+  { to: '/admin-social-media',                    icon: 'campaign',           label: 'Social Media' },
 ];
 
 export default function AdminSidebar() {
   const navigate = useNavigate();
   const [open, setOpen] = useState(false);
+  const { pathname } = useLocation();
+  const isSocialMedia = pathname.includes('social-media');
 
   const sidebarContent = (
     <aside className="w-56 flex-shrink-0 flex flex-col bg-surface-container-lowest border-r border-outline-variant/20 py-6 px-4 relative z-10">
@@ -42,15 +46,25 @@ export default function AdminSidebar() {
         ))}
       </nav>
 
+      {!isSocialMedia && (
+        <button
+          onClick={() => { navigate('/admin-caseload-inventory'); setOpen(false); }}
+          className="w-full py-3 rounded-xl font-bold text-sm flex items-center justify-center gap-2 hover:opacity-90 transition-opacity mb-2 shadow-sm"
+          style={{ backgroundColor: '#ffba38', color: '#281900' }}
+        >
+          <span className="material-symbols-outlined text-[18px]" style={{ fontVariationSettings: "'FILL' 1" }}>
+            add_circle
+          </span>
+          New Resident
+        </button>
+      )}
+
       <button
-        onClick={() => { navigate('/admin-caseload-inventory'); setOpen(false); }}
-        className="w-full py-3 rounded-xl font-bold text-sm flex items-center justify-center gap-2 hover:opacity-90 transition-opacity mb-2 shadow-sm"
-        style={{ backgroundColor: '#ffba38', color: '#281900' }}
+        onClick={() => { clearToken(); navigate('/login'); }}
+        className="flex items-center justify-center gap-2 text-on-surface-variant text-xs font-semibold py-2 rounded-xl hover:bg-surface-container-low transition-colors w-full mb-1"
       >
-        <span className="material-symbols-outlined text-[18px]" style={{ fontVariationSettings: "'FILL' 1" }}>
-          add_circle
-        </span>
-        New Resident
+        <span className="material-symbols-outlined text-[16px]">logout</span>
+        Sign out
       </button>
 
       <Link

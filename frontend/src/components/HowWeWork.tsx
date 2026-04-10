@@ -1,30 +1,34 @@
 import { useLanguage } from '../context/LanguageContext'
+const BOARD_MEMBERS = [
+  {
+    name: 'Margaret L. Harmon',
+    title: 'Chair, Board of Directors',
+    photo: '/images/Woman Smiling at Camera.jpg',
+    cover: false,
+  },
+  {
+    name: 'Dr. James K. Osei',
+    title: 'Vice Chair',
+    photo: '/images/SmilingDoctor.jpg',
+    cover: false,
+  },
+  {
+    name: 'Catherine M. Wells',
+    title: 'Treasurer',
+    photo: '/images/Woman Hand Chin Smiling.jpg',
+    cover: false,
+  },
+  {
+    name: 'Marco A. Rivera',
+    title: 'Secretary',
+    photo: '/images/ManWithGlasses.jpeg',
+    cover: true,
+  },
+]
 
 export default function HowWeWork() {
   const { t } = useLanguage()
 
-  const BOARD_MEMBERS = [
-    {
-      name: 'Margaret L. Harmon',
-      title: t('how.board.chair'),
-      photo: '/images/Woman Smiling at Camera.jpg',
-    },
-    {
-      name: 'Dr. James K. Osei',
-      title: t('how.board.vice_chair'),
-      photo: '/images/SmilingDoctor.jpg',
-    },
-    {
-      name: 'Priya Nair-Chandran',
-      title: t('how.board.treasurer'),
-      photo: '/images/Woman Hand Chin Smiling.jpg',
-    },
-    {
-      name: 'Marco A. Rivera',
-      title: t('how.board.secretary'),
-      photo: '/images/Man Wearing Blue T-shirt.jpg',
-    },
-  ]
 
   return (
     <section className="bg-surface py-28 overflow-hidden">
@@ -44,8 +48,8 @@ export default function HowWeWork() {
               key={member.name}
               className="bg-surface-container-lowest border border-outline-variant/20 rounded-2xl overflow-hidden flex flex-col shadow-sm"
             >
-              <div className="w-full h-80 overflow-hidden">
-                <img src={member.photo} alt={member.name} className="w-full block" />
+              <div className="w-full h-[28rem] overflow-hidden">
+                <img src={member.photo} alt={member.name} className={member.cover ? 'w-full h-full object-cover object-top' : 'w-full block'} />
               </div>
               <div className="p-4 flex flex-col">
                 <h3 className="font-manrope font-bold text-on-surface text-sm mb-0.5">{member.name}</h3>
