@@ -213,14 +213,25 @@ public class SocialMediaController : ControllerBase
             {
                 if (platform == "Facebook")
                 {
-                    var fbUrl = $"https://graph.facebook.com/{version}/{pageId}/feed";
+                    string fbUrl;
                     var fbBody = new Dictionary<string, string>
                     {
-                        ["message"] = fullCaption,
                         ["access_token"] = pageToken,
                     };
+
                     if (!string.IsNullOrWhiteSpace(req.MediaUrl) && req.MediaType != "Text")
-                        fbBody["link"] = req.MediaUrl;
+                    {
+                        // Photo post — use /photos endpoint
+                        fbUrl = $"https://graph.facebook.com/{version}/{pageId}/photos";
+                        fbBody["url"] = req.MediaUrl;
+                        fbBody["caption"] = fullCaption;
+                    }
+                    else
+                    {
+                        // Text-only post — use /feed endpoint
+                        fbUrl = $"https://graph.facebook.com/{version}/{pageId}/feed";
+                        fbBody["message"] = fullCaption;
+                    }
 
                     var fbRes = await http.PostAsync(fbUrl, new FormUrlEncodedContent(fbBody));
                     var fbJson = await fbRes.Content.ReadFromJsonAsync<JsonElement>();
@@ -232,8 +243,10 @@ public class SocialMediaController : ControllerBase
                         continue;
                     }
 
-                    var postId = fbJson.GetProperty("id").GetString() ?? "";
-                    var permalink = $"https://www.facebook.com/{postId}";
+                    var postId = fbJson.TryGetProperty("post_id", out var pid)
+                        ? pid.GetString() ?? ""
+                        : fbJson.GetProperty("id").GetString() ?? "";
+                    var permalink = $"https://www.facebook.com/{postId.Replace("_", "/posts/")}";
 
                     await SavePost(platform, postId, permalink, req, now);
                     results.Add(new PlatformResult("Facebook", "published", postId, permalink, null));

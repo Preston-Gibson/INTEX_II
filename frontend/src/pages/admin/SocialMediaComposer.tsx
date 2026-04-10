@@ -1,6 +1,7 @@
 import { useState, useCallback, useRef, useEffect, type ReactNode } from 'react';
 import AdminSidebar from '../../components/AdminSidebar';
 import { authHeaders } from '../../utils/auth';
+import { supabase } from '../../utils/supabase';
 
 const API = `${import.meta.env.VITE_API_URL ?? 'http://localhost:5229'}/api/social-media`;
 
@@ -881,9 +882,36 @@ export default function SocialMediaComposer() {
     if (e.key === 'Backspace' && !hashtagInput && draft.hashtags.length) update('hashtags', draft.hashtags.slice(0, -1));
   };
 
-  const handleMedia = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const [mediaUploading, setMediaUploading] = useState(false);
+
+  const handleMedia = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const f = e.target.files?.[0];
-    if (f) setMedia(URL.createObjectURL(f));
+    if (!f) return;
+
+    // Show local preview immediately
+    setMedia(URL.createObjectURL(f));
+    setMediaUploading(true);
+
+    try {
+      const ext = f.name.split('.').pop();
+      const path = `posts/${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
+      const { error } = await supabase.storage
+        .from('Social Media Uploads')
+        .upload(path, f, { upsert: true });
+
+      if (error) { showToast(`Upload failed: ${error.message}`); return; }
+
+      const { data } = supabase.storage
+        .from('Social Media Uploads')
+        .getPublicUrl(path);
+
+      setMedia(data.publicUrl);
+      showToast('Image uploaded successfully');
+    } catch {
+      showToast('Upload failed — check Supabase storage permissions');
+    } finally {
+      setMediaUploading(false);
+    }
   };
 
   const copyCaption = (p: Platform) => {
@@ -899,6 +927,8 @@ export default function SocialMediaComposer() {
     if (!draft.caption.trim()) { showToast('Caption is required'); return; }
     const publishPlatforms = draft.platforms.filter(p => p === 'Instagram' || p === 'Facebook' || p === 'Twitter');
     if (publishPlatforms.length === 0) { showToast('Select at least one platform to publish'); return; }
+    if (draft.mediaType !== 'Text' && media?.startsWith('blob:')) { showToast('Image still uploading — please wait'); return; }
+    if (draft.mediaType !== 'Text' && !media) { showToast('Please upload an image first'); return; }
 
     setPublishing(true);
     setPublishResults([]);
@@ -1119,13 +1149,17 @@ export default function SocialMediaComposer() {
               {/* Media upload */}
               <div>
                 <label className="text-[10px] font-bold text-on-surface-variant uppercase tracking-widest mb-1.5 block">Media</label>
-                <button onClick={() => fileRef.current?.click()}
-                  className="w-full border-2 border-dashed border-outline-variant rounded-xl py-3 flex flex-col items-center gap-1.5 hover:border-primary/40 hover:bg-primary/5 transition-colors">
-                  {media
-                    ? <img src={media} alt="Preview" className="w-16 h-16 object-cover rounded-lg" />
-                    : <span className="material-symbols-outlined text-[28px] text-on-surface-variant/50">upload</span>
+                <button onClick={() => fileRef.current?.click()} disabled={mediaUploading}
+                  className="w-full border-2 border-dashed border-outline-variant rounded-xl py-3 flex flex-col items-center gap-1.5 hover:border-primary/40 hover:bg-primary/5 transition-colors disabled:opacity-60">
+                  {mediaUploading
+                    ? <span className="material-symbols-outlined text-[28px] text-primary animate-spin">refresh</span>
+                    : media
+                      ? <img src={media} alt="Preview" className="w-16 h-16 object-cover rounded-lg" />
+                      : <span className="material-symbols-outlined text-[28px] text-on-surface-variant/50">upload</span>
                   }
-                  <p className="text-xs font-semibold text-on-surface-variant">{media ? 'Change media' : 'Upload image or video'}</p>
+                  <p className="text-xs font-semibold text-on-surface-variant">
+                    {mediaUploading ? 'Uploading…' : media ? 'Change media' : 'Upload image or video'}
+                  </p>
                 </button>
                 <input ref={fileRef} type="file" accept="image/*,video/*" className="hidden" onChange={handleMedia} />
               </div>
