@@ -149,28 +149,6 @@ public static class DbSeeder
         Console.WriteLine("[Seeder] Sequences reset.");
     }
 
-    public static async Task SeedUsersAsync(UserManager<ApplicationUser> userManager)
-    {
-        var testUsers = new[]
-        {
-            (Email: "admin2@lucera.org",  First: "Sarah",  Last: "Mitchell", Password: "testadminpassword", Role: "Admin"),
-            (Email: "donor1@lucera.org",  First: "James",  Last: "Rivera",   Password: "testdonorpassword", Role: "Donor"),
-            (Email: "donor2@lucera.org",  First: "Emily",  Last: "Chen",     Password: "testdonorpassword", Role: "Donor"),
-        };
-
-        foreach (var (email, first, last, password, role) in testUsers)
-        {
-            if (await userManager.FindByEmailAsync(email) != null) continue;
-
-            var user = new ApplicationUser { UserName = email, Email = email, FirstName = first, LastName = last, EmailConfirmed = true };
-            var result = await userManager.CreateAsync(user, password);
-            if (result.Succeeded)
-                await userManager.AddToRoleAsync(user, role);
-            else
-                Console.WriteLine($"[Seeder] Failed to create {email}: {string.Join(", ", result.Errors.Select(e => e.Description))}");
-        }
-    }
-
     private static async Task SeedTable<T>(
         AppDbContext db,
         string csvDataPath,

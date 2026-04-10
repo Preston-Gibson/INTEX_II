@@ -117,7 +117,7 @@ using (var scope = app.Services.CreateScope())
     ");
 }
 
-// Seed roles and default admin account
+// Seed roles
 using (var scope = app.Services.CreateScope())
 {
     var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
@@ -125,23 +125,6 @@ using (var scope = app.Services.CreateScope())
     {
         if (!await roleManager.RoleExistsAsync(role))
             await roleManager.CreateAsync(new IdentityRole(role));
-    }
-
-    var userManager = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
-    const string adminEmail = "admin@lucera.org";
-    if (await userManager.FindByEmailAsync(adminEmail) == null)
-    {
-        var admin = new ApplicationUser
-        {
-            UserName = adminEmail,
-            Email = adminEmail,
-            FirstName = "Admin",
-            LastName = "User",
-            EmailConfirmed = true
-        };
-        var result = await userManager.CreateAsync(admin, "adminadminadmin");
-        if (result.Succeeded)
-            await userManager.AddToRoleAsync(admin, "Admin");
     }
 }
 
@@ -153,8 +136,7 @@ if (builder.Configuration.GetValue<bool>("DataSeeding:SeedOnStartup"))
     var forceReseed = builder.Configuration.GetValue<bool>("DataSeeding:ForcedReseed");
     await DbSeeder.SeedAsync(db, csvPath, forceReseed);
 
-    var userManager = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
-    await DbSeeder.SeedUsersAsync(userManager);
+    // Test user seeding removed — accounts are created through the app
 }
 
 // Always reset sequences on startup to keep them in sync with seeded data.

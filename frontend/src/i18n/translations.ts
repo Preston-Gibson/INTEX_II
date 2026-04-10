@@ -73,6 +73,7 @@ const translations = {
       'We use only strictly necessary cookies to keep you securely logged in. No tracking or analytics.',
     'cookie.learn': 'Learn more',
     'cookie.accept': 'Got it',
+    'cookie.decline': 'Decline',
   },
   es: {
     // NavBar
@@ -151,6 +152,7 @@ const translations = {
       'Solo usamos cookies estrictamente necesarias para mantenerle conectado de forma segura. Sin rastreo ni análisis.',
     'cookie.learn': 'Más información',
     'cookie.accept': 'Entendido',
+    'cookie.decline': 'Rechazar',
   },
 } as const;
 
