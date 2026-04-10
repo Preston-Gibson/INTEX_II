@@ -272,7 +272,13 @@ public class SocialMediaController : ControllerBase
                         : fbJson.GetProperty("id").GetString() ?? "";
                     var permalink = $"https://www.facebook.com/{postId.Replace("_", "/posts/")}";
 
-                    await SavePost(platform, postId, permalink, req, now);
+                    // DB save is best-effort — a transient failure here should not
+                    // report the Facebook publish as failed (the post is already live).
+                    try { await SavePost(platform, postId, permalink, req, now); }
+                    catch (Exception dbEx)
+                    {
+                        Console.Error.WriteLine($"[SavePost] DB write failed for post {postId}: {dbEx.Message}");
+                    }
                     results.Add(new PlatformResult("Facebook", "published", postId, permalink, null));
                 }
                 else if (platform == "Instagram")
@@ -394,7 +400,8 @@ public class SocialMediaController : ControllerBase
                     var igPostId = pubJson.GetProperty("id").GetString() ?? "";
                     var igPermalink = $"https://www.instagram.com/p/{igPostId}/";
 
-                    await SavePost(platform, igPostId, igPermalink, req, now);
+                    try { await SavePost(platform, igPostId, igPermalink, req, now); }
+                    catch (Exception dbEx) { Console.Error.WriteLine($"[SavePost] DB write failed for IG post {igPostId}: {dbEx.Message}"); }
                     results.Add(new PlatformResult("Instagram", "published", igPostId, igPermalink, null));
                 }
                 else if (platform == "Twitter")
@@ -427,7 +434,8 @@ public class SocialMediaController : ControllerBase
                     }
 
                     var tweetPermalink = $"https://x.com/i/web/status/{tweetId}";
-                    await SavePost(platform, tweetId!, tweetPermalink, req, now);
+                    try { await SavePost(platform, tweetId!, tweetPermalink, req, now); }
+                    catch (Exception dbEx) { Console.Error.WriteLine($"[SavePost] DB write failed for tweet {tweetId}: {dbEx.Message}"); }
                     results.Add(new PlatformResult("Twitter", "published", tweetId, tweetPermalink, null));
                 }
             }
