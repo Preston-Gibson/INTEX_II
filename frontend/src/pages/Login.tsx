@@ -2,12 +2,14 @@ import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { getRole } from '../utils/auth';
+import { useLanguage } from '../context/LanguageContext';
 
 const API_URL = import.meta.env.VITE_API_URL;
 
 export default function Login() {
   const navigate = useNavigate();
   const { login } = useAuth();
+  const { t } = useLanguage();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -25,14 +27,14 @@ export default function Login() {
       });
       if (!res.ok) {
         const msg = await res.text();
-        setError(msg || 'Invalid email or password.');
+        setError(msg || t('login.error.invalid'));
         return;
       }
       const { token } = await res.json();
       login(token);
       navigate(getRole() === 'Admin' ? '/admin-dashboard' : '/donor-dashboard');
     } catch {
-      setError('Unable to reach the server. Please try again.');
+      setError(t('login.error.server'));
     } finally {
       setLoading(false);
     }
@@ -47,7 +49,7 @@ export default function Login() {
           <div className="mb-6">
             <Link to="/" className="inline-flex items-center gap-1.5 text-sm font-medium text-on-surface-variant hover:text-primary transition-colors">
               <span className="material-symbols-outlined text-[18px]">arrow_back</span>
-              Back to home
+              {t('login.back')}
             </Link>
           </div>
 
@@ -60,17 +62,17 @@ export default function Login() {
 
           <div className="bg-surface-container-lowest rounded-[1.25rem] shadow-[0_8px_32px_rgba(0,63,135,0.1)] p-10">
             <h1 className="font-manrope font-bold text-3xl text-primary mb-2">
-              Welcome back
+              {t('login.heading')}
             </h1>
             <p className="text-on-surface-variant mb-8">
-              Sign in to your Lucera account
+              {t('login.subheading')}
             </p>
 
             <form className="space-y-5" onSubmit={handleSubmit}>
               {/* Email */}
               <div>
                 <label className="block text-sm font-medium text-on-surface-variant mb-1.5">
-                  Email address
+                  {t('login.email')}
                 </label>
                 <input
                   type="email"
@@ -86,10 +88,10 @@ export default function Login() {
               <div>
                 <div className="flex items-center justify-between mb-1.5">
                   <label className="block text-sm font-medium text-on-surface-variant">
-                    Password
+                    {t('login.password')}
                   </label>
                   <a href="#" className="text-sm font-semibold text-primary hover:opacity-80 transition">
-                    Forgot password?
+                    {t('login.forgot')}
                   </a>
                 </div>
                 <input
@@ -115,13 +117,13 @@ export default function Login() {
                 disabled={loading}
                 className="aurora-gradient text-white w-full py-3.5 rounded-[0.75rem] font-manrope font-bold shadow-[0_4px_16px_rgba(0,63,135,0.35)] hover:opacity-90 active:scale-[0.97] transition-all mt-2 disabled:opacity-60"
               >
-                {loading ? 'Signing in…' : 'Sign In'}
+                {loading ? t('login.signing') : t('login.submit')}
               </button>
 
               {/* Divider */}
               <div className="flex items-center gap-3 my-1">
                 <div className="flex-1 h-px bg-slate-200" />
-                <span className="text-xs text-on-surface-variant font-medium">or continue with</span>
+                <span className="text-xs text-on-surface-variant font-medium">{t('login.orwith')}</span>
                 <div className="flex-1 h-px bg-slate-200" />
               </div>
 
@@ -155,9 +157,9 @@ export default function Login() {
             </form>
 
             <p className="text-center text-sm text-on-surface-variant mt-6">
-              Don't have an account?{' '}
+              {t('login.noaccount')}{' '}
               <Link to="/register" className="font-semibold text-primary hover:opacity-80 transition">
-                Create one
+                {t('login.create')}
               </Link>
             </p>
           </div>
@@ -186,10 +188,10 @@ export default function Login() {
         <div className="relative z-10 flex-1 flex items-center">
           <div className="space-y-6">
             <h2 className="font-manrope font-bold text-4xl text-white leading-tight">
-              Empowering families.<br />Building futures.
+              {t('login.brand.heading')}
             </h2>
             <p className="text-white/80 text-lg leading-relaxed max-w-sm">
-              Your work makes all the difference.
+              {t('login.brand.sub')}
             </p>
           </div>
         </div>

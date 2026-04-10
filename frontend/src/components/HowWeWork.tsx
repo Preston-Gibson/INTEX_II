@@ -1,36 +1,40 @@
-const BOARD_MEMBERS = [
-  {
-    name: 'Margaret L. Harmon',
-    title: 'Chair, Board of Directors',
-    photo: '/images/Woman Smiling at Camera.jpg',
-  },
-  {
-    name: 'Dr. James K. Osei',
-    title: 'Vice Chair',
-    photo: '/images/SmilingDoctor.jpg',
-  },
-  {
-    name: 'Priya Nair-Chandran',
-    title: 'Treasurer',
-    photo: '/images/Woman Hand Chin Smiling.jpg',
-  },
-  {
-    name: 'Marco A. Rivera',
-    title: 'Secretary',
-    photo: '/images/Man Wearing Blue T-shirt.jpg',
-  },
-]
+import { useLanguage } from '../context/LanguageContext'
 
 export default function HowWeWork() {
+  const { t } = useLanguage()
+
+  const BOARD_MEMBERS = [
+    {
+      name: 'Margaret L. Harmon',
+      title: t('how.board.chair'),
+      photo: '/images/Woman Smiling at Camera.jpg',
+    },
+    {
+      name: 'Dr. James K. Osei',
+      title: t('how.board.vice_chair'),
+      photo: '/images/SmilingDoctor.jpg',
+    },
+    {
+      name: 'Priya Nair-Chandran',
+      title: t('how.board.treasurer'),
+      photo: '/images/Woman Hand Chin Smiling.jpg',
+    },
+    {
+      name: 'Marco A. Rivera',
+      title: t('how.board.secretary'),
+      photo: '/images/Man Wearing Blue T-shirt.jpg',
+    },
+  ]
+
   return (
     <section className="bg-surface py-28 overflow-hidden">
       <div className="max-w-7xl mx-auto px-6">
         <div className="text-center mb-14">
           <h2 className="font-manrope text-[clamp(2rem,3.2vw,2.75rem)] font-extrabold text-primary mb-4">
-            Board of Directors
+            {t('how.board.heading')}
           </h2>
           <p className="text-[1.05rem] leading-[1.8] text-on-surface-variant max-w-2xl mx-auto">
-            Our board brings together decades of expertise in child welfare, law, finance, and international development to guide our mission.
+            {t('how.board.subheading')}
           </p>
         </div>
 

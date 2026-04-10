@@ -3,6 +3,7 @@ import { MapContainer, TileLayer, Marker, Popup, CircleMarker, useMap } from 're
 import { Icon, LatLngBounds, LatLng } from 'leaflet'
 import 'leaflet/dist/leaflet.css'
 import { getCoords } from '../utils/cityCoords'
+import { useLanguage } from '../context/LanguageContext'
 
 import markerIcon2x from 'leaflet/dist/images/marker-icon-2x.png'
 import markerIcon from 'leaflet/dist/images/marker-icon.png'
@@ -49,6 +50,7 @@ interface ResidentOrigin {
 export default function MapSection() {
   const [safehouses, setSafehouses] = useState<SafehouseLocation[]>([])
   const [origins, setOrigins] = useState<ResidentOrigin[]>([])
+  const { t } = useLanguage()
 
   useEffect(() => {
     fetch(`${import.meta.env.VITE_API_URL ?? 'http://localhost:5229'}/api/impact/safehouse-locations`)
@@ -73,14 +75,13 @@ export default function MapSection() {
           <div className="flex flex-col gap-6 min-h-0">
             <div className="flex-shrink-0">
               <span className="inline-block text-[0.72rem] font-extrabold tracking-[0.12em] uppercase text-secondary mb-3">
-                Our Reach
+                {t('map.reach')}
               </span>
               <h2 className="font-manrope text-[clamp(1.9rem,3vw,2.5rem)] font-extrabold text-primary mb-3">
-                Where We Serve
+                {t('map.heading')}
               </h2>
               <p className="text-[1.02rem] leading-[1.75] text-on-surface-variant max-w-[560px]">
-                Operating across Central America, Lucera maintains safe houses, legal
-                offices, and partner networks to serve those most in need.
+                {t('map.subheading')}
               </p>
             </div>
             <div className="flex-1 relative rounded-[2rem] overflow-hidden shadow-[0_4px_24px_rgba(0,0,0,0.08)]" style={{ minHeight: 300 }}>
@@ -116,7 +117,7 @@ export default function MapSection() {
                     <Popup>
                       <strong>{city}</strong>
                       <br />
-                      {count} resident{count !== 1 ? 's' : ''} from this area
+                      {count} {t('map.resident')}{count !== 1 ? 's' : ''} {t('map.residents_from')}
                     </Popup>
                   </CircleMarker>
                 )
@@ -150,21 +151,21 @@ export default function MapSection() {
             <div className="flex flex-col gap-2">
               <div className="flex items-center gap-2">
                 <img src={markerIcon} style={{ width: 14, height: 22 }} alt="safehouse pin" />
-                <span className="text-[0.85rem] font-bold text-on-surface">Safehouse Location</span>
+                <span className="text-[0.85rem] font-bold text-on-surface">{t('map.safehouse')}</span>
               </div>
               <div className="flex items-center gap-2">
                 <span className="w-4 h-4 rounded-full flex-shrink-0" style={{ background: '#e07b39', opacity: 0.7 }} />
-                <span className="text-[0.85rem] font-bold text-on-surface">Resident Origin City</span>
+                <span className="text-[0.85rem] font-bold text-on-surface">{t('map.origin')}</span>
               </div>
               <p className="text-[0.78rem] text-on-surface-variant leading-relaxed">
-                Circle size reflects the number of residents from that area.
+                {t('map.circle_desc')}
               </p>
             </div>
 
             {/* Safehouse list — full height, no scroll */}
             <div className="flex flex-col">
               <h3 className="font-manrope text-[1.1rem] font-bold text-on-surface mb-3">
-                Active Safehouses
+                {t('map.active')}
               </h3>
               <div className="flex flex-col gap-2">
                 {uniqueCountries.length > 0 ? uniqueCountries.map(country => (
@@ -172,7 +173,7 @@ export default function MapSection() {
                     <p className="text-[0.88rem] font-bold text-on-surface">{country}</p>
                   </div>
                 )) : (
-                  <p className="text-[0.85rem] text-on-surface-variant">Loading safehouses...</p>
+                  <p className="text-[0.85rem] text-on-surface-variant">{t('map.loading')}</p>
                 )}
               </div>
             </div>

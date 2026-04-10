@@ -1,59 +1,51 @@
 import { useState, useEffect } from 'react'
 import StoryCard from './StoryCard'
-
-const stories = [
-  {
-    imageSrc: '/elena-story-cover.png',
-    imageAlt: 'Illustration for Elena\'s story',
-    imageBorderColor: 'border-primary-fixed',
-    tagBg: 'bg-primary-fixed text-on-primary-fixed',
-    tagText: 'Case Highlight: Reintegration',
-    title: "Elena's Journey to Independence",
-    quote: 'After three years in our transition program, Elena graduated from her nursing vocational course and has been safely reunited with her extended family.',
-    programValue: 'Vocational Path',
-    metaLabel: 'Duration',
-    metaValue: '3.5 Years',
-    fullStory: `Elena arrived at Lucera at fourteen years old, rescued from a trafficking network operating across two countries. She was quiet in those first weeks — sitting apart at meals, startling at doors — carrying a weight that words couldn't yet reach.
-
-Her caseworker, Marta, began meeting with her twice a week. Slowly, Elena started to talk. About the cousins she missed. About wanting, someday, to be a nurse.
-
-That someday became a plan. Lucera enrolled her in an accelerated literacy program, then in a certified nursing assistant course at a partnered vocational institute in the city. Elena studied in the evenings after house chores, borrowing textbooks she dog-eared with careful notes in the margins.
-
-In her second year, she sat with younger girls who were just arriving — not as a counselor, but as someone who understood. "I was you," she would say. "It gets quieter."
-
-After three and a half years, Elena passed her certification exam on the first attempt. Her aunt — vetted and approved through Lucera's family reintegration process — was waiting outside. They drove north together.
-
-She sends a message to the house on holidays. Last December, she wrote that she had gotten her first hospital placement. She signed it: grateful.`,
-  },
-  {
-    imageSrc: '/sofia-story-cover.png',
-    imageAlt: 'Illustration for Sofia\'s story',
-    imageBorderColor: 'border-tertiary-fixed',
-    tagBg: 'bg-tertiary-fixed text-on-tertiary-fixed',
-    tagText: 'Case Highlight: Safe Return',
-    title: "Sofia's Road Home",
-    quote: 'When Sofia arrived at Lucera, she hadn\'t spoken in weeks. Two years later, she walked back to her grandmother\'s village — on her own terms, ready.',
-    programValue: 'Family Reintegration',
-    metaLabel: 'Duration',
-    metaValue: '2 Years',
-    fullStory: `Sofia was twelve when the authorities brought her to Lucera. She arrived with a plastic bag, a borrowed jacket two sizes too large, and nothing else.
-
-For the first month she communicated almost entirely through nods. Her caseworker, Rosa, did not push. She sat with her during meals, walked beside her in the garden, and let the silence be. "She needed to learn the house was safe," Rosa said later. "That takes time. There's no shortcut."
-
-The breakthrough came quietly. One afternoon in the craft room, Sofia picked up a needle and thread from the supply table and began to embroider a small bird onto a scrap of fabric — precise, deliberate stitches. A staff member noticed and sat beside her without comment. Within an hour, three other girls had joined them at the table.
-
-Needlework became Sofia's language when words still felt unreliable. She made small things — flowers, birds, a tiny house with a red door. When she finally started speaking in sessions, her words came out the same way: careful and exact.
-
-By her second year she was attending the community education program and helping younger girls settle into the safehouse routine. She had identified an aunt in her home region — a woman the Lucera family tracing team spent four months verifying, visiting twice before any contact was made.
-
-The reintegration visit happened on a Tuesday morning. Sofia carried a small embroidered pouch she had made for her aunt. They sat across from each other at a table in the community center, a social worker nearby. After twenty minutes, Sofia reached across and took her aunt's hand.
-
-Six months later, she is enrolled in school. She sends a photograph once a month — never of her face, always of something she has made. Last month it was a tablecloth with a pattern of birds in flight along the border.`,
-  },
-]
+import { useLanguage } from '../context/LanguageContext'
 
 export default function StoriesSection() {
-  const [activeStory, setActiveStory] = useState<typeof stories[0] | null>(null)
+  const { t } = useLanguage()
+  const [activeStory, setActiveStory] = useState<{
+    imageSrc: string
+    imageAlt: string
+    imageBorderColor: string
+    tagBg: string
+    tagText: string
+    title: string
+    quote: string
+    programValue: string
+    metaLabel: string
+    metaValue: string
+    fullStory: string
+  } | null>(null)
+
+  const stories = [
+    {
+      imageSrc: '/elena-story-cover.png',
+      imageAlt: "Illustration for Elena's story",
+      imageBorderColor: 'border-primary-fixed',
+      tagBg: 'bg-primary-fixed text-on-primary-fixed',
+      tagText: t('stories.elena.tag'),
+      title: t('stories.elena.title'),
+      quote: t('stories.elena.quote'),
+      programValue: t('stories.elena.program'),
+      metaLabel: t('stories.elena.meta'),
+      metaValue: t('stories.elena.meta_val'),
+      fullStory: t('stories.elena.full'),
+    },
+    {
+      imageSrc: '/sofia-story-cover.png',
+      imageAlt: "Illustration for Sofia's story",
+      imageBorderColor: 'border-tertiary-fixed',
+      tagBg: 'bg-tertiary-fixed text-on-tertiary-fixed',
+      tagText: t('stories.sofia.tag'),
+      title: t('stories.sofia.title'),
+      quote: t('stories.sofia.quote'),
+      programValue: t('stories.sofia.program'),
+      metaLabel: t('stories.sofia.meta'),
+      metaValue: t('stories.sofia.meta_val'),
+      fullStory: t('stories.sofia.full'),
+    },
+  ]
 
   useEffect(() => {
     if (activeStory) {
@@ -75,10 +67,10 @@ export default function StoriesSection() {
       <div className="flex flex-col md:flex-row md:justify-between md:items-end gap-6 mb-12">
         <div className="max-w-xl">
           <h2 className="text-3xl md:text-4xl font-extrabold text-primary mb-4 tracking-tight">
-            The Lives Behind the Data
+            {t('stories.heading')}
           </h2>
           <p className="text-on-surface-variant leading-relaxed">
-            Names and locations have been changed to protect the privacy and safety of our residents.
+            {t('stories.privacy')}
           </p>
         </div>
       </div>
@@ -130,7 +122,7 @@ export default function StoriesSection() {
             {/* Footer */}
             <div className="px-7 py-4 border-t border-outline-variant/20 flex gap-6 text-xs">
               <div>
-                <p className="font-bold text-primary uppercase tracking-widest">Program</p>
+                <p className="font-bold text-primary uppercase tracking-widest">{t('stories.modal.program')}</p>
                 <p className="text-on-surface-variant">{activeStory.programValue}</p>
               </div>
               <div className="w-px bg-outline-variant/30" />

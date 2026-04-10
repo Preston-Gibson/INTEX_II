@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react'
+import { useLanguage } from '../context/LanguageContext'
 
 interface Allocation {
   programArea: string
@@ -42,6 +43,7 @@ export default function TransparencySection() {
   const [allocations, setAllocations] = useState<Allocation[]>([])
   const [animated, setAnimated] = useState(false)
   const ref = useRef<HTMLDivElement>(null)
+  const { t } = useLanguage()
 
   useEffect(() => {
     fetch(`${import.meta.env.VITE_API_URL ?? 'http://localhost:5229'}/api/impact/donation-allocation`)
@@ -63,9 +65,9 @@ export default function TransparencySection() {
 
   return (
     <div ref={ref} className="bg-surface-container-lowest p-8 rounded-xl border border-outline-variant/10">
-      <h3 className="text-2xl font-bold text-primary mb-1">Where Your Money Goes</h3>
+      <h3 className="text-2xl font-bold text-primary mb-1">{t('transparency.heading')}</h3>
       <p className="text-on-surface-variant text-sm mb-8">
-        For every $1 donated, 92 cents goes directly to program costs.
+        {t('transparency.subheading')}
       </p>
 
       <div className="space-y-5">

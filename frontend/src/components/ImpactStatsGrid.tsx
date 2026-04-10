@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { useLanguage } from '../context/LanguageContext'
 
 interface Stats {
   residentsServed: number
@@ -8,6 +9,7 @@ interface Stats {
 
 export default function ImpactStatsGrid() {
   const [stats, setStats] = useState<Stats | null>(null)
+  const { t } = useLanguage()
 
   useEffect(() => {
     fetch(`${import.meta.env.VITE_API_URL ?? 'http://localhost:5229'}/api/impact/stats`)
@@ -26,13 +28,13 @@ export default function ImpactStatsGrid() {
         <div>
           <span className="material-symbols-outlined text-secondary text-3xl mb-4">home_pin</span>
           <h3 className="text-sm font-semibold text-on-surface-variant uppercase tracking-widest mb-2">
-            Residents Served
+            {t('stats.residents')}
           </h3>
           <p className="text-5xl font-extrabold text-primary">{residentsServed}</p>
         </div>
         <div className="mt-4 flex items-center gap-2 text-secondary font-medium">
           <span className="material-symbols-outlined text-sm">trending_up</span>
-          <span>Across all active safehouses</span>
+          <span>{t('stats.residents.sub')}</span>
         </div>
       </div>
 
@@ -40,13 +42,13 @@ export default function ImpactStatsGrid() {
         <div>
           <span className="material-symbols-outlined text-secondary text-3xl mb-4">volunteer_activism</span>
           <h3 className="text-sm font-semibold text-on-surface-variant uppercase tracking-widest mb-2">
-            Successful Reintegrations
+            {t('stats.reintegrations')}
           </h3>
           <p className="text-5xl font-extrabold text-primary">{reintegrations}</p>
         </div>
         <div className="mt-4 flex items-center gap-2 text-secondary font-medium">
           <span className="material-symbols-outlined text-sm">check_circle</span>
-          <span>Stable home environments secured</span>
+          <span>{t('stats.reintegrations.sub')}</span>
         </div>
       </div>
 
@@ -54,13 +56,13 @@ export default function ImpactStatsGrid() {
         <div>
           <span className="material-symbols-outlined text-white/80 text-3xl mb-4">history_edu</span>
           <h3 className="text-sm font-semibold text-white/70 uppercase tracking-widest mb-2">
-            Education Hours Provided
+            {t('stats.education')}
           </h3>
           <p className="text-5xl font-extrabold">{educationHours}</p>
         </div>
         <div className="mt-4 flex items-center gap-2 text-white/90 font-medium">
           <span className="material-symbols-outlined text-sm">school</span>
-          <span>Accredited curriculum programs</span>
+          <span>{t('stats.education.sub')}</span>
         </div>
       </div>
     </section>
