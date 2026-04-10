@@ -947,6 +947,7 @@ export default function SocialMediaComposer() {
   };
 
   const [mediaUploading, setMediaUploading] = useState(false);
+  const [mediaUploadFailed, setMediaUploadFailed] = useState(false);
   const [now, setNow] = useState(() => new Date());
   useEffect(() => {
     const id = setInterval(() => setNow(new Date()), 1000);
@@ -960,6 +961,7 @@ export default function SocialMediaComposer() {
     const blobUrl = URL.createObjectURL(f);
     setMedia(blobUrl);
     setMediaPublicUrl(null);
+    setMediaUploadFailed(false);
     setMediaUploading(true);
 
     try {
@@ -969,7 +971,7 @@ export default function SocialMediaComposer() {
         .from('Social Media Uploads')
         .upload(path, f, { upsert: true });
 
-      if (error) { showToast(`Upload failed: ${error.message}`); return; }
+      if (error) { setMediaUploadFailed(true); showToast(`Upload failed: ${error.message}`); return; }
 
       const { data } = supabase.storage
         .from('Social Media Uploads')
@@ -978,6 +980,7 @@ export default function SocialMediaComposer() {
       setMediaPublicUrl(data.publicUrl);  // only used for publish API call
       showToast('Photo ready to publish');
     } catch {
+      setMediaUploadFailed(true);
       showToast('Upload failed — check Supabase storage permissions');
     } finally {
       setMediaUploading(false);
@@ -997,7 +1000,9 @@ export default function SocialMediaComposer() {
     if (!draft.caption.trim()) { showToast('Caption is required'); return; }
     if (!draft.platforms.includes('Facebook')) { showToast('Select Facebook to publish'); return; }
     if (draft.mediaType !== 'Text' && !media) { showToast('Please upload a photo first'); return; }
-    if (draft.mediaType !== 'Text' && !mediaPublicUrl) { showToast('Photo still uploading — please wait'); return; }
+    if (draft.mediaType !== 'Text' && mediaUploadFailed) { showToast('Photo upload failed — please re-upload the image'); return; }
+    if (draft.mediaType !== 'Text' && mediaUploading) { showToast('Photo still uploading — please wait'); return; }
+    if (draft.mediaType !== 'Text' && !mediaPublicUrl) { showToast('Photo upload failed — please re-upload the image'); return; }
 
     setPublishing(true);
     setPublishResults([]);
