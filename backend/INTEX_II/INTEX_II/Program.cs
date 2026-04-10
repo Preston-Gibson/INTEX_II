@@ -197,14 +197,14 @@ app.Use(async (context, next) =>
         var logger = context.RequestServices.GetRequiredService<ILogger<Program>>();
         logger.LogWarning("Unauthorized (401): {Path} from {IP}", path, ip);
         var secLog = context.RequestServices.GetRequiredService<SecurityLogService>();
-        await secLog.WarnAsync("UNAUTHORIZED_401", ipAddress: ip, details: path);
+        await secLog.WarnAsync("UNAUTHORIZED_401", ip: ip, details: path);
     }
     else if (context.Response.StatusCode == 403)
     {
         var logger = context.RequestServices.GetRequiredService<ILogger<Program>>();
         logger.LogWarning("Forbidden (403): {Path} from {IP}", path, ip);
         var secLog = context.RequestServices.GetRequiredService<SecurityLogService>();
-        await secLog.WarnAsync("FORBIDDEN_403", ipAddress: ip, details: path);
+        await secLog.WarnAsync("FORBIDDEN_403", ip: ip, details: path);
     }
 });
 
