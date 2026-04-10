@@ -242,6 +242,12 @@ Six months later, she is enrolled in school. She sends a photograph once a month
       'No names listed in this circle yet \u2014 your support could be recognized here.',
     'shoutout.give_portal': 'Give through the donor portal',
     'shoutout.anonymous': 'Anonymous supporter',
+    'shoutout.tier.cornerstone.label': 'Cornerstone',
+    'shoutout.tier.cornerstone.subtitle': 'Leadership gifts that anchor our long-term work with children and families.',
+    'shoutout.tier.partner.label': 'Partner',
+    'shoutout.tier.partner.subtitle': 'Consistent and generous gifts that help us plan ahead and deepen our impact.',
+    'shoutout.tier.friend.label': 'Friend',
+    'shoutout.tier.friend.subtitle': 'Every gift matters — thank you for standing with Lucera and the communities we serve.',
 
     // PrivacyPolicy
     'privacy.legal': 'Legal',
@@ -654,6 +660,12 @@ Seis meses después, está inscrita en la escuela. Envía una fotografía una ve
       'Aún no hay nombres en este círculo \u2014 tu apoyo podría ser reconocido aquí.',
     'shoutout.give_portal': 'Dona a través del portal de donantes',
     'shoutout.anonymous': 'Colaborador anónimo',
+    'shoutout.tier.cornerstone.label': 'Piedra Angular',
+    'shoutout.tier.cornerstone.subtitle': 'Donaciones de liderazgo que sostienen nuestro trabajo a largo plazo con niños y familias.',
+    'shoutout.tier.partner.label': 'Socio',
+    'shoutout.tier.partner.subtitle': 'Donaciones constantes y generosas que nos ayudan a planificar y profundizar nuestro impacto.',
+    'shoutout.tier.friend.label': 'Amigo',
+    'shoutout.tier.friend.subtitle': 'Cada donación importa — gracias por estar con Lucera y las comunidades que servimos.',
 
     // PrivacyPolicy
     'privacy.legal': 'Legal',
