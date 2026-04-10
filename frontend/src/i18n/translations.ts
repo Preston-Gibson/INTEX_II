@@ -18,10 +18,10 @@ const translations = {
       'Lucera is a dedicated sanctuary providing recovery, advocacy, and a hopeful future for children surviving exploitation in Central America.',
     'hero.donate': 'Donate Now',
     'hero.impact': 'Our Impact',
-    'hero.quote': '"Hope is the first step toward healing."',
+    'hero.quote': '"Lucera is a safe place where we\'re treated as family."',
 
     // ImpactSection
-    'impact.heading': 'Our Impact',
+    'impact.heading': 'Our Services',
     'impact.subheading':
       'Through direct intervention and long-term care, we are rewriting the stories of those who have endured the unimaginable.',
     'impact.holistic.title': 'Holistic Recovery',

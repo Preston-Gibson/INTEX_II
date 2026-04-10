@@ -175,10 +175,7 @@ export default function DonorDashboard() {
               placeholder="Search mission reports..."
             />
           </div>
-          <p className="flex-1 text-center text-sm font-bold text-on-surface">
-            {activeNav === 'Overview' ? 'Donor Dashboard' : activeNav === 'Impact' ? 'Impact Report' : 'Giving Overview'}
-          </p>
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-3 ml-auto">
             <UserAvatar />
           </div>
         </header>
@@ -317,12 +314,8 @@ export default function DonorDashboard() {
                   <button
                     onClick={() => downloadExport('/api/export/my-tax-receipt', 'xlsx', new Date().getFullYear())}
                     className="w-full flex items-center gap-2 text-sm text-primary font-medium hover:underline">
-                    <span className="material-symbols-outlined text-[16px]">receipt_long</span>
+                    <span className="material-symbols-outlined text-[16px]">description</span>
                     Download Tax Receipt ({new Date().getFullYear()})
-                  </button>
-                  <button className="w-full flex items-center gap-2 text-sm text-primary font-medium hover:underline">
-                    <span className="material-symbols-outlined text-[16px]">mail</span>
-                    Contact Support
                   </button>
                 </div>
               </div>
