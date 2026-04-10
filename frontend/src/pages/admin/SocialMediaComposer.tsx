@@ -5,7 +5,7 @@ import { supabase } from '../../utils/supabase';
 
 const API = `${import.meta.env.VITE_API_URL ?? 'http://localhost:5229'}/api/social-media`;
 
-const BRAND_LOGO_SRC = '/lucera-logo.png';
+const BRAND_LOGO_SRC = '/logo.png';
 const BRAND_INSTAGRAM_HANDLE = 'luceraofficial';
 const BRAND_SOCIAL_NAME = 'Lucera Safehouses & Support';
 const BRAND_TWITTER_HANDLE = '@LuceraSafehouses';
@@ -442,115 +442,104 @@ function IPhoneBlackShell({ children, statusDark = false }: { children: React.Re
 
 function FacebookPreview({ caption, hashtags, media }: { caption: string; hashtags: string[]; media: string | null }) {
   const text = adaptCaption(caption, hashtags, 'Facebook');
-  const bg = '#fff';
   const border = '1px solid #e4e6eb';
 
   return (
     <IPhoneBlackShell statusDark={false}>
-      <div style={{ flex: 1, background: '#f0f2f5', overflowY: 'auto', display: 'flex', flexDirection: 'column' }}>
+      <div style={{ flex: 1, background: '#f0f2f5', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
 
         {/* FB top nav */}
-        <div style={{ background: bg, borderBottom: border, padding: '8px 12px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexShrink: 0 }}>
-          <span style={{ fontSize: 22, fontWeight: 800, color: '#1877f2', letterSpacing: -0.5 }}>f</span>
-          <div style={{ display: 'flex', gap: 8 }}>
-            {[
-              <svg key="s" viewBox="0 0 24 24" fill="#050505" style={{ width: 22, height: 22 }}><circle cx="11" cy="11" r="8" fill="none" stroke="#050505" strokeWidth="2"/><line x1="21" y1="21" x2="16.65" y2="16.65" stroke="#050505" strokeWidth="2"/></svg>,
-              <svg key="m" viewBox="0 0 24 24" style={{ width: 22, height: 22 }}><path d="M12 2C6.477 2 2 6.145 2 11.243c0 3.025 1.517 5.716 3.878 7.472V22l3.547-1.945c.947.261 1.949.4 2.975.4 5.523 0 10-4.145 10-9.243C22 6.145 17.523 2 12 2z" fill="#1877f2"/><path d="M13.07 14.4l-2.56-2.73-4.99 2.73 5.49-5.83 2.63 2.73 4.92-2.73-5.49 5.83z" fill="#fff"/></svg>,
-            ]}
+        <div style={{ background: '#fff', borderBottom: border, padding: '8px 12px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexShrink: 0 }}>
+          <svg viewBox="0 0 24 24" fill="#1877f2" style={{ width: 26, height: 26 }}><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
+          <div style={{ display: 'flex', gap: 10 }}>
+            {/* Search */}
+            <div style={{ width: 32, height: 32, borderRadius: '50%', background: '#e4e6eb', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <svg viewBox="0 0 24 24" fill="none" stroke="#050505" strokeWidth="2.5" style={{ width: 16, height: 16 }}><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            </div>
+            {/* Messenger */}
+            <div style={{ width: 32, height: 32, borderRadius: '50%', background: '#e4e6eb', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <svg viewBox="0 0 24 24" fill="#050505" style={{ width: 16, height: 16 }}><path d="M12 2C6.477 2 2 6.145 2 11.243c0 3.025 1.517 5.716 3.878 7.472V22l3.547-1.945c.947.261 1.949.4 2.975.4 5.523 0 10-4.145 10-9.243C22 6.145 17.523 2 12 2z"/></svg>
+            </div>
           </div>
         </div>
 
-        {/* Stories strip */}
-        <div style={{ background: bg, borderBottom: border, padding: '10px 12px', display: 'flex', gap: 8, overflowX: 'hidden', flexShrink: 0 }}>
-          {[{ label: 'Create', isCreate: true }, { label: 'hope' }, { label: 'giving' }, { label: 'impact' }].map((s) => (
-            <div key={s.label} style={{ flexShrink: 0, width: 60, height: 100, borderRadius: 10, overflow: 'hidden', position: 'relative', background: s.isCreate ? '#e4e6eb' : 'linear-gradient(180deg,rgba(0,0,0,0) 40%,rgba(0,0,0,0.7))', border: '1px solid #e4e6eb' }}>
-              {!s.isCreate && <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(135deg,#1877f2,#a855f7)' }} />}
-              <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, padding: '4px 4px 5px', textAlign: 'center' }}>
-                <span style={{ fontSize: 8, fontWeight: 700, color: s.isCreate ? '#050505' : '#fff' }}>{s.label}</span>
-              </div>
-              {s.isCreate && (
-                <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%,-60%)', width: 28, height: 28, borderRadius: '50%', background: '#1877f2', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                  <svg viewBox="0 0 10 10" fill="white" style={{ width: 14, height: 14 }}><path d="M5 1v8M1 5h8"/></svg>
-                </div>
-              )}
-            </div>
-          ))}
+        {/* What's on your mind row */}
+        <div style={{ background: '#fff', borderBottom: border, padding: '10px 12px', display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0 }}>
+          <img src={BRAND_LOGO_SRC} alt="" style={{ width: 36, height: 36, borderRadius: '50%', objectFit: 'contain', background: '#fff', border: '1px solid #e4e6eb', flexShrink: 0 }} />
+          <div style={{ flex: 1, background: '#f0f2f5', borderRadius: 20, padding: '8px 14px' }}>
+            <span style={{ color: '#65676b', fontSize: 13 }}>What's on your mind, Lucera Offical?</span>
+          </div>
         </div>
 
-        {/* Post card */}
-        <div style={{ background: bg, marginTop: 8, flexShrink: 0 }}>
-          {/* Post header */}
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '10px 12px 6px' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-              <img src={BRAND_LOGO_SRC} alt="" style={{ width: 36, height: 36, borderRadius: '50%', objectFit: 'contain', background: '#fff', border: '1px solid #e4e6eb' }} />
-              <div>
-                <p style={{ color: '#050505', fontSize: 13, fontWeight: 600, lineHeight: 1.2, margin: 0 }}>{BRAND_SOCIAL_NAME}</p>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-                  <span style={{ color: '#65676b', fontSize: 10 }}>2h ·</span>
-                  <svg viewBox="0 0 24 24" fill="#65676b" style={{ width: 10, height: 10 }}><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/></svg>
-                </div>
-              </div>
+        {/* Create post modal sheet */}
+        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', background: '#fff', marginTop: 8, borderRadius: '16px 16px 0 0', overflow: 'hidden' }}>
+
+          {/* Modal header */}
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '12px 14px', borderBottom: border, position: 'relative', flexShrink: 0 }}>
+            <span style={{ fontSize: 15, fontWeight: 700, color: '#050505' }}>Create post</span>
+            <div style={{ position: 'absolute', right: 14, width: 28, height: 28, borderRadius: '50%', background: '#e4e6eb', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <svg viewBox="0 0 24 24" fill="#050505" style={{ width: 14, height: 14 }}><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
             </div>
-            <svg viewBox="0 0 24 24" fill="#65676b" style={{ width: 18, height: 18 }}><circle cx="5" cy="12" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="19" cy="12" r="2"/></svg>
           </div>
 
-          {/* Caption */}
-          {text && (
-            <p style={{ color: '#050505', fontSize: 13, lineHeight: 1.5, margin: '0 12px 8px', whiteSpace: 'pre-wrap' }}>
-              {text.length > 120 ? <>{text.slice(0, 120)}<span style={{ color: '#65676b' }}> ...See more</span></> : text}
+          {/* Page identity */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '10px 14px 6px', flexShrink: 0 }}>
+            <img src={BRAND_LOGO_SRC} alt="" style={{ width: 38, height: 38, borderRadius: '50%', objectFit: 'contain', background: '#fff', border: '1px solid #e4e6eb' }} />
+            <div>
+              <p style={{ color: '#050505', fontSize: 13, fontWeight: 700, margin: 0, lineHeight: 1.3 }}>Lucera Offical</p>
+              <div style={{ display: 'inline-flex', alignItems: 'center', gap: 4, background: '#e4e6eb', borderRadius: 6, padding: '2px 7px', marginTop: 3 }}>
+                <svg viewBox="0 0 24 24" fill="#050505" style={{ width: 11, height: 11 }}><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/></svg>
+                <span style={{ fontSize: 11, fontWeight: 600, color: '#050505' }}>Public</span>
+                <svg viewBox="0 0 24 24" fill="#050505" style={{ width: 10, height: 10 }}><path d="M7 10l5 5 5-5z"/></svg>
+              </div>
+            </div>
+          </div>
+
+          {/* Caption text */}
+          <div style={{ flex: 1, padding: '4px 14px 8px', overflowY: 'auto' }}>
+            <p style={{ color: text ? '#050505' : '#bcc0c4', fontSize: 18, lineHeight: 1.4, margin: 0, whiteSpace: 'pre-wrap' }}>
+              {text || "What's on your mind, Lucera Offical?"}
             </p>
-          )}
-
-          {/* Media */}
-          {media ? (
-            <img src={media} alt="Post" style={{ width: '100%', maxHeight: 200, objectFit: 'cover', display: 'block' }} />
-          ) : (
-            <div style={{ width: '100%', height: 160, background: '#e4e6eb', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 6 }}>
-              <svg viewBox="0 0 24 24" fill="#bec3c9" style={{ width: 32, height: 32 }}><path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"/></svg>
-              <span style={{ fontSize: 10, color: '#bec3c9' }}>Upload media to preview</span>
-            </div>
-          )}
-
-          {/* Reactions bar */}
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '6px 12px', borderBottom: border }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-              {['#1877F2','#F02849','#F5C518'].map((c, i) => (
-                <div key={i} style={{ width: 16, height: 16, borderRadius: '50%', background: c, border: '1.5px solid #fff', marginLeft: i > 0 ? -4 : 0, fontSize: 8, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                  {i === 0 ? '👍' : i === 1 ? '❤️' : '😮'}
-                </div>
-              ))}
-              <span style={{ color: '#65676b', fontSize: 11, marginLeft: 4 }}>1.2K</span>
-            </div>
-            <span style={{ color: '#65676b', fontSize: 11 }}>142 comments · 38 shares</span>
+            {/* Media preview */}
+            {media && (
+              <img src={media} alt="Post" style={{ width: '100%', borderRadius: 8, objectFit: 'cover', maxHeight: 140, display: 'block', marginTop: 10 }} />
+            )}
           </div>
 
-          {/* Action buttons */}
-          <div style={{ display: 'flex', borderBottom: border }}>
-            {[
-              { icon: <svg viewBox="0 0 24 24" fill="none" stroke="#65676b" strokeWidth="2" style={{ width: 18, height: 18 }}><path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"/></svg>, label: 'Like' },
-              { icon: <svg viewBox="0 0 24 24" fill="none" stroke="#65676b" strokeWidth="2" style={{ width: 18, height: 18 }}><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>, label: 'Comment' },
-              { icon: <svg viewBox="0 0 24 24" fill="none" stroke="#65676b" strokeWidth="2" style={{ width: 18, height: 18 }}><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>, label: 'Share' },
-            ].map(({ icon, label }) => (
-              <div key={label} style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 5, padding: '8px 0', cursor: 'default' }}>
-                {icon}
-                <span style={{ color: '#65676b', fontSize: 12, fontWeight: 600 }}>{label}</span>
-              </div>
-            ))}
+          {/* Background color + emoji row */}
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '6px 14px', flexShrink: 0 }}>
+            <div style={{ width: 32, height: 32, borderRadius: 8, background: 'linear-gradient(135deg,#ffd200,#f7971e)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <span style={{ fontSize: 13, fontWeight: 900, color: '#fff' }}>Aa</span>
+            </div>
+            <div style={{ width: 32, height: 32, borderRadius: '50%', border: '1.5px solid #e4e6eb', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <svg viewBox="0 0 24 24" fill="none" stroke="#65676b" strokeWidth="1.8" style={{ width: 18, height: 18 }}><circle cx="12" cy="12" r="9"/><path d="M8.5 14s1.5 2 3.5 2 3.5-2 3.5-2"/><circle cx="9" cy="10" r="1" fill="#65676b"/><circle cx="15" cy="10" r="1" fill="#65676b"/></svg>
+            </div>
+          </div>
+
+          {/* Add to your post bar */}
+          <div style={{ border: `1px solid #e4e6eb`, borderRadius: 10, margin: '0 12px 10px', padding: '8px 10px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexShrink: 0 }}>
+            <span style={{ fontSize: 12, fontWeight: 600, color: '#050505' }}>Add to your post</span>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+              {/* Photo */}
+              <svg viewBox="0 0 24 24" fill="#45bd62" style={{ width: 22, height: 22 }}><path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"/></svg>
+              {/* Tag */}
+              <svg viewBox="0 0 24 24" fill="#1877f2" style={{ width: 22, height: 22 }}><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+              {/* Video */}
+              <svg viewBox="0 0 24 24" fill="#f02849" style={{ width: 22, height: 22 }}><path d="M15 10l4.553-2.277A1 1 0 0 1 21 8.618v6.764a1 1 0 0 1-1.447.894L15 14v-4z"/><rect x="2" y="6" width="13" height="12" rx="2"/></svg>
+              {/* Location */}
+              <svg viewBox="0 0 24 24" fill="#f5533d" style={{ width: 22, height: 22 }}><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
+              {/* Emoji */}
+              <svg viewBox="0 0 24 24" fill="#f7b928" style={{ width: 22, height: 22 }}><circle cx="12" cy="12" r="10"/><path d="M8.5 14s1.5 2 3.5 2 3.5-2 3.5-2" stroke="#fff" strokeWidth="1.5" fill="none"/><circle cx="9" cy="10" r="1.2" fill="#fff"/><circle cx="15" cy="10" r="1.2" fill="#fff"/></svg>
+              {/* More */}
+              <svg viewBox="0 0 24 24" fill="#65676b" style={{ width: 22, height: 22 }}><circle cx="5" cy="12" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="19" cy="12" r="2"/></svg>
+            </div>
+          </div>
+
+          {/* Next button */}
+          <div style={{ margin: '0 12px 14px', background: '#e4e6eb', borderRadius: 8, padding: '10px 0', textAlign: 'center', flexShrink: 0 }}>
+            <span style={{ fontSize: 14, fontWeight: 700, color: text ? '#050505' : '#bcc0c4' }}>Next</span>
           </div>
         </div>
-      </div>
-
-      {/* FB bottom tab bar */}
-      <div style={{ background: bg, borderTop: border, display: 'flex', alignItems: 'center', justifyContent: 'space-around', padding: '6px 0 18px', flexShrink: 0 }}>
-        {[
-          <svg key="h" viewBox="0 0 24 24" fill="#1877f2" style={{ width: 22, height: 22 }}><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>,
-          <svg key="f" viewBox="0 0 24 24" fill="none" stroke="#65676b" strokeWidth="2" style={{ width: 22, height: 22 }}><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>,
-          <svg key="w" viewBox="0 0 24 24" fill="none" stroke="#65676b" strokeWidth="2" style={{ width: 22, height: 22 }}><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>,
-          <svg key="b" viewBox="0 0 24 24" fill="none" stroke="#65676b" strokeWidth="2" style={{ width: 22, height: 22 }}><path d="M18 8h1a4 4 0 0 1 0 8h-1"/><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/><line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/></svg>,
-          <svg key="m" viewBox="0 0 24 24" fill="none" stroke="#65676b" strokeWidth="2" style={{ width: 22, height: 22 }}><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>,
-        ].map((icon, i) => (
-          <div key={i} style={{ padding: '4px 8px', cursor: 'default' }}>{icon}</div>
-        ))}
       </div>
     </IPhoneBlackShell>
   );
@@ -775,7 +764,7 @@ function DonationGauge({ probability }: { probability: number }) {
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
-const PLATFORMS: Platform[] = ['Instagram', 'Facebook', 'LinkedIn', 'Twitter'];
+const PLATFORMS: Platform[] = ['Facebook', 'Instagram', 'Twitter'];
 const DAYS: DayOfWeek[] = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
 
 const PLATFORM_META: Record<Platform, { gradient: string; icon: ReactNode }> = {
@@ -831,12 +820,12 @@ const suggestionColor = { good: 'text-secondary', warning: 'text-error', tip: 't
 
 export default function SocialMediaComposer() {
   const [draft, setDraft] = useState<DraftPost>({
-    postType: 'ImpactStory', platforms: ['Instagram'], mediaType: 'Reel',
+    postType: 'ImpactStory', platforms: ['Facebook'], mediaType: 'Photo',
     sentimentTone: 'Emotional', hasCallToAction: true, callToActionType: 'DonateNow',
     featuresResidentStory: false, caption: '', hashtags: [], postHour: 13,
     dayOfWeek: 'Saturday', scheduleLater: false, scheduledAt: '',
   });
-  const [activeTab, setActiveTab] = useState<Platform>('Instagram');
+  const [activeTab, setActiveTab] = useState<Platform>('Facebook');
   const [hashtagInput, setHashtagInput] = useState('');
   const [media, setMedia] = useState<string | null>(null);
   const [copied, setCopied] = useState<Platform | null>(null);
@@ -1290,7 +1279,7 @@ export default function SocialMediaComposer() {
               <div className="mt-4 bg-surface-container-lowest rounded-xl p-4 border border-outline-variant/20 max-w-[500px] mx-auto">
                 <p className="text-[10px] font-bold text-on-surface-variant uppercase tracking-widest mb-3">Character Limits</p>
                 <div className="space-y-2">
-                  {([['Instagram',2200],['Facebook',63206],['LinkedIn',3000],['Twitter',280]] as [Platform,number][]).map(([p,lim]) => {
+                  {([['Facebook',63206],['Instagram',2200],['Twitter',280]] as [Platform,number][]).map(([p,lim]) => {
                     const len = adaptCaption(draft.caption, draft.hashtags, p).length;
                     const pct = Math.min(len / lim, 1);
                     const over = len > lim;
