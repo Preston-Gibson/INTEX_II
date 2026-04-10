@@ -40,7 +40,7 @@ export default function StoryCard({
           </span>
           <h4 className="text-xl font-bold text-primary mb-3">{title}</h4>
           <p className="text-on-surface-variant text-sm leading-relaxed mb-6 italic">"{quote}"</p>
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-0">
             <div className="flex gap-4">
               <div className="text-center">
                 <p className="text-xs font-bold text-primary uppercase">Program</p>
