@@ -12,24 +12,24 @@ const translations = {
 
     // Hero
     'hero.badge': 'Santa Rosa de Copán, Honduras',
-    'hero.title': 'A Radiant Shield for the',
-    'hero.title.accent': 'Vulnerable.',
+    'hero.title': 'Restoring Safety, Healing, Hope, and',
+    'hero.title.accent': 'Light.',
     'hero.subtitle':
       'Lucera is a dedicated sanctuary providing recovery, advocacy, and a hopeful future for children surviving exploitation in Central America.',
     'hero.donate': 'Donate Now',
     'hero.impact': 'Our Impact',
-    'hero.quote': '"Hope is the first step toward healing."',
+    'hero.quote': '"Lucera is a safe place where we\'re treated as family."',
 
     // ImpactSection
-    'impact.heading': 'Our Impact',
+    'impact.heading': 'Our Services',
     'impact.subheading':
       'Through direct intervention and long-term care, we are rewriting the stories of those who have endured the unimaginable.',
     'impact.holistic.title': 'Holistic Recovery',
     'impact.holistic.desc':
       'Specialized trauma-informed therapy and medical care designed for the unique needs of survivors.',
     'impact.holistic.stat': 'Lives Restored',
-    'impact.legal.title': 'Legal Advocacy',
-    'impact.legal.desc': 'Ensuring justice through proactive legal support and systemic reform.',
+    'impact.legal.title': 'Healing',
+    'impact.legal.desc': 'Trauma-informed care and emotional support guiding every survivor toward wholeness and hope.',
     'impact.education.title': 'Education',
     'impact.education.desc': 'Empowering survivors with skills for an independent, secure future.',
     'impact.housing.title': 'Safe Haven Housing',
@@ -45,7 +45,7 @@ const translations = {
       'Community-based monitoring systems to identify at-risk children before exploitation occurs.',
     'how.response.title': 'Rapid Response',
     'how.response.desc':
-      "Immediate legal and physical intervention protocols to remove survivors from harm's way.",
+      "Immediate shelter, care, and support to remove survivors from harm's way and begin their journey to safety.",
     'how.healing.title': 'Generational Healing',
     'how.healing.desc':
       'Working with families to break cycles of vulnerability and poverty through sustainable support.',
@@ -89,8 +89,8 @@ const translations = {
 
     // Hero
     'hero.badge': 'Santa Rosa de Copán, Honduras',
-    'hero.title': 'Un Escudo Radiante para los',
-    'hero.title.accent': 'Vulnerables.',
+    'hero.title': 'Restaurando Seguridad, Sanación, Esperanza y',
+    'hero.title.accent': 'Luz.',
     'hero.subtitle':
       'Lucera es un santuario dedicado que brinda recuperación, defensa y un futuro esperanzador para niños que sobreviven la explotación en América Central.',
     'hero.donate': 'Donar Ahora',
@@ -105,9 +105,9 @@ const translations = {
     'impact.holistic.desc':
       'Terapia especializada con enfoque en trauma y atención médica diseñada para las necesidades únicas de los sobrevivientes.',
     'impact.holistic.stat': 'Vidas Restauradas',
-    'impact.legal.title': 'Defensa Legal',
+    'impact.legal.title': 'Sanación',
     'impact.legal.desc':
-      'Garantizando justicia a través de apoyo legal proactivo y reforma sistémica.',
+      'Atención informada en trauma y apoyo emocional que guía a cada sobreviviente hacia la plenitud y la esperanza.',
     'impact.education.title': 'Educación',
     'impact.education.desc':
       'Empoderando a los sobrevivientes con habilidades para un futuro independiente y seguro.',
@@ -124,7 +124,7 @@ const translations = {
       'Sistemas de monitoreo comunitario para identificar a niños en riesgo antes de que ocurra la explotación.',
     'how.response.title': 'Respuesta Rápida',
     'how.response.desc':
-      'Protocolos inmediatos de intervención legal y física para sacar a los sobrevivientes del peligro.',
+      'Refugio, atención y apoyo inmediatos para sacar a los sobrevivientes del peligro y comenzar su camino hacia la seguridad.',
     'how.healing.title': 'Sanación Generacional',
     'how.healing.desc':
       'Trabajando con familias para romper ciclos de vulnerabilidad y pobreza mediante apoyo sostenible.',

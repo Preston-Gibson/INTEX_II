@@ -338,8 +338,8 @@ export default function UserManagement() {
         {/* Header */}
         <div className="flex items-center justify-between mb-6">
           <div>
-            <h1 className="text-2xl font-headline font-bold text-on-surface">User Management</h1>
-            <p className="text-sm text-on-surface-variant mt-0.5">Hidden admin route — manage accounts, roles, and security logs</p>
+            <h1 className="font-manrope text-4xl font-extrabold text-primary tracking-tight mb-2">User Management</h1>
+            <p className="text-on-surface-variant text-sm leading-relaxed">Manage accounts, assign roles, and control access across the platform.</p>
           </div>
           {activeTab === 'users' && (
             <div className="flex gap-2">

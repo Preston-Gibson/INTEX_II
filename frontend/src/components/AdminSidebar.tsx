@@ -50,7 +50,7 @@ export default function AdminSidebar() {
         <span className="material-symbols-outlined text-[18px]" style={{ fontVariationSettings: "'FILL' 1" }}>
           add_circle
         </span>
-        New Case
+        New Resident
       </button>
 
       <Link

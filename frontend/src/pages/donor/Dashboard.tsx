@@ -28,11 +28,6 @@ interface Stats {
   educationHours: number;
 }
 
-interface YearlyImpact {
-  year: number;
-  residentCount: number;
-}
-
 interface DonationAllocation {
   programArea: string;
   totalAllocated: number;
@@ -59,10 +54,8 @@ export default function DonorDashboard() {
   const location = useLocation();
   const [activeNav, setActiveNav] = useState<string>((location.state as { tab?: string })?.tab ?? 'Overview');
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [chartRange, setChartRange] = useState<'6 MONTHS' | '12 MONTHS'>('12 MONTHS');
 
   const [stats, setStats] = useState<Stats | null>(null);
-  const [yearlyImpact, setYearlyImpact] = useState<YearlyImpact[]>([]);
   const [allocation, setAllocation] = useState<DonationAllocation[]>([]);
   const [myDonations, setMyDonations] = useState<MyDonationsResponse | null>(null);
   const [loading, setLoading] = useState(true);
@@ -74,27 +67,15 @@ export default function DonorDashboard() {
     setLoading(true);
     Promise.all([
       fetch(`${API}/stats`, { headers: authHeaders() }).then(r => r.json()),
-      fetch(`${API}/yearly-impact`, { headers: authHeaders() }).then(r => r.json()),
       fetch(`${API}/donation-allocation`, { headers: authHeaders() }).then(r => r.json()),
       fetch(`${API}/my-donations`, { headers: authHeaders() }).then(r => r.json()),
-    ]).then(([s, y, a, m]) => {
+    ]).then(([s, a, m]) => {
       setStats(s);
-      setYearlyImpact(y);
       setAllocation(a);
       setMyDonations(m);
       setLoading(false);
     }).catch(() => setLoading(false));
   }, [activeNav]);
-
-  const chartData = (() => {
-    const source = chartRange === '6 MONTHS' ? yearlyImpact.slice(-6) : yearlyImpact.slice(-12);
-    const max = Math.max(...source.map(y => y.residentCount), 1);
-    return source.map((y, i) => ({
-      label: String(y.year),
-      height: Math.round((y.residentCount / max) * 100),
-      active: i === source.length - 1,
-    }));
-  })();
 
   const myDonationCount = myDonations?.donations.length ?? 0;
   const myLifetimeUSD = myDonations
@@ -168,17 +149,7 @@ export default function DonorDashboard() {
 
       <div className="flex-1 flex flex-col overflow-hidden">
         <header className="flex items-center gap-3 pl-14 lg:pl-6 pr-4 md:pr-6 py-3 bg-surface-container-lowest border-b border-outline-variant/20 flex-shrink-0">
-          <div className="hidden md:flex items-center gap-2 bg-surface-container-low rounded-xl px-3 py-2 flex-1 max-w-xs">
-            <span className="material-symbols-outlined text-on-surface-variant text-[18px]">search</span>
-            <input
-              className="bg-transparent text-sm text-on-surface placeholder:text-on-surface-variant outline-none w-full"
-              placeholder="Search mission reports..."
-            />
-          </div>
-          <p className="flex-1 text-center text-sm font-bold text-on-surface">
-            {activeNav === 'Overview' ? 'Donor Dashboard' : activeNav === 'Impact' ? 'Impact Report' : 'Giving Overview'}
-          </p>
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-3 ml-auto">
             <UserAvatar />
           </div>
         </header>
@@ -258,33 +229,6 @@ export default function DonorDashboard() {
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
             <div className="lg:col-span-2 space-y-4">
               <div className="bg-surface-container-low rounded-xl p-5">
-                <div className="flex items-center justify-between mb-4">
-                  <div>
-                    <p className="font-manrope font-bold text-on-surface">Year-Over-Year Impact</p>
-                    <p className="text-xs text-on-surface-variant">Resident admissions by year</p>
-                  </div>
-                  <div className="flex gap-1 bg-surface-container rounded-xl p-1">
-                    {(['6 MONTHS', '12 MONTHS'] as const).map((r) => (
-                      <button key={r} onClick={() => setChartRange(r)}
-                        className={`text-[10px] font-bold px-3 py-1.5 rounded-lg transition-colors ${chartRange === r ? 'aurora-gradient text-white' : 'text-on-surface-variant'}`}>
-                        {r}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-                <div className="flex items-end gap-2 h-32 px-2">
-                  {loading ? (
-                    <div className="flex-1 flex items-center justify-center text-on-surface-variant text-xs">Loading...</div>
-                  ) : chartData.map(({ label, height, active }) => (
-                    <div key={label} className="flex-1 flex flex-col items-center gap-1">
-                      <div className={`w-full rounded-t-lg transition-all ${active ? 'bg-primary' : 'bg-surface-container-high hover:bg-primary/40'}`} style={{ height: `${height}%` }}></div>
-                      <span className={`text-[9px] font-bold uppercase ${active ? 'text-primary' : 'text-on-surface-variant'}`}>{label}</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              <div className="bg-surface-container-low rounded-xl p-5">
                 <p className="font-manrope font-bold text-on-surface mb-1">Where Your Money Goes</p>
                 <p className="text-xs text-on-surface-variant mb-4">For every $1 donated, 92 cents goes directly to program costs.</p>
                 {loading ? <p className="text-xs text-on-surface-variant">Loading...</p> : (
@@ -317,12 +261,8 @@ export default function DonorDashboard() {
                   <button
                     onClick={() => downloadExport('/api/export/my-tax-receipt', 'xlsx', new Date().getFullYear())}
                     className="w-full flex items-center gap-2 text-sm text-primary font-medium hover:underline">
-                    <span className="material-symbols-outlined text-[16px]">receipt_long</span>
+                    <span className="material-symbols-outlined text-[16px]">description</span>
                     Download Tax Receipt ({new Date().getFullYear()})
-                  </button>
-                  <button className="w-full flex items-center gap-2 text-sm text-primary font-medium hover:underline">
-                    <span className="material-symbols-outlined text-[16px]">mail</span>
-                    Contact Support
                   </button>
                 </div>
               </div>

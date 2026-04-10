@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { getRole } from '../utils/auth';
 
 const API_URL = import.meta.env.VITE_API_URL;
 
@@ -94,7 +95,7 @@ export default function Register() {
 
       const { token } = await loginRes.json();
       login(token);
-      navigate('/donor-dashboard');
+      navigate(getRole() === 'Admin' ? '/admin-dashboard' : '/donor-dashboard');
     } catch {
       setServerError('Unable to reach the server. Please try again.');
     } finally {
@@ -271,7 +272,7 @@ export default function Register() {
       </div>
 
       {/* Right branding panel */}
-      <div className="hidden lg:flex lg:w-1/2 aurora-gradient flex-col justify-between p-12 relative overflow-hidden">
+      <div className="hidden lg:flex lg:w-1/2 aurora-gradient flex-col p-12 relative overflow-hidden">
         {/* Dot-grid texture overlay */}
         <div
           className="absolute inset-0 opacity-[0.07]"
@@ -289,31 +290,15 @@ export default function Register() {
         </div>
 
         {/* Center content */}
-        <div className="relative z-10 space-y-6">
-          <div className="inline-flex items-center gap-2 bg-white/15 text-white text-sm font-semibold px-4 py-2 rounded-full">
-            <span className="material-symbols-outlined text-base">handshake</span>
-            Join the mission
+        <div className="relative z-10 flex-1 flex items-center">
+          <div className="space-y-6">
+            <h2 className="font-manrope font-bold text-4xl text-white leading-tight">
+              Be part of<br />the change.
+            </h2>
+            <p className="text-white/80 text-lg leading-relaxed max-w-sm">
+              Create your account to access tools that help you serve more families and track your impact.
+            </p>
           </div>
-          <h2 className="font-manrope font-bold text-4xl text-white leading-tight">
-            Be part of<br />the change.
-          </h2>
-          <p className="text-white/80 text-lg leading-relaxed max-w-sm">
-            Create your account to access tools that help you serve more families, track impact, and collaborate with your team.
-          </p>
-        </div>
-
-        {/* Stats row */}
-        <div className="relative z-10 grid grid-cols-3 gap-4">
-          {[
-            { value: '2,400+', label: 'Families served' },
-            { value: '98%', label: 'Case resolution' },
-            { value: '12', label: 'Partner agencies' },
-          ].map(({ value, label }) => (
-            <div key={label} className="bg-white/15 backdrop-blur-sm rounded-xl p-4 border border-white/20 text-center">
-              <p className="font-manrope font-bold text-2xl text-white">{value}</p>
-              <p className="text-white/70 text-xs mt-1">{label}</p>
-            </div>
-          ))}
         </div>
       </div>
     </div>
