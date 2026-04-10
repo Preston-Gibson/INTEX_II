@@ -94,6 +94,10 @@ export default function GeographicSection() {
             zoom={5}
             scrollWheelZoom={false}
             zoomControl={false}
+            dragging={false}
+            doubleClickZoom={false}
+            keyboard={false}
+            touchZoom={false}
             style={{ width: '100%', height: '100%' }}
           >
             <TileLayer

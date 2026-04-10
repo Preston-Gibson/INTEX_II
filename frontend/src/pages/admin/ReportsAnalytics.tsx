@@ -111,11 +111,11 @@ export default function ReportsAnalytics() {
         </header>
 
       <div className="flex-1 overflow-y-auto">
-      <div className="p-6 max-w-7xl mx-auto">
+      <div className="p-6">
 
       {/* Page heading */}
       <div className="mb-8">
-        <h1 className="font-manrope text-3xl font-extrabold text-primary tracking-tight mb-2">
+        <h1 className="font-manrope text-4xl font-extrabold text-primary tracking-tight mb-2">
           Reports &amp; Analytics
         </h1>
         <p className="text-on-surface-variant text-sm max-w-xl leading-relaxed">
@@ -265,6 +265,33 @@ export default function ReportsAnalytics() {
             </div>
           </div>
 
+          {/* Reintegration Breakdown */}
+          <section className="mb-8">
+            <div className="flex items-center gap-2 mb-4">
+              <span className="w-1 h-5 rounded-full bg-tertiary-fixed-dim"></span>
+              <h2 className="font-manrope font-bold text-on-surface">Reintegration Success Rates</h2>
+            </div>
+            {!reintegration || reintegration.breakdown.length === 0 ? (
+              <div className="bg-surface-container-low rounded-2xl p-8 text-center text-xs text-on-surface-variant">No reintegration data for {year}</div>
+            ) : (
+              <div className={`grid gap-4 grid-cols-2 ${reintegration.breakdown.length <= 4 ? 'md:grid-cols-4' : 'md:grid-cols-3'}`}>
+                {reintegration.breakdown.map(({ type, count, percentage }) => (
+                  <div key={type} className="bg-surface-container-low rounded-2xl p-5 text-center">
+                    <div className="w-12 h-12 rounded-2xl bg-primary/10 flex items-center justify-center mx-auto mb-3">
+                      <span className="material-symbols-outlined text-primary text-[22px]" style={{ fontVariationSettings: "'FILL' 1" }}>{reintegrationIcon(type)}</span>
+                    </div>
+                    <p className="font-manrope font-extrabold text-2xl text-primary mb-0.5">{percentage}%</p>
+                    <p className="text-xs font-bold text-on-surface mb-1">{type}</p>
+                    <p className="text-[10px] text-on-surface-variant">{count} cases</p>
+                    <div className="w-full bg-surface-container h-1.5 rounded-full overflow-hidden mt-3">
+                      <div className="bg-secondary h-full rounded-full" style={{ width: `${percentage}%` }} />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </section>
+
           {/* Safehouse Performance Table */}
           <section className="mb-8">
             <div className="flex items-center gap-2 mb-4">
@@ -315,33 +342,6 @@ export default function ReportsAnalytics() {
                 </tbody>
               </table>
             </div>
-          </section>
-
-          {/* Reintegration Breakdown */}
-          <section className="mb-8">
-            <div className="flex items-center gap-2 mb-4">
-              <span className="w-1 h-5 rounded-full bg-tertiary-fixed-dim"></span>
-              <h2 className="font-manrope font-bold text-on-surface">Reintegration Success Rates</h2>
-            </div>
-            {!reintegration || reintegration.breakdown.length === 0 ? (
-              <div className="bg-surface-container-low rounded-2xl p-8 text-center text-xs text-on-surface-variant">No reintegration data for {year}</div>
-            ) : (
-              <div className={`grid gap-4 grid-cols-2 ${reintegration.breakdown.length <= 4 ? 'md:grid-cols-4' : 'md:grid-cols-3'}`}>
-                {reintegration.breakdown.map(({ type, count, percentage }) => (
-                  <div key={type} className="bg-surface-container-low rounded-2xl p-5 text-center">
-                    <div className="w-12 h-12 rounded-2xl bg-primary/10 flex items-center justify-center mx-auto mb-3">
-                      <span className="material-symbols-outlined text-primary text-[22px]" style={{ fontVariationSettings: "'FILL' 1" }}>{reintegrationIcon(type)}</span>
-                    </div>
-                    <p className="font-manrope font-extrabold text-2xl text-primary mb-0.5">{percentage}%</p>
-                    <p className="text-xs font-bold text-on-surface mb-1">{type}</p>
-                    <p className="text-[10px] text-on-surface-variant">{count} cases</p>
-                    <div className="w-full bg-surface-container h-1.5 rounded-full overflow-hidden mt-3">
-                      <div className="bg-secondary h-full rounded-full" style={{ width: `${percentage}%` }} />
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
           </section>
 
           {/* Beneficiary Summary */}

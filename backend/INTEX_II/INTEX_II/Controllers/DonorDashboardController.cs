@@ -7,7 +7,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace INTEX_II.Controllers;
 
-[Authorize(Roles = "Donor")]
+[Authorize(Roles = "Donor,Admin")]
 [ApiController]
 [Route("api/donor-dashboard")]
 public class DonorDashboardController : ControllerBase

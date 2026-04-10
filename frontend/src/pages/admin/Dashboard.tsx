@@ -21,12 +21,6 @@ interface CommandCenterStats {
   nextVisitLocation: string;
 }
 
-interface WeeklyActivity {
-  day: string;
-  shortDay: string;
-  value: number;
-}
-
 interface ScheduledVisit {
   visitationId: number;
   residentCaseNo: string;
@@ -86,7 +80,6 @@ export default function AdminCommandCenter() {
   const navigate = useNavigate();
 
   const [stats, setStats]                         = useState<CommandCenterStats | null>(null);
-  const [weeklyData, setWeeklyData]               = useState<WeeklyActivity[]>([]);
   const [visits, setVisits]                       = useState<ScheduledVisit[]>([]);
   const [activity, setActivity]                   = useState<ActivityItem[]>([]);
   const [reintegrationRate, setReintegrationRate] = useState<ReintegrationRate | null>(null);
@@ -97,14 +90,13 @@ export default function AdminCommandCenter() {
     let cancelled = false;
     async function load() {
       try {
-        const [s, w, v, a, rr] = await Promise.all([
+        const [s, v, a, rr] = await Promise.all([
           apiFetch<CommandCenterStats>('/api/admin-dashboard/stats'),
-          apiFetch<WeeklyActivity[]>('/api/admin-dashboard/weekly-activity'),
           apiFetch<ScheduledVisit[]>('/api/admin-dashboard/upcoming-visits'),
           apiFetch<ActivityItem[]>('/api/admin-dashboard/recent-activity'),
           apiFetch<ReintegrationRate>('/api/admin-dashboard/reintegration-rate'),
         ]);
-        if (!cancelled) { setStats(s); setWeeklyData(w); setVisits(v); setActivity(a); setReintegrationRate(rr); }
+        if (!cancelled) { setStats(s); setVisits(v); setActivity(a); setReintegrationRate(rr); }
       } catch {
         if (!cancelled) setError('Unable to load dashboard data.');
       } finally {
@@ -114,20 +106,6 @@ export default function AdminCommandCenter() {
     load();
     return () => { cancelled = true; };
   }, []);
-
-  // Bar chart – normalise to max value; fall back to placeholder proportions
-  const maxVal = Math.max(...weeklyData.map(d => d.value), 1);
-  const chartBars = weeklyData.length > 0
-    ? weeklyData.map(d => ({ label: d.shortDay, pct: Math.round((d.value / maxVal) * 100), peak: d.value === maxVal }))
-    : [
-        { label: 'Mon', pct: 40,  peak: false },
-        { label: 'Tue', pct: 65,  peak: false },
-        { label: 'Wed', pct: 45,  peak: false },
-        { label: 'Thu', pct: 90,  peak: true  },
-        { label: 'Fri', pct: 60,  peak: false },
-        { label: 'Sat', pct: 30,  peak: false },
-        { label: 'Sun', pct: 75,  peak: false },
-      ];
 
   function fmtDate(iso: string) {
     const d = new Date(iso);
@@ -162,10 +140,10 @@ export default function AdminCommandCenter() {
           {/* Page greeting + action buttons */}
           <section className="flex flex-col md:flex-row items-end justify-between gap-4">
             <div>
-              <h2 className="text-3xl font-extrabold text-primary tracking-tight font-headline">
+              <h1 className="font-manrope text-4xl font-extrabold text-primary tracking-tight mb-2">
                 {getGreeting()}
-              </h2>
-              <p className="text-on-surface-variant max-w-md mt-1 leading-relaxed text-sm">
+              </h1>
+              <p className="text-on-surface-variant text-sm leading-relaxed">
                 Here are the core metrics for today's operations across all locations.
               </p>
             </div>
@@ -335,44 +313,6 @@ export default function AdminCommandCenter() {
             {/* Left col: chart + visits */}
             <div className="lg:col-span-2 space-y-5">
 
-              {/* Operational velocity chart */}
-              <div className="bg-surface-container-low p-6 rounded-xl">
-                <div className="flex justify-between items-center mb-5">
-                  <h3 className="text-lg font-bold text-primary font-headline">Operational Velocity</h3>
-                  <span className="px-3 py-1 bg-surface-container-lowest text-[10px] font-bold rounded-full text-[#006a6a]">
-                    WEEKLY VIEW
-                  </span>
-                </div>
-                {loading ? (
-                  <div className="h-48 flex items-end gap-2 px-2">
-                    {Array.from({ length: 7 }).map((_, i) => (
-                      <Skeleton key={i} className="w-full rounded-t-lg" style={{ height: `${30 + i * 8}%` } as React.CSSProperties} />
-                    ))}
-                  </div>
-                ) : (
-                  <>
-                    <div className="h-48 flex items-end justify-between gap-2 px-2">
-                      {chartBars.map((bar, i) => (
-                        <div
-                          key={i}
-                          className={`w-full rounded-t-lg relative group/bar transition-all duration-500 ${bar.peak ? 'bg-primary-container' : 'bg-primary-container/20'}`}
-                          style={{ height: `${bar.pct}%` }}
-                        >
-                          {bar.peak && (
-                            <div className="absolute -top-9 left-1/2 -translate-x-1/2 bg-on-surface text-surface text-[10px] px-2 py-1 rounded hidden group-hover/bar:block whitespace-nowrap">
-                              Peak: {bar.pct}%
-                            </div>
-                          )}
-                        </div>
-                      ))}
-                    </div>
-                    <div className="flex justify-between mt-3 text-[10px] font-bold text-on-surface-variant uppercase tracking-tighter">
-                      {chartBars.map((b, i) => <span key={i}>{b.label}</span>)}
-                    </div>
-                  </>
-                )}
-              </div>
-
               {/* Scheduled visits */}
               <div className="bg-surface-container-lowest p-6 rounded-xl shadow-sm">
                 <div className="flex justify-between items-center mb-5">
@@ -487,27 +427,6 @@ export default function AdminCommandCenter() {
                 >
                   View All Activity
                 </NavLink>
-              </div>
-
-              {/* Local Focus card – contains the Lucero mascot/creature */}
-              <div className="rounded-xl overflow-hidden relative h-48 group">
-                <img
-                  src="https://lh3.googleusercontent.com/aida-public/AB6AXuDhWQ0gFZC0R2VZPlGnMYQjFlvE67DEcUSFpycBGy0xR3FFTwUPR8v9bj5SlkoBOmBRdlVSZbypzPSm0r1NENqOJ1K5fJ_kLiO7OWJuRdClUdHZYsVnMU_L2uA3HaDgmX5Ti6JU-ZQgg-hpSlWREdPRs4yytDbImwG514-44p-_5GfeX6pAppSUOEqrTng-8QWos_a9G-1ZmnKBTNtwCx6ixV-LOPT6U2s4pjBmx9FFr90KAcUfyg99ro5aGjgdB0oj1ahfOnChVA"
-                  alt="Santa Rosa de Copán — Lucero community"
-                  className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                  onError={(e) => {
-                    // Fallback: hide broken image so the gradient shows through
-                    (e.target as HTMLImageElement).style.display = 'none';
-                  }}
-                />
-                <div className="absolute inset-0 aurora-gradient opacity-80" />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent p-5 flex flex-col justify-end">
-                  <span className="text-[10px] text-white/70 uppercase font-bold tracking-widest mb-1">
-                    Local Focus
-                  </span>
-                  <h4 className="text-white font-bold text-lg font-headline">Santa Rosa de Copán</h4>
-                  <p className="text-white/80 text-xs">Current conditions: Sunny, 24°C</p>
-                </div>
               </div>
             </div>
           </div>

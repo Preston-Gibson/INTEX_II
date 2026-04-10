@@ -165,7 +165,7 @@ export default function Login() {
       </div>
 
       {/* Right branding panel */}
-      <div className="hidden lg:flex lg:w-1/2 aurora-gradient flex-col justify-between p-12 relative overflow-hidden">
+      <div className="hidden lg:flex lg:w-1/2 aurora-gradient flex-col p-12 relative overflow-hidden">
         {/* Dot-grid texture overlay */}
         <div
           className="absolute inset-0 opacity-[0.07]"
@@ -183,25 +183,15 @@ export default function Login() {
         </div>
 
         {/* Center content */}
-        <div className="relative z-10 space-y-6">
-          <div className="inline-flex items-center gap-2 bg-white/15 text-white text-sm font-semibold px-4 py-2 rounded-full">
-            <span className="material-symbols-outlined text-base">favorite</span>
-            Transforming lives together
+        <div className="relative z-10 flex-1 flex items-center">
+          <div className="space-y-6">
+            <h2 className="font-manrope font-bold text-4xl text-white leading-tight">
+              Empowering families.<br />Building futures.
+            </h2>
+            <p className="text-white/80 text-lg leading-relaxed max-w-sm">
+              Your work makes all the difference.
+            </p>
           </div>
-          <h2 className="font-manrope font-bold text-4xl text-white leading-tight">
-            Empowering families.<br />Building futures.
-          </h2>
-          <p className="text-white/80 text-lg leading-relaxed max-w-sm">
-            Your work makes a measurable difference. Sign in to track impact, manage cases, and connect with the community.
-          </p>
-        </div>
-
-        {/* Quote card */}
-        <div className="relative z-10 bg-white/15 backdrop-blur-sm rounded-[1.25rem] p-6 border border-white/20">
-          <p className="text-white/90 italic text-sm leading-relaxed">
-            "Lucera has helped us reach families we never could have before. Every data point represents a life changed."
-          </p>
-          <p className="text-white/60 text-xs mt-3 font-semibold">— Field Case Manager</p>
         </div>
       </div>
     </div>

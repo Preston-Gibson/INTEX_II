@@ -5,19 +5,19 @@ interface Allocation {
   percentage: number
 }
 
-const AREA_META: Record<string, { color: string; icon: string }> = {
-  'Direct Care':     { color: '#1a7f64', icon: '🏠' },
-  'Education':       { color: '#2563eb', icon: '📚' },
-  'Medical':         { color: '#9333ea', icon: '🩺' },
-  'Operations':      { color: '#ea580c', icon: '⚙️' },
-  'Nutrition':       { color: '#16a34a', icon: '🥗' },
-  'Mental Health':   { color: '#db2777', icon: '🧠' },
-  'Vocational':      { color: '#0891b2', icon: '🛠️' },
-  'Administration':  { color: '#92400e', icon: '📋' },
-  'Wellbeing':       { color: '#0d9488', icon: '💚' },
-  'Transport':       { color: '#7c3aed', icon: '🚌' },
-  'Maintenance':     { color: '#c2410c', icon: '🔧' },
-  'Outreach':        { color: '#15803d', icon: '🤝' },
+const AREA_META: Record<string, { color: string}> = {
+  'Direct Care':     { color: '#1a7f64'},
+  'Education':       { color: '#2563eb'},
+  'Medical':         { color: '#9333ea'},
+  'Operations':      { color: '#ea580c'},
+  'Nutrition':       { color: '#16a34a'},
+  'Mental Health':   { color: '#db2777'},
+  'Vocational':      { color: '#0891b2'},
+  'Administration':  { color: '#92400e'},
+  'Wellbeing':       { color: '#0d9488'},
+  'Transport':       { color: '#7c3aed'},
+  'Maintenance':     { color: '#c2410c'},
+  'Outreach':        { color: '#15803d'},
 }
 
 const PALETTE = [
@@ -25,10 +25,10 @@ const PALETTE = [
   '#16a34a', '#db2777', '#0891b2', '#0d9488',
 ]
 
-function metaForArea(area: string, index: number): { color: string; icon: string } {
+function metaForArea(area: string, index: number): { color: string } {
   const key = Object.keys(AREA_META).find(k => area.toLowerCase().includes(k.toLowerCase()))
   if (key) return AREA_META[key]
-  return { color: PALETTE[index % PALETTE.length], icon: '💰' }
+  return { color: PALETTE[index % PALETTE.length] }
 }
 
 const FALLBACK: Allocation[] = [
@@ -70,17 +70,11 @@ export default function TransparencySection() {
 
       <div className="space-y-5">
         {display.map(({ programArea, percentage }, i) => {
-          const { color, icon } = metaForArea(programArea, i)
+          const { color } = metaForArea(programArea, i)
           return (
             <div key={programArea} className="group">
               <div className="flex items-center justify-between mb-2">
                 <div className="flex items-center gap-2">
-                  <span
-                    className="flex items-center justify-center w-8 h-8 rounded-lg text-base shrink-0"
-                    style={{ backgroundColor: `${color}20` }}
-                  >
-                    {icon}
-                  </span>
                   <span className="text-sm font-semibold text-on-surface">{programArea}</span>
                 </div>
                 <span

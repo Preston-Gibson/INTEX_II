@@ -49,7 +49,7 @@ export default function Hero() {
                 volunteer_activism
               </span>
             </button>
-            <button onClick={() => navigate('/impact')} className="inline-flex items-center gap-2 px-8 py-3.5 bg-surface-container-lowest text-on-surface font-manrope font-bold text-base rounded-[0.75rem] border border-outline-variant/20 hover:bg-surface-container-low transition-colors">
+            <button onClick={() => navigate('/impact')} className="inline-flex items-center gap-2 px-8 py-3.5 font-manrope font-bold text-base rounded-[0.75rem] transition-colors" style={{ background: '#ffffff', color: '#003f87', border: '2px solid #003f87' }} onMouseEnter={e => (e.currentTarget.style.background = '#edeeef')} onMouseLeave={e => (e.currentTarget.style.background = '#ffffff')}>
               {t('hero.impact')}
             </button>
           </div>

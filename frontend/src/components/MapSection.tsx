@@ -62,12 +62,7 @@ export default function MapSection() {
       .catch(() => {})
   }, [])
 
-  // Derive unique regions from safehouses for the legend
-  const regionMap: Record<string, SafehouseLocation[]> = {}
-  safehouses.forEach(sh => {
-    if (!regionMap[sh.region]) regionMap[sh.region] = []
-    regionMap[sh.region].push(sh)
-  })
+  const uniqueCountries = Array.from(new Set(safehouses.map(sh => sh.country)))
 
   const maxOriginCount = origins.length ? Math.max(...origins.map(o => o.count)) : 1
 
@@ -75,7 +70,7 @@ export default function MapSection() {
     <section className="bg-surface-container-low py-24">
       <div className="max-w-7xl mx-auto px-6">
         <div className="grid grid-cols-1 lg:grid-cols-[1fr_320px] gap-10 items-stretch">
-          <div className="flex flex-col gap-6">
+          <div className="flex flex-col gap-6 min-h-0">
             <div className="flex-shrink-0">
               <span className="inline-block text-[0.72rem] font-extrabold tracking-[0.12em] uppercase text-secondary mb-3">
                 Our Reach
@@ -88,12 +83,12 @@ export default function MapSection() {
                 offices, and partner networks to serve those most in need.
               </p>
             </div>
-            <div className="flex-1 rounded-[2rem] overflow-hidden shadow-[0_4px_24px_rgba(0,0,0,0.08)]" style={{ minHeight: 400 }}>
+            <div className="flex-1 relative rounded-[2rem] overflow-hidden shadow-[0_4px_24px_rgba(0,0,0,0.08)]" style={{ minHeight: 300 }}>
             <MapContainer
               center={[11.5, -85.5]}
               zoom={5}
               scrollWheelZoom={false}
-              style={{ width: '100%', height: '100%', borderRadius: '2rem' }}
+              style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', borderRadius: '2rem' }}
             >
               <TileLayer
                 attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
@@ -172,10 +167,9 @@ export default function MapSection() {
                 Active Safehouses
               </h3>
               <div className="flex flex-col gap-2">
-                {safehouses.length > 0 ? safehouses.map(sh => (
-                  <div key={sh.safehouseId} className="bg-surface-container-lowest rounded-xl px-4 py-3">
-                    <p className="text-[0.88rem] font-bold text-on-surface">{sh.city}</p>
-                    <p className="text-[0.78rem] text-on-surface-variant">{sh.country}</p>
+                {uniqueCountries.length > 0 ? uniqueCountries.map(country => (
+                  <div key={country} className="bg-surface-container-lowest rounded-xl px-4 py-3">
+                    <p className="text-[0.88rem] font-bold text-on-surface">{country}</p>
                   </div>
                 )) : (
                   <p className="text-[0.85rem] text-on-surface-variant">Loading safehouses...</p>

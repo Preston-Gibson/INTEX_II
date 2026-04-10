@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import AdminSidebar from '../../components/AdminSidebar';
 import UserAvatar from '../../components/UserAvatar';
 import { authHeaders } from '../../utils/auth';
@@ -161,6 +161,47 @@ export default function CaseloadInventory() {
   const [filterStatus, setFilterStatus] = useState('');
   const [filterSafehouse, setFilterSafehouse] = useState('');
   const [filterCategory, setFilterCategory] = useState('');
+  const [filterSubCategory, setFilterSubCategory] = useState('');
+  const [filterSocialWorker, setFilterSocialWorker] = useState('');
+
+  type SortKey = 'caseControlNo' | 'internalCode' | 'safehouseCity' | 'caseStatus' | 'caseCategory' | 'dateOfAdmission' | 'assignedSocialWorker' | 'currentRiskLevel';
+  const [sortKey, setSortKey] = useState<SortKey | null>(null);
+  const [sortDir, setSortDir] = useState<'asc' | 'desc'>('asc');
+
+  function handleSort(key: SortKey) {
+    if (sortKey === key) {
+      if (sortDir === 'asc') setSortDir('desc');
+      else { setSortKey(null); setSortDir('asc'); }
+    } else {
+      setSortKey(key); setSortDir('asc');
+    }
+  }
+
+  const uniqueSocialWorkers = useMemo(() =>
+    Array.from(new Set(residents.map(r => r.assignedSocialWorker).filter(Boolean))).sort()
+  , [residents]);
+
+  const uniqueSubCategories = useMemo(() =>
+    Array.from(new Set(residents.flatMap(r => r.subCategories))).sort()
+  , [residents]);
+
+  const filteredResidents = useMemo(() => residents
+    .filter(r => !filterSubCategory || r.subCategories.includes(filterSubCategory))
+    .filter(r => !filterSocialWorker || r.assignedSocialWorker === filterSocialWorker)
+  , [residents, filterSubCategory, filterSocialWorker]);
+
+  const sortedResidents = useMemo(() => {
+    if (!sortKey) return filteredResidents;
+    return [...filteredResidents].sort((a, b) => {
+      const aVal = sortKey === 'safehouseCity'
+        ? (safehouses.find(s => s.safehouseId === a.safehouseId)?.city ?? a.safehouseName)
+        : String(a[sortKey as keyof typeof a] ?? '');
+      const bVal = sortKey === 'safehouseCity'
+        ? (safehouses.find(s => s.safehouseId === b.safehouseId)?.city ?? b.safehouseName)
+        : String(b[sortKey as keyof typeof b] ?? '');
+      return sortDir === 'asc' ? aVal.localeCompare(bVal) : bVal.localeCompare(aVal);
+    });
+  }, [filteredResidents, sortKey, sortDir, safehouses]);
 
   const [currentPage, setCurrentPage] = useState(1);
 
@@ -344,6 +385,24 @@ export default function CaseloadInventory() {
             {CASE_CATEGORY_OPTIONS.map(c => <option key={c} value={c}>{c}</option>)}
           </select>
 
+          <select
+            value={filterSubCategory}
+            onChange={e => setFilterSubCategory(e.target.value)}
+            className="bg-surface-container-low text-sm text-on-surface rounded-xl px-3 py-2 outline-none border-none"
+          >
+            <option value="">All Sub-categories</option>
+            {uniqueSubCategories.map(s => <option key={s} value={s}>{s}</option>)}
+          </select>
+
+          <select
+            value={filterSocialWorker}
+            onChange={e => setFilterSocialWorker(e.target.value)}
+            className="bg-surface-container-low text-sm text-on-surface rounded-xl px-3 py-2 outline-none border-none"
+          >
+            <option value="">All Social Workers</option>
+            {uniqueSocialWorkers.map(w => <option key={w} value={w}>{w}</option>)}
+          </select>
+
           <div className="ml-auto flex items-center gap-3">
             <button
               onClick={openAdd}
@@ -358,6 +417,10 @@ export default function CaseloadInventory() {
 
         {/* Main table */}
         <main className="flex-1 overflow-y-auto p-6">
+          <div className="mb-6">
+            <h1 className="font-manrope text-4xl font-extrabold text-primary tracking-tight mb-2">Caseload Inventory</h1>
+            <p className="text-on-surface-variant text-sm leading-relaxed">View, manage, and track all resident cases across safehouses.</p>
+          </div>
           {loading ? (
             <div className="flex items-center justify-center h-40 text-on-surface-variant text-sm">
               Loading residents...
@@ -368,17 +431,39 @@ export default function CaseloadInventory() {
               No residents match your filters.
             </div>
           ) : (() => {
-            const totalPages = Math.ceil(residents.length / PAGE_SIZE);
-            const pageRows = residents.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE);
+            const totalPages = Math.ceil(sortedResidents.length / PAGE_SIZE);
+            const pageRows = sortedResidents.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE);
             return (
               <div className="flex flex-col gap-4">
                 <div className="bg-surface-container-lowest rounded-xl border border-outline-variant/20 overflow-x-auto">
                   <table className="w-full text-sm min-w-[960px]">
                     <thead>
                       <tr className="border-b border-outline-variant/20 bg-surface-container-low">
-                        {['Case Control No', 'Internal Code', 'Safehouse', 'Status', 'Category', 'Sub-categories', 'Admission Date', 'Social Worker', 'Risk Level', ''].map(h => (
-                          <th key={h} className="text-left px-4 py-3 text-[10px] font-bold text-on-surface-variant uppercase tracking-widest whitespace-nowrap">
-                            {h}
+                        {([
+                          { label: 'Case Control No',  key: 'caseControlNo' },
+                          { label: 'Internal Code',    key: 'internalCode' },
+                          { label: 'Safehouse',        key: 'safehouseCity' },
+                          { label: 'Status',           key: 'caseStatus' },
+                          { label: 'Category',         key: 'caseCategory' },
+                          { label: 'Sub-categories',   key: null },
+                          { label: 'Admission Date',   key: 'dateOfAdmission' },
+                          { label: 'Social Worker',    key: 'assignedSocialWorker' },
+                          { label: 'Risk Level',       key: 'currentRiskLevel' },
+                          { label: '',                 key: null },
+                        ] as { label: string; key: SortKey | null }[]).map(({ label, key }) => (
+                          <th
+                            key={label}
+                            onClick={() => key && handleSort(key)}
+                            className={`text-left px-4 py-3 text-[10px] font-bold text-on-surface-variant uppercase tracking-widest whitespace-nowrap ${key ? 'cursor-pointer hover:text-primary select-none' : ''}`}
+                          >
+                            <span className="inline-flex items-center gap-1">
+                              {label}
+                              {key && (
+                                <span className="material-symbols-outlined text-[13px]">
+                                  {sortKey === key ? (sortDir === 'asc' ? 'arrow_upward' : 'arrow_downward') : 'unfold_more'}
+                                </span>
+                              )}
+                            </span>
                           </th>
                         ))}
                       </tr>
@@ -388,7 +473,7 @@ export default function CaseloadInventory() {
                         <tr key={r.residentId} className="border-b border-outline-variant/10 hover:bg-surface-container-low transition-colors">
                           <td className="px-4 py-3 font-mono text-xs text-primary font-semibold whitespace-nowrap">{r.caseControlNo}</td>
                           <td className="px-4 py-3 font-mono text-xs text-on-surface-variant whitespace-nowrap">{r.internalCode}</td>
-                          <td className="px-4 py-3 text-xs whitespace-nowrap">{r.safehouseName}</td>
+                          <td className="px-4 py-3 text-xs whitespace-nowrap">{safehouses.find(s => s.safehouseId === r.safehouseId)?.city ?? r.safehouseName}</td>
                           <td className="px-4 py-3">
                             <span className={`inline-block px-2 py-0.5 rounded-full text-[10px] font-bold whitespace-nowrap ${STATUS_BADGE[r.caseStatus] ?? 'bg-surface-container text-on-surface-variant'}`}>
                               {r.caseStatus}
@@ -443,7 +528,7 @@ export default function CaseloadInventory() {
                 {/* Pagination bar */}
                 <div className="flex items-center justify-between px-1">
                   <p className="text-xs text-on-surface-variant">
-                    Showing <span className="font-semibold text-on-surface">{(currentPage - 1) * PAGE_SIZE + 1}–{Math.min(currentPage * PAGE_SIZE, residents.length)}</span> of <span className="font-semibold text-on-surface">{residents.length}</span> residents
+                    Showing <span className="font-semibold text-on-surface">{(currentPage - 1) * PAGE_SIZE + 1}–{Math.min(currentPage * PAGE_SIZE, sortedResidents.length)}</span> of <span className="font-semibold text-on-surface">{sortedResidents.length}</span> residents
                   </p>
                   <div className="flex items-center gap-1">
                     <button

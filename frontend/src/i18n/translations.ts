@@ -12,16 +12,16 @@ const translations = {
 
     // Hero
     'hero.badge': 'Santa Rosa de Copán, Honduras',
-    'hero.title': 'A Radiant Shield for the',
-    'hero.title.accent': 'Vulnerable.',
+    'hero.title': 'Restoring Safety, Healing, Hope, and',
+    'hero.title.accent': 'Light.',
     'hero.subtitle':
       'Lucera is a dedicated sanctuary providing recovery, advocacy, and a hopeful future for children surviving exploitation in Central America.',
     'hero.donate': 'Donate Now',
     'hero.impact': 'Our Impact',
-    'hero.quote': '"Hope is the first step toward healing."',
+    'hero.quote': '"Lucera is a safe place where we\'re treated as family."',
 
     // ImpactSection
-    'impact.heading': 'Our Impact',
+    'impact.heading': 'Our Services',
     'impact.subheading':
       'Through direct intervention and long-term care, we are rewriting the stories of those who have endured the unimaginable.',
     'impact.holistic.title': 'Holistic Recovery',
@@ -88,8 +88,8 @@ const translations = {
 
     // Hero
     'hero.badge': 'Santa Rosa de Copán, Honduras',
-    'hero.title': 'Un Escudo Radiante para los',
-    'hero.title.accent': 'Vulnerables.',
+    'hero.title': 'Restaurando Seguridad, Sanación, Esperanza y',
+    'hero.title.accent': 'Luz.',
     'hero.subtitle':
       'Lucera es un santuario dedicado que brinda recuperación, defensa y un futuro esperanzador para niños que sobreviven la explotación en América Central.',
     'hero.donate': 'Donar Ahora',
