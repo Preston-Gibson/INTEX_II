@@ -971,7 +971,7 @@ export default function SocialMediaComposer() {
         .from('Social Media Uploads')
         .upload(path, f, { upsert: true });
 
-      if (error) { setMediaUploadFailed(true); showToast(`Upload failed: ${error.message}`); return; }
+      if (error) { console.error('Supabase upload error:', error); setMediaUploadFailed(true); showToast(`Upload failed: ${error.message}`); return; }
 
       const { data } = supabase.storage
         .from('Social Media Uploads')
@@ -979,7 +979,8 @@ export default function SocialMediaComposer() {
 
       setMediaPublicUrl(data.publicUrl);  // only used for publish API call
       showToast('Photo ready to publish');
-    } catch {
+    } catch (err) {
+      console.error('Supabase upload exception:', err);
       setMediaUploadFailed(true);
       showToast('Upload failed — check Supabase storage permissions');
     } finally {
