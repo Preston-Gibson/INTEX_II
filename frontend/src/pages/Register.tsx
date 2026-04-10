@@ -2,40 +2,14 @@ import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { getRole } from '../utils/auth';
+import { useLanguage } from '../context/LanguageContext';
 
 const API_URL = import.meta.env.VITE_API_URL;
-
-function validateFields(fields: {
-  firstName: string;
-  lastName: string;
-  email: string;
-  password: string;
-  confirmPassword: string;
-}) {
-  const errors: Record<string, string> = {};
-  if (!fields.firstName.trim()) errors.firstName = 'First name is required.';
-  if (!fields.lastName.trim()) errors.lastName = 'Last name is required.';
-  if (!fields.email.trim()) {
-    errors.email = 'Email is required.';
-  } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(fields.email)) {
-    errors.email = 'Enter a valid email address.';
-  }
-  if (!fields.password) {
-    errors.password = 'Password is required.';
-  } else if (fields.password.length < 14) {
-    errors.password = 'Password must be at least 14 characters.';
-  }
-  if (!fields.confirmPassword) {
-    errors.confirmPassword = 'Please confirm your password.';
-  } else if (fields.password !== fields.confirmPassword) {
-    errors.confirmPassword = 'Passwords do not match.';
-  }
-  return errors;
-}
 
 export default function Register() {
   const navigate = useNavigate();
   const { login } = useAuth();
+  const { t } = useLanguage();
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
   const [email, setEmail] = useState('');
@@ -45,7 +19,29 @@ export default function Register() {
   const [serverError, setServerError] = useState('');
   const [loading, setLoading] = useState(false);
 
-  const fieldErrors = validateFields({ firstName, lastName, email, password, confirmPassword });
+  function validateFields() {
+    const errors: Record<string, string> = {};
+    if (!firstName.trim()) errors.firstName = t('register.error.firstname');
+    if (!lastName.trim()) errors.lastName = t('register.error.lastname');
+    if (!email.trim()) {
+      errors.email = t('register.error.email.required');
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      errors.email = t('register.error.email.invalid');
+    }
+    if (!password) {
+      errors.password = t('register.error.password.required');
+    } else if (password.length < 14) {
+      errors.password = t('register.error.password.length');
+    }
+    if (!confirmPassword) {
+      errors.confirmPassword = t('register.error.confirm.required');
+    } else if (password !== confirmPassword) {
+      errors.confirmPassword = t('register.error.match');
+    }
+    return errors;
+  }
+
+  const fieldErrors = validateFields();
   const hasErrors = Object.keys(fieldErrors).length > 0;
 
   function touch(field: string) {
@@ -60,7 +56,6 @@ export default function Register() {
     e.preventDefault();
     setServerError('');
 
-    // Mark all fields touched so errors show on submit
     setTouched({ firstName: true, lastName: true, email: true, password: true, confirmPassword: true });
     if (hasErrors) return;
 
@@ -76,12 +71,11 @@ export default function Register() {
         const data = await registerRes.json().catch(() => null);
         const msg = Array.isArray(data)
           ? data.map((e: { description: string }) => e.description).join(' ')
-          : 'Registration failed. Please try again.';
+          : t('register.error.failed');
         setServerError(msg);
         return;
       }
 
-      // Auto-login after successful registration
       const loginRes = await fetch(`${API_URL}/api/auth/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -97,7 +91,7 @@ export default function Register() {
       login(token);
       navigate(getRole() === 'Admin' ? '/admin-dashboard' : '/donor-dashboard');
     } catch {
-      setServerError('Unable to reach the server. Please try again.');
+      setServerError(t('register.error.server'));
     } finally {
       setLoading(false);
     }
@@ -112,7 +106,7 @@ export default function Register() {
           <div className="mb-6">
             <Link to="/" className="inline-flex items-center gap-1.5 text-sm font-medium text-on-surface-variant hover:text-primary transition-colors">
               <span className="material-symbols-outlined text-[18px]">arrow_back</span>
-              Back to home
+              {t('register.back')}
             </Link>
           </div>
 
@@ -125,10 +119,10 @@ export default function Register() {
 
           <div className="bg-surface-container-lowest rounded-[1.25rem] shadow-[0_8px_32px_rgba(0,63,135,0.1)] p-10">
             <h1 className="font-manrope font-bold text-3xl text-primary mb-2">
-              Create your account
+              {t('register.heading')}
             </h1>
             <p className="text-on-surface-variant mb-8">
-              Join Lucera to make a difference
+              {t('register.subheading')}
             </p>
 
             <form className="space-y-5" onSubmit={handleSubmit}>
@@ -136,7 +130,7 @@ export default function Register() {
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-on-surface-variant mb-1.5">
-                    First name
+                    {t('register.firstname')}
                   </label>
                   <input
                     type="text"
@@ -150,7 +144,7 @@ export default function Register() {
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-on-surface-variant mb-1.5">
-                    Last name
+                    {t('register.lastname')}
                   </label>
                   <input
                     type="text"
@@ -167,7 +161,7 @@ export default function Register() {
               {/* Email */}
               <div>
                 <label className="block text-sm font-medium text-on-surface-variant mb-1.5">
-                  Email address
+                  {t('register.email')}
                 </label>
                 <input
                   type="email"
@@ -183,7 +177,7 @@ export default function Register() {
               {/* Password */}
               <div>
                 <label className="block text-sm font-medium text-on-surface-variant mb-1.5">
-                  Password
+                  {t('register.password')}
                 </label>
                 <input
                   type="password"
@@ -199,7 +193,7 @@ export default function Register() {
               {/* Confirm password */}
               <div>
                 <label className="block text-sm font-medium text-on-surface-variant mb-1.5">
-                  Confirm password
+                  {t('register.confirm')}
                 </label>
                 <input
                   type="password"
@@ -222,13 +216,13 @@ export default function Register() {
                 disabled={loading}
                 className="aurora-gradient text-white w-full py-3.5 rounded-[0.75rem] font-manrope font-bold shadow-[0_4px_16px_rgba(0,63,135,0.35)] hover:opacity-90 active:scale-[0.97] transition-all mt-2 disabled:opacity-60"
               >
-                {loading ? 'Creating account…' : 'Create Account'}
+                {loading ? t('register.creating') : t('register.submit')}
               </button>
 
               {/* Divider */}
               <div className="flex items-center gap-3 my-1">
                 <div className="flex-1 h-px bg-slate-200" />
-                <span className="text-xs text-on-surface-variant font-medium">or sign up with</span>
+                <span className="text-xs text-on-surface-variant font-medium">{t('register.orwith')}</span>
                 <div className="flex-1 h-px bg-slate-200" />
               </div>
 
@@ -262,9 +256,9 @@ export default function Register() {
             </form>
 
             <p className="text-center text-sm text-on-surface-variant mt-6">
-              Already have an account?{' '}
+              {t('register.hasaccount')}{' '}
               <Link to="/login" className="font-semibold text-primary hover:opacity-80 transition">
-                Sign in
+                {t('register.signin')}
               </Link>
             </p>
           </div>
@@ -293,10 +287,10 @@ export default function Register() {
         <div className="relative z-10 flex-1 flex items-center">
           <div className="space-y-6">
             <h2 className="font-manrope font-bold text-4xl text-white leading-tight">
-              Be part of<br />the change.
+              {t('register.brand.heading')}
             </h2>
             <p className="text-white/80 text-lg leading-relaxed max-w-sm">
-              Create your account to access tools that help you serve more families and track your impact.
+              {t('register.brand.sub')}
             </p>
           </div>
         </div>

@@ -3,6 +3,7 @@ import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet'
 import { Icon } from 'leaflet'
 import 'leaflet/dist/leaflet.css'
 import { getCoords } from '../utils/cityCoords'
+import { useLanguage } from '../context/LanguageContext'
 
 const PIN_COLORS: Record<string, string> = {
   Honduras:      '#1565C0',
@@ -63,6 +64,7 @@ export default function GeographicSection() {
   const [geoReach, setGeoReach] = useState<CountryReach[]>([])
   const [yearlyImpact, setYearlyImpact] = useState<YearImpact[]>([])
   const [safehouses, setSafehouses] = useState<SafehouseLocation[]>([])
+  const { t } = useLanguage()
 
   useEffect(() => {
     fetch(`${import.meta.env.VITE_API_URL ?? 'http://localhost:5229'}/api/impact/geographic-reach`)
@@ -87,7 +89,7 @@ export default function GeographicSection() {
   return (
     <div className="space-y-8">
       <div className="p-8 bg-surface-container-low rounded-xl">
-        <h3 className="text-2xl font-bold text-primary mb-6">Geographic Reach</h3>
+        <h3 className="text-2xl font-bold text-primary mb-6">{t('geo.geographic')}</h3>
         <div className="aspect-video rounded-lg overflow-hidden">
           <MapContainer
             center={[11.5, -85.5]}
@@ -129,7 +131,7 @@ export default function GeographicSection() {
       </div>
 
       <div className="p-8 bg-surface-container-low rounded-xl">
-        <h3 className="text-2xl font-bold text-primary mb-6">Year-Over-Year Admissions</h3>
+        <h3 className="text-2xl font-bold text-primary mb-6">{t('geo.yearly')}</h3>
         <div className="space-y-2">
           <div className="flex gap-2 mb-1">
             {(recentYears.length > 0 ? recentYears : [{year:2021,count:0},{year:2022,count:0},{year:2023,count:0},{year:2024,count:0}]).map(({ year, count }) => (

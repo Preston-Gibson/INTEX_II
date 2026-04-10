@@ -5,6 +5,7 @@ import {
   type DonorShoutoutTier,
   type DonorShoutoutTierId,
 } from '../data/donorShoutout';
+import { useLanguage } from '../context/LanguageContext';
 
 /** All tier-specific classes live here — edit one row to change how a tier looks. */
 const TIER_STYLE: Record<
@@ -37,6 +38,7 @@ const TIER_STYLE: Record<
 };
 
 export default function DonorShoutout() {
+  const { t } = useLanguage();
   const [tiers, setTiers] = useState<DonorShoutoutTier[] | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -49,7 +51,7 @@ export default function DonorShoutout() {
       })
       .catch(() => {
         if (!cancelled) {
-          setError('We could not load donor recognition right now. Please try again later.');
+          setError(t('shoutout.error'));
         }
       })
       .finally(() => {
@@ -68,15 +70,13 @@ export default function DonorShoutout() {
         <header className="mb-14 md:mb-16 grid gap-10 md:grid-cols-2 md:gap-12 md:items-center">
           <div>
             <p className="font-manrope text-xs font-bold uppercase tracking-widest text-blue-700 mb-3">
-              Thank you
+              {t('shoutout.thanks')}
             </p>
             <h1 className="text-3xl md:text-5xl font-extrabold text-primary mb-4 tracking-tight">
-              Our supporters
+              {t('shoutout.heading')}
             </h1>
             <p className="text-base md:text-xl text-on-surface-variant leading-relaxed">
-              Lucera exists because people choose generosity. We are grateful to every donor who helps
-              children and families find safety, education, and hope. Names appear when donors choose
-              public recognition; others give quietly as anonymous supporters.
+              {t('shoutout.subheading')}
             </p>
           </div>
           <figure className="m-0 w-full max-w-md mx-auto overflow-hidden rounded-2xl border border-slate-200/80 shadow-lg aspect-[3/4] md:aspect-auto md:max-w-none md:mx-0 md:h-[min(440px,52vh)]">
@@ -119,13 +119,13 @@ export default function DonorShoutout() {
         {!loading && tiers && allEmpty && !error && (
           <div className="rounded-2xl border border-dashed border-slate-300 bg-slate-50 px-8 py-16 text-center">
             <p className="text-lg text-on-surface-variant font-manrope max-w-lg mx-auto">
-              Recognition names will appear here once we publish our first list.
+              {t('shoutout.empty')}
             </p>
             <Link
               to="/impact"
               className="inline-block mt-6 text-sm font-bold text-blue-700 hover:text-blue-800 underline-offset-2 hover:underline"
             >
-              See the impact your gifts make
+              {t('shoutout.see_impact')}
             </Link>
           </div>
         )}
@@ -140,21 +140,21 @@ export default function DonorShoutout() {
               >
                 <div className="mb-8">
                   <h2 className="text-2xl md:text-3xl font-extrabold text-primary tracking-tight mb-2">
-                    {tier.label}
+                    {t(`shoutout.tier.${tier.id}.label` as const)}
                   </h2>
-                  <p className="text-on-surface-variant max-w-2xl leading-relaxed">{tier.subtitle}</p>
+                  <p className="text-on-surface-variant max-w-2xl leading-relaxed">{t(`shoutout.tier.${tier.id}.subtitle` as const)}</p>
                 </div>
 
                 {tier.donors.length === 0 ? (
                   <div className="rounded-xl border border-dashed border-slate-300 bg-slate-50/80 px-6 py-10 text-center">
                     <p className="text-on-surface-variant font-manrope">
-                      No names listed in this circle yet — your support could be recognized here.
+                      {t('shoutout.no_names')}
                     </p>
                     <Link
                       to="/login"
                       className="inline-block mt-4 text-sm font-bold text-blue-700 hover:text-blue-800 underline-offset-2 hover:underline"
                     >
-                      Give through the donor portal
+                      {t('shoutout.give_portal')}
                     </Link>
                   </div>
                 ) : (
@@ -166,7 +166,7 @@ export default function DonorShoutout() {
                         <li key={d.id}>
                           <div className={style.card}>
                             <p className={anon ? style.nameAnonymous : style.name}>
-                              {anon ? 'Anonymous supporter' : d.displayName}
+                              {anon ? t('shoutout.anonymous') : d.displayName}
                             </p>
                           </div>
                         </li>

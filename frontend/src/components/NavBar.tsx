@@ -44,7 +44,7 @@ export default function NavBar() {
         <div className="hidden md:flex justify-center items-center gap-8 font-manrope text-sm font-semibold tracking-tight">
           <NavLink to="/" end className={navClass}>{t('nav.mission')}</NavLink>
           <NavLink to="/impact" className={navClass}>{t('nav.impact')}</NavLink>
-          <NavLink to="/donor-shoutout" className={navClass}>Our Supporters</NavLink>
+          <NavLink to="/donor-shoutout" className={navClass}>{t('shoutout.heading')}</NavLink>
         </div>
 
         {/* Right — auth + hamburger */}

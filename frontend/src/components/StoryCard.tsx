@@ -1,3 +1,5 @@
+import { useLanguage } from '../context/LanguageContext'
+
 interface StoryCardProps {
   imageSrc: string
   imageAlt: string
@@ -25,6 +27,8 @@ export default function StoryCard({
   metaValue,
   onClick,
 }: StoryCardProps) {
+  const { t } = useLanguage()
+
   return (
     <div
       onClick={onClick}
@@ -43,7 +47,7 @@ export default function StoryCard({
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-0">
             <div className="flex gap-4">
               <div className="text-center">
-                <p className="text-xs font-bold text-primary uppercase">Program</p>
+                <p className="text-xs font-bold text-primary uppercase">{t('stories.card.program')}</p>
                 <p className="text-xs">{programValue}</p>
               </div>
               <div className="w-px h-8 bg-outline-variant/30"></div>
@@ -53,7 +57,7 @@ export default function StoryCard({
               </div>
             </div>
             <span className="text-xs font-semibold text-primary flex items-center gap-1 group-hover:underline">
-              Read story
+              {t('stories.card.read')}
               <span className="material-symbols-outlined text-[14px]">arrow_forward</span>
             </span>
           </div>
