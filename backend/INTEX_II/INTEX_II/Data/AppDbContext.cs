@@ -25,6 +25,7 @@ public class AppDbContext : IdentityDbContext<ApplicationUser>
     public DbSet<Partner> Partners => Set<Partner>();
     public DbSet<PartnerAssignment> PartnerAssignments => Set<PartnerAssignment>();
     public DbSet<PublicImpactSnapshot> PublicImpactSnapshots => Set<PublicImpactSnapshot>();
+    public DbSet<SecurityLog> SecurityLogs => Set<SecurityLog>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

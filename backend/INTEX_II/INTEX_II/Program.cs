@@ -1,4 +1,5 @@
 using INTEX_II.Data;
+using INTEX_II.Services;
 using Microsoft.EntityFrameworkCore;
 using System.Text;
 using INTEX_II.Models;
@@ -11,6 +12,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddOpenApi();
 builder.Services.AddControllers();
+builder.Services.AddScoped<SecurityLogService>();
 
 builder.Services.AddCors(options =>
 {
@@ -115,6 +117,17 @@ using (var scope = app.Services.CreateScope())
         ALTER TABLE donations
         ADD COLUMN IF NOT EXISTS is_reviewed boolean NOT NULL DEFAULT false;
     ");
+    await db.Database.ExecuteSqlRawAsync(@"
+        CREATE TABLE IF NOT EXISTS security_logs (
+            id            SERIAL PRIMARY KEY,
+            timestamp     TIMESTAMP NOT NULL DEFAULT NOW(),
+            level         TEXT NOT NULL,
+            event_type    TEXT NOT NULL,
+            user_email    TEXT,
+            ip_address    TEXT,
+            details       TEXT
+        );
+    ");
 }
 
 // Seed roles
@@ -172,6 +185,29 @@ app.UseCookiePolicy(new CookiePolicyOptions
 });
 app.UseAuthentication();
 app.UseAuthorization();
+
+// Security event logging — capture 401/403 responses after auth pipeline runs
+app.Use(async (context, next) =>
+{
+    await next();
+    var ip   = context.Connection.RemoteIpAddress?.ToString() ?? "unknown";
+    var path = context.Request.Path.Value ?? "";
+    if (context.Response.StatusCode == 401)
+    {
+        var logger = context.RequestServices.GetRequiredService<ILogger<Program>>();
+        logger.LogWarning("Unauthorized (401): {Path} from {IP}", path, ip);
+        var secLog = context.RequestServices.GetRequiredService<SecurityLogService>();
+        await secLog.WarnAsync("UNAUTHORIZED_401", ipAddress: ip, details: path);
+    }
+    else if (context.Response.StatusCode == 403)
+    {
+        var logger = context.RequestServices.GetRequiredService<ILogger<Program>>();
+        logger.LogWarning("Forbidden (403): {Path} from {IP}", path, ip);
+        var secLog = context.RequestServices.GetRequiredService<SecurityLogService>();
+        await secLog.WarnAsync("FORBIDDEN_403", ipAddress: ip, details: path);
+    }
+});
+
 app.MapControllers();
 
 app.Run();
