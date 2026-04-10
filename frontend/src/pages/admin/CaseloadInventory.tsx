@@ -1,5 +1,6 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import AdminSidebar from '../../components/AdminSidebar';
+import UserAvatar from '../../components/UserAvatar';
 import { authHeaders } from '../../utils/auth';
 
 const API = `${import.meta.env.VITE_API_URL ?? 'http://localhost:5229'}/api/residents`;
@@ -160,14 +161,58 @@ export default function CaseloadInventory() {
   const [filterStatus, setFilterStatus] = useState('');
   const [filterSafehouse, setFilterSafehouse] = useState('');
   const [filterCategory, setFilterCategory] = useState('');
+  const [filterSubCategory, setFilterSubCategory] = useState('');
+  const [filterSocialWorker, setFilterSocialWorker] = useState('');
+
+  type SortKey = 'caseControlNo' | 'internalCode' | 'safehouseCity' | 'caseStatus' | 'caseCategory' | 'dateOfAdmission' | 'assignedSocialWorker' | 'currentRiskLevel';
+  const [sortKey, setSortKey] = useState<SortKey | null>(null);
+  const [sortDir, setSortDir] = useState<'asc' | 'desc'>('asc');
+
+  function handleSort(key: SortKey) {
+    if (sortKey === key) {
+      if (sortDir === 'asc') setSortDir('desc');
+      else { setSortKey(null); setSortDir('asc'); }
+    } else {
+      setSortKey(key); setSortDir('asc');
+    }
+  }
+
+  const uniqueSocialWorkers = useMemo(() =>
+    Array.from(new Set(residents.map(r => r.assignedSocialWorker).filter(Boolean))).sort()
+  , [residents]);
+
+  const uniqueSubCategories = useMemo(() =>
+    Array.from(new Set(residents.flatMap(r => r.subCategories))).sort()
+  , [residents]);
+
+  const filteredResidents = useMemo(() => residents
+    .filter(r => !filterSubCategory || r.subCategories.includes(filterSubCategory))
+    .filter(r => !filterSocialWorker || r.assignedSocialWorker === filterSocialWorker)
+  , [residents, filterSubCategory, filterSocialWorker]);
+
+  const sortedResidents = useMemo(() => {
+    if (!sortKey) return filteredResidents;
+    return [...filteredResidents].sort((a, b) => {
+      const aVal = sortKey === 'safehouseCity'
+        ? (safehouses.find(s => s.safehouseId === a.safehouseId)?.city ?? a.safehouseName)
+        : String(a[sortKey as keyof typeof a] ?? '');
+      const bVal = sortKey === 'safehouseCity'
+        ? (safehouses.find(s => s.safehouseId === b.safehouseId)?.city ?? b.safehouseName)
+        : String(b[sortKey as keyof typeof b] ?? '');
+      return sortDir === 'asc' ? aVal.localeCompare(bVal) : bVal.localeCompare(aVal);
+    });
+  }, [filteredResidents, sortKey, sortDir, safehouses]);
 
   const [currentPage, setCurrentPage] = useState(1);
 
-  const [modalMode, setModalMode] = useState<'add' | 'edit' | null>(null);
+  const [modalMode, setModalMode] = useState<'add' | 'edit' | 'delete' | null>(null);
   const [selectedResident, setSelectedResident] = useState<ResidentDetail | null>(null);
   const [formData, setFormData] = useState<ResidentFormData>(EMPTY_FORM);
   const [formLoading, setFormLoading] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
+
+  const [caseToClose, setCaseToClose] = useState<ResidentRow | null>(null);
+  const [closing, setClosing] = useState(false);
 
   // Fetch safehouses once on mount
   useEffect(() => {
@@ -222,6 +267,28 @@ export default function CaseloadInventory() {
     }
   }
 
+  async function handleCloseCase() {
+    if (!caseToClose) return;
+    setClosing(true);
+    try {
+      const detail: ResidentDetail = await fetch(`${API}/${caseToClose.residentId}`, { headers: authHeaders() }).then(r => r.json());
+      const updated = {
+        ...detail,
+        caseStatus: 'Closed',
+        dateClosed: new Date().toISOString().slice(0, 10),
+      };
+      await fetch(`${API}/${caseToClose.residentId}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json', ...authHeaders() },
+        body: JSON.stringify(updated),
+      });
+      setCaseToClose(null);
+      setRefreshKey(k => k + 1);
+    } finally {
+      setClosing(false);
+    }
+  }
+
   async function handleSubmit() {
     setFormError(null);
 
@@ -242,6 +309,28 @@ export default function CaseloadInventory() {
         body: JSON.stringify(body),
       });
       if (!res.ok) { setFormError('Save failed. Please check all fields and try again.'); return; }
+      setModalMode(null);
+      setRefreshKey(k => k + 1);
+    } catch {
+      setFormError('Network error. Please try again.');
+    }
+  }
+
+  function openDelete(resident: ResidentDetail) {
+    setSelectedResident(resident);
+    setFormError(null);
+    setModalMode('delete');
+  }
+
+  async function handleDelete() {
+    if (!selectedResident) return;
+    setFormError(null);
+    try {
+      const res = await fetch(`${API}/${selectedResident.residentId}`, {
+        method: 'DELETE',
+        headers: authHeaders(),
+      });
+      if (!res.ok) { setFormError('Delete failed. Please try again.'); return; }
       setModalMode(null);
       setRefreshKey(k => k + 1);
     } catch {
@@ -283,7 +372,7 @@ export default function CaseloadInventory() {
           >
             <option value="">All Safehouses</option>
             {safehouses.map(s => (
-              <option key={s.safehouseId} value={s.safehouseId}>{s.name}</option>
+              <option key={s.safehouseId} value={s.safehouseId}>{s.city}, {s.province}</option>
             ))}
           </select>
 
@@ -296,19 +385,42 @@ export default function CaseloadInventory() {
             {CASE_CATEGORY_OPTIONS.map(c => <option key={c} value={c}>{c}</option>)}
           </select>
 
-          <p className="flex-1 text-center text-sm font-bold text-on-surface">Caseload Inventory</p>
-
-          <button
-            onClick={openAdd}
-            className="aurora-gradient text-white text-sm font-bold px-4 py-2 rounded-xl hover:opacity-90 transition-opacity flex items-center gap-2 flex-shrink-0"
+          <select
+            value={filterSubCategory}
+            onChange={e => setFilterSubCategory(e.target.value)}
+            className="bg-surface-container-low text-sm text-on-surface rounded-xl px-3 py-2 outline-none border-none"
           >
-            <span className="material-symbols-outlined text-[18px]">add</span>
-            Add Resident
-          </button>
+            <option value="">All Sub-categories</option>
+            {uniqueSubCategories.map(s => <option key={s} value={s}>{s}</option>)}
+          </select>
+
+          <select
+            value={filterSocialWorker}
+            onChange={e => setFilterSocialWorker(e.target.value)}
+            className="bg-surface-container-low text-sm text-on-surface rounded-xl px-3 py-2 outline-none border-none"
+          >
+            <option value="">All Social Workers</option>
+            {uniqueSocialWorkers.map(w => <option key={w} value={w}>{w}</option>)}
+          </select>
+
+          <div className="ml-auto flex items-center gap-3">
+            <button
+              onClick={openAdd}
+              className="aurora-gradient text-white text-sm font-bold px-4 py-2 rounded-xl hover:opacity-90 transition-opacity flex items-center gap-2 flex-shrink-0"
+            >
+              <span className="material-symbols-outlined text-[18px]">add</span>
+              Add Resident
+            </button>
+            <UserAvatar />
+          </div>
         </header>
 
         {/* Main table */}
         <main className="flex-1 overflow-y-auto p-6">
+          <div className="mb-6">
+            <h1 className="font-manrope text-4xl font-extrabold text-primary tracking-tight mb-2">Caseload Inventory</h1>
+            <p className="text-on-surface-variant text-sm leading-relaxed">View, manage, and track all resident cases across safehouses.</p>
+          </div>
           {loading ? (
             <div className="flex items-center justify-center h-40 text-on-surface-variant text-sm">
               Loading residents...
@@ -319,17 +431,39 @@ export default function CaseloadInventory() {
               No residents match your filters.
             </div>
           ) : (() => {
-            const totalPages = Math.ceil(residents.length / PAGE_SIZE);
-            const pageRows = residents.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE);
+            const totalPages = Math.ceil(sortedResidents.length / PAGE_SIZE);
+            const pageRows = sortedResidents.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE);
             return (
               <div className="flex flex-col gap-4">
                 <div className="bg-surface-container-lowest rounded-xl border border-outline-variant/20 overflow-x-auto">
                   <table className="w-full text-sm min-w-[960px]">
                     <thead>
                       <tr className="border-b border-outline-variant/20 bg-surface-container-low">
-                        {['Case Control No', 'Internal Code', 'Safehouse', 'Status', 'Category', 'Sub-categories', 'Admission Date', 'Social Worker', 'Risk Level', ''].map(h => (
-                          <th key={h} className="text-left px-4 py-3 text-[10px] font-bold text-on-surface-variant uppercase tracking-widest whitespace-nowrap">
-                            {h}
+                        {([
+                          { label: 'Case Control No',  key: 'caseControlNo' },
+                          { label: 'Internal Code',    key: 'internalCode' },
+                          { label: 'Safehouse',        key: 'safehouseCity' },
+                          { label: 'Status',           key: 'caseStatus' },
+                          { label: 'Category',         key: 'caseCategory' },
+                          { label: 'Sub-categories',   key: null },
+                          { label: 'Admission Date',   key: 'dateOfAdmission' },
+                          { label: 'Social Worker',    key: 'assignedSocialWorker' },
+                          { label: 'Risk Level',       key: 'currentRiskLevel' },
+                          { label: '',                 key: null },
+                        ] as { label: string; key: SortKey | null }[]).map(({ label, key }) => (
+                          <th
+                            key={label}
+                            onClick={() => key && handleSort(key)}
+                            className={`text-left px-4 py-3 text-[10px] font-bold text-on-surface-variant uppercase tracking-widest whitespace-nowrap ${key ? 'cursor-pointer hover:text-primary select-none' : ''}`}
+                          >
+                            <span className="inline-flex items-center gap-1">
+                              {label}
+                              {key && (
+                                <span className="material-symbols-outlined text-[13px]">
+                                  {sortKey === key ? (sortDir === 'asc' ? 'arrow_upward' : 'arrow_downward') : 'unfold_more'}
+                                </span>
+                              )}
+                            </span>
                           </th>
                         ))}
                       </tr>
@@ -339,7 +473,7 @@ export default function CaseloadInventory() {
                         <tr key={r.residentId} className="border-b border-outline-variant/10 hover:bg-surface-container-low transition-colors">
                           <td className="px-4 py-3 font-mono text-xs text-primary font-semibold whitespace-nowrap">{r.caseControlNo}</td>
                           <td className="px-4 py-3 font-mono text-xs text-on-surface-variant whitespace-nowrap">{r.internalCode}</td>
-                          <td className="px-4 py-3 text-xs whitespace-nowrap">{r.safehouseName}</td>
+                          <td className="px-4 py-3 text-xs whitespace-nowrap">{safehouses.find(s => s.safehouseId === r.safehouseId)?.city ?? r.safehouseName}</td>
                           <td className="px-4 py-3">
                             <span className={`inline-block px-2 py-0.5 rounded-full text-[10px] font-bold whitespace-nowrap ${STATUS_BADGE[r.caseStatus] ?? 'bg-surface-container text-on-surface-variant'}`}>
                               {r.caseStatus}
@@ -366,13 +500,24 @@ export default function CaseloadInventory() {
                             </span>
                           </td>
                           <td className="px-4 py-3">
-                            <button
-                              onClick={() => openEdit(r.residentId)}
-                              className="flex items-center gap-1 text-primary text-xs font-semibold hover:underline whitespace-nowrap"
-                            >
-                              <span className="material-symbols-outlined text-[15px]">edit</span>
-                              View/Edit
-                            </button>
+                            <div className="flex items-center gap-3">
+                              <button
+                                onClick={() => openEdit(r.residentId)}
+                                className="flex items-center gap-1 text-primary text-xs font-semibold whitespace-nowrap"
+                              >
+                                <span className="material-symbols-outlined text-[15px]">edit</span>
+                                <span className="hover:underline">View/Edit</span>
+                              </button>
+                              {r.caseStatus !== 'Closed' && (
+                                <button
+                                  onClick={() => setCaseToClose(r)}
+                                  className="flex items-center gap-1 text-on-surface-variant text-xs font-semibold hover:text-error hover:underline whitespace-nowrap transition-colors"
+                                >
+                                  <span className="material-symbols-outlined text-[15px]">folder_off</span>
+                                  Close Case
+                                </button>
+                              )}
+                            </div>
                           </td>
                         </tr>
                       ))}
@@ -383,7 +528,7 @@ export default function CaseloadInventory() {
                 {/* Pagination bar */}
                 <div className="flex items-center justify-between px-1">
                   <p className="text-xs text-on-surface-variant">
-                    Showing <span className="font-semibold text-on-surface">{(currentPage - 1) * PAGE_SIZE + 1}–{Math.min(currentPage * PAGE_SIZE, residents.length)}</span> of <span className="font-semibold text-on-surface">{residents.length}</span> residents
+                    Showing <span className="font-semibold text-on-surface">{(currentPage - 1) * PAGE_SIZE + 1}–{Math.min(currentPage * PAGE_SIZE, sortedResidents.length)}</span> of <span className="font-semibold text-on-surface">{sortedResidents.length}</span> residents
                   </p>
                   <div className="flex items-center gap-1">
                     <button
@@ -444,8 +589,40 @@ export default function CaseloadInventory() {
         </main>
       </div>
 
+      {/* ── Delete Confirmation Modal ── */}
+      {modalMode === 'delete' && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
+          <div className="bg-surface-container-lowest rounded-2xl shadow-xl w-full max-w-sm mx-4 p-6">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-10 h-10 rounded-full bg-error/10 flex items-center justify-center flex-shrink-0">
+                <span className="material-symbols-outlined text-error text-[20px]">delete_forever</span>
+              </div>
+              <div>
+                <h2 className="font-headline font-bold text-on-surface">Delete Resident?</h2>
+                <p className="text-xs text-on-surface-variant">This will permanently remove the resident and all associated records.</p>
+              </div>
+            </div>
+            {formError && <p className="text-xs text-error mb-3">{formError}</p>}
+            <div className="flex gap-3 justify-end">
+              <button
+                onClick={() => setModalMode(null)}
+                className="px-4 py-2 rounded-xl text-sm font-semibold text-on-surface-variant hover:bg-surface-container-low transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleDelete}
+                className="px-4 py-2 rounded-xl text-sm font-bold text-white bg-error hover:opacity-90 transition-opacity"
+              >
+                Delete
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* ── Add / Edit Modal ── */}
-      {modalMode !== null && (
+      {(modalMode === 'add' || modalMode === 'edit') && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
           <div className="bg-surface-container-lowest rounded-xl shadow-xl w-full max-w-3xl max-h-[90vh] flex flex-col mx-4">
             {/* Modal header */}
@@ -479,7 +656,7 @@ export default function CaseloadInventory() {
                         onChange={e => patch({ safehouseId: Number(e.target.value) })}>
                         <option value={0} disabled>Select safehouse...</option>
                         {safehouses.map(s => (
-                          <option key={s.safehouseId} value={s.safehouseId}>{s.name}</option>
+                          <option key={s.safehouseId} value={s.safehouseId}>{s.city}, {s.province}</option>
                         ))}
                       </select>
                     </Field>
@@ -715,8 +892,17 @@ export default function CaseloadInventory() {
 
             {/* Modal footer */}
             <div className="px-6 py-4 border-t border-outline-variant/20 flex items-center justify-between flex-shrink-0">
-              <div className="flex-1">
+              <div className="flex items-center gap-4 flex-1">
                 {formError && <p className="text-error text-xs font-semibold">{formError}</p>}
+                {modalMode === 'edit' && selectedResident && (
+                  <button
+                    onClick={() => openDelete(selectedResident)}
+                    className="flex items-center gap-1.5 text-error text-xs font-semibold hover:underline"
+                  >
+                    <span className="material-symbols-outlined text-[15px]">delete</span>
+                    Delete Resident
+                  </button>
+                )}
               </div>
               <div className="flex gap-3">
                 <button
@@ -730,6 +916,43 @@ export default function CaseloadInventory() {
                   className="aurora-gradient text-white text-sm font-bold px-6 py-2 rounded-xl hover:opacity-90 transition-opacity"
                 >
                   {modalMode === 'add' ? 'Create Resident' : 'Save Changes'}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Close Case confirmation modal */}
+      {caseToClose && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
+          <div className="bg-surface-container-lowest rounded-2xl shadow-xl w-full max-w-sm mx-4">
+            <div className="flex items-center justify-between px-6 pt-6 pb-4 border-b border-outline-variant/20">
+              <h2 className="text-base font-manrope font-bold text-on-surface">Close Case</h2>
+              <button onClick={() => setCaseToClose(null)} className="text-on-surface-variant hover:text-on-surface transition-colors">
+                <span className="material-symbols-outlined text-[20px]">close</span>
+              </button>
+            </div>
+            <div className="px-6 py-5">
+              <p className="text-sm text-on-surface mb-1">
+                Close case <strong>{caseToClose.caseControlNo}</strong>?
+              </p>
+              <p className="text-sm text-on-surface-variant mb-4">
+                The case status will be set to <strong>Closed</strong> and today will be recorded as the close date. This can be reversed by editing the case.
+              </p>
+              <div className="flex justify-end gap-3">
+                <button
+                  onClick={() => setCaseToClose(null)}
+                  className="px-4 py-2 rounded-xl text-sm font-semibold text-on-surface-variant hover:bg-surface-container-low transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleCloseCase}
+                  disabled={closing}
+                  className="px-4 py-2 rounded-xl text-sm font-bold text-white aurora-gradient hover:opacity-90 transition-opacity disabled:opacity-50"
+                >
+                  {closing ? 'Closing…' : 'Close Case'}
                 </button>
               </div>
             </div>

@@ -1,8 +1,25 @@
 import { useState, useEffect } from 'react';
 import AdminSidebar from '../../components/AdminSidebar';
+import UserAvatar from '../../components/UserAvatar';
 import { authHeaders, downloadExport } from '../../utils/auth';
 
 const API = `${import.meta.env.VITE_API_URL ?? 'http://localhost:5229'}/api/supporters`;
+
+// Approximate fixed rates to USD (updated periodically)
+const TO_USD: Record<string, number> = {
+  USD: 1,
+  NIO: 0.027,   // Nicaraguan córdoba
+  HNL: 0.040,   // Honduran lempira
+  CRC: 0.0019,  // Costa Rican colón
+  GTQ: 0.129,   // Guatemalan quetzal
+  PHP: 0.017,   // Philippine peso
+};
+
+function toUSD(amount: number, currency: string | null): string {
+  const rate = TO_USD[(currency ?? 'USD').toUpperCase()] ?? 1;
+  const usd = amount * rate;
+  return `$${usd.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+}
 
 const SUPPORTER_TYPES  = ['Monetary Donor', 'Volunteer', 'Skills Contributor', 'In-Kind Donor', 'Social Media Ambassador'];
 const DONATION_TYPES   = ['Monetary', 'InKind', 'Time', 'Skills', 'SocialMedia'];
@@ -99,6 +116,7 @@ interface DonationRow {
   estimatedValue: number;
   impactUnit: string;
   notes: string | null;
+  isReviewed: boolean;
   allocationCount: number;
   allocations: DonationAllocation[];
 }
@@ -242,8 +260,19 @@ export default function DonorsContributions() {
   const [donModalMode, setDonModalMode]       = useState<'add' | 'view' | null>(null);
   const [selectedDonation, setSelectedDonation] = useState<DonationRow | null>(null);
   const [donTargetSuppId, setDonTargetSuppId] = useState<number | null>(null);
+  const [donShowSuppSelector, setDonShowSuppSelector] = useState(false);
   const [donForm, setDonForm]                 = useState<DonationFormData>(EMPTY_DONATION);
   const [donFormError, setDonFormError]       = useState<string | null>(null);
+
+  // ── Expanded details tracking ───────────────────────────────────────────────
+  const [expandedDetails, setExpandedDetails] = useState<Set<number>>(new Set());
+  function toggleDetail(id: number) {
+    setExpandedDetails(prev => {
+      const next = new Set(prev);
+      next.has(id) ? next.delete(id) : next.add(id);
+      return next;
+    });
+  }
 
   // ── Supporter donations panel (within edit modal) ─────────────────────────
   const [suppDonations, setSuppDonations]     = useState<DonationRow[]>([]);
@@ -334,7 +363,7 @@ export default function DonorsContributions() {
     try {
       const res = await fetch(url, {
         method,
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', ...authHeaders() },
         body: JSON.stringify(suppForm),
       });
       if (!res.ok) { setSuppFormError('Save failed. Please check all fields and try again.'); return; }
@@ -348,6 +377,15 @@ export default function DonorsContributions() {
   // ── Donation modal helpers ────────────────────────────────────────────────
   function openRecordDonation(suppId: number) {
     setDonTargetSuppId(suppId);
+    setDonShowSuppSelector(false);
+    setDonForm(EMPTY_DONATION);
+    setDonFormError(null);
+    setDonModalMode('add');
+  }
+
+  function openAddDonationFromTab() {
+    setDonTargetSuppId(null);
+    setDonShowSuppSelector(true);
     setDonForm(EMPTY_DONATION);
     setDonFormError(null);
     setDonModalMode('add');
@@ -358,12 +396,23 @@ export default function DonorsContributions() {
     setDonModalMode('view');
   }
 
+  async function toggleReview(donationId: number, isReviewed: boolean) {
+    await fetch(`${API}/donations/${donationId}/review`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json', ...authHeaders() },
+      body: JSON.stringify({ isReviewed }),
+    });
+    setSuppDonations(prev => prev.map(d => d.donationId === donationId ? { ...d, isReviewed } : d));
+    setDonations(prev => prev.map(d => d.donationId === donationId ? { ...d, isReviewed } : d));
+  }
+
   function patchDon(updates: Partial<DonationFormData>) {
     setDonForm(prev => ({ ...prev, ...updates }));
   }
 
   async function handleDonationSubmit() {
     setDonFormError(null);
+    if (donShowSuppSelector && !donTargetSuppId) { setDonFormError('Please select a supporter.'); return; }
     if (!donForm.donationType)         { setDonFormError('Donation Type is required.'); return; }
     if (!donForm.estimatedValue)       { setDonFormError('Estimated Value is required.'); return; }
 
@@ -406,7 +455,13 @@ export default function DonorsContributions() {
   // ── Paginated slices ──────────────────────────────────────────────────────
   const suppPageRows = supporters.slice((suppPage - 1) * PAGE_SIZE, suppPage * PAGE_SIZE);
   const donPageRows  = donations.slice((donPage  - 1) * PAGE_SIZE, donPage  * PAGE_SIZE);
-  const suppDonPageRows = suppDonations.slice((suppDonPage - 1) * PAGE_SIZE, suppDonPage * PAGE_SIZE);
+  const sortedSuppDonations = [...suppDonations].sort((a, b) => {
+    const needsReview = (d: DonationRow) => (d.donationType === 'InKind' || d.donationType === 'Time') && !d.isReviewed;
+    const aNeeds = needsReview(a) ? 0 : (a.donationType === 'InKind' || a.donationType === 'Time') ? 1 : 2;
+    const bNeeds = needsReview(b) ? 0 : (b.donationType === 'InKind' || b.donationType === 'Time') ? 1 : 2;
+    return aNeeds - bNeeds;
+  });
+  const suppDonPageRows = sortedSuppDonations.slice((suppDonPage - 1) * PAGE_SIZE, suppDonPage * PAGE_SIZE);
 
   return (
     <div className="flex h-screen bg-surface overflow-hidden font-body">
@@ -466,7 +521,7 @@ export default function DonorsContributions() {
               className={`text-xs font-semibold px-3 py-1.5 rounded-lg transition-colors ${
                 activeTab === 'supporters' ? 'aurora-gradient text-white' : 'text-on-surface-variant hover:bg-surface-container'
               }`}>
-              Supporters
+              Donors
             </button>
             <button onClick={() => setActiveTab('donations')}
               className={`text-xs font-semibold px-3 py-1.5 rounded-lg transition-colors ${
@@ -495,10 +550,22 @@ export default function DonorsContributions() {
               Add Supporter
             </button>
           )}
+          {activeTab === 'donations' && (
+            <button onClick={openAddDonationFromTab}
+              className="aurora-gradient text-white text-sm font-bold px-4 py-2 rounded-xl hover:opacity-90 transition-opacity flex items-center gap-2 flex-shrink-0">
+              <span className="material-symbols-outlined text-[18px]">add_card</span>
+              Add Donation
+            </button>
+          )}
+          <UserAvatar />
         </header>
 
         {/* ── Main content ── */}
         <main className="flex-1 overflow-y-auto p-6">
+          <div className="mb-6">
+            <h1 className="font-manrope text-4xl font-extrabold text-primary tracking-tight mb-2">Donors & Contributions</h1>
+            <p className="text-on-surface-variant text-sm leading-relaxed">Manage supporter profiles and track donation history across all campaigns.</p>
+          </div>
 
           {/* ── Supporters Tab ── */}
           {activeTab === 'supporters' && (
@@ -544,12 +611,12 @@ export default function DonorsContributions() {
                           <td className="px-4 py-3 text-xs text-on-surface-variant whitespace-nowrap">{s.email || '—'}</td>
                           <td className="px-4 py-3 text-xs text-on-surface-variant whitespace-nowrap">{s.acquisitionChannel || '—'}</td>
                           <td className="px-4 py-3 text-xs text-on-surface font-semibold whitespace-nowrap text-center">{s.donationCount}</td>
-                          <td className="px-4 py-3 text-xs text-on-surface whitespace-nowrap">₱{fmt(s.totalEstimatedValue)}</td>
+                          <td className="px-4 py-3 text-xs text-on-surface whitespace-nowrap">${fmt(s.totalEstimatedValue)}</td>
                           <td className="px-4 py-3 whitespace-nowrap">
                             <button onClick={() => openEditSupporter(s.supporterId)}
-                              className="flex items-center gap-1 text-primary text-xs font-semibold hover:underline whitespace-nowrap">
+                              className="flex items-center gap-1 text-primary text-xs font-semibold whitespace-nowrap">
                               <span className="material-symbols-outlined text-[15px]">edit</span>
-                              View/Edit
+                              <span className="hover:underline">View/Edit</span>
                             </button>
                           </td>
                         </tr>
@@ -577,10 +644,10 @@ export default function DonorsContributions() {
             ) : (
               <div className="flex flex-col gap-4">
                 <div className="bg-surface-container-lowest rounded-xl border border-outline-variant/20 overflow-x-auto">
-                  <table className="w-full text-sm min-w-[960px]">
+                  <table className="w-full text-sm min-w-[1100px]">
                     <thead>
                       <tr className="border-b border-outline-variant/20 bg-surface-container-low">
-                        {['Supporter', 'Type', 'Date', 'Amount', 'Est. Value', 'Campaign', 'Channel', 'Recurring', 'Allocations', ''].map(h => (
+                        {['Supporter', 'Type', 'Date', 'Amount', 'Est. Value', 'Campaign', 'Details', 'Channel', 'Recurring', 'Allocations', ''].map(h => (
                           <th key={h} className="text-left px-4 py-3 text-[10px] font-bold text-on-surface-variant uppercase tracking-widest whitespace-nowrap">
                             {h}
                           </th>
@@ -598,10 +665,20 @@ export default function DonorsContributions() {
                           </td>
                           <td className="px-4 py-3 text-xs text-on-surface-variant whitespace-nowrap">{d.donationDate ?? '—'}</td>
                           <td className="px-4 py-3 text-xs whitespace-nowrap">
-                            {d.amount != null ? `${d.currencyCode ?? ''} ${fmt(d.amount)}` : '—'}
+                            {d.amount != null ? toUSD(d.amount, d.currencyCode) : '—'}
                           </td>
-                          <td className="px-4 py-3 text-xs whitespace-nowrap">₱{fmt(d.estimatedValue)}</td>
+                          <td className="px-4 py-3 text-xs whitespace-nowrap">{toUSD(d.estimatedValue, d.currencyCode ?? 'USD')}</td>
                           <td className="px-4 py-3 text-xs text-on-surface-variant whitespace-nowrap">{d.campaignName || '—'}</td>
+                          <td className="px-4 py-3 text-xs text-on-surface-variant max-w-[260px]">
+                            {d.notes ? (
+                              <div>
+                                <span className={expandedDetails.has(d.donationId) ? 'whitespace-pre-wrap break-words' : 'block truncate'}>{d.notes}</span>
+                                <button onClick={() => toggleDetail(d.donationId)} className="text-primary text-[10px] font-bold mt-0.5 hover:underline">
+                                  {expandedDetails.has(d.donationId) ? 'Show less' : 'Show more'}
+                                </button>
+                              </div>
+                            ) : '—'}
+                          </td>
                           <td className="px-4 py-3 text-xs text-on-surface-variant whitespace-nowrap">{d.channelSource || '—'}</td>
                           <td className="px-4 py-3 text-xs whitespace-nowrap">
                             <span className={`inline-block px-2 py-0.5 rounded-full text-[10px] font-bold ${d.isRecurring ? 'bg-secondary/10 text-secondary' : 'bg-surface-container text-on-surface-variant'}`}>
@@ -695,10 +772,10 @@ export default function DonorsContributions() {
                   <p className="text-[10px] font-bold text-on-surface-variant uppercase tracking-widest mb-3 border-b border-outline-variant/20 pb-1">Contact & Location</p>
                   <div className="grid grid-cols-2 gap-4">
                     <Field label="Email">
-                      <input className={inputCls} type="email" value={suppForm.email} onChange={e => patchSupp({ email: e.target.value })} />
+                      <input className={`${inputCls} ${suppModalMode === 'edit' ? 'opacity-60 cursor-not-allowed' : ''}`} type="email" value={suppForm.email} onChange={e => patchSupp({ email: e.target.value })} readOnly={suppModalMode === 'edit'} />
                     </Field>
                     <Field label="Phone">
-                      <input className={inputCls} value={suppForm.phone} onChange={e => patchSupp({ phone: e.target.value })} />
+                      <input className={`${inputCls} ${suppModalMode === 'edit' ? 'opacity-60 cursor-not-allowed' : ''}`} value={suppForm.phone} onChange={e => patchSupp({ phone: e.target.value })} readOnly={suppModalMode === 'edit'} />
                     </Field>
                     <Field label="Region">
                       <input className={inputCls} value={suppForm.region} onChange={e => patchSupp({ region: e.target.value })} />
@@ -754,10 +831,10 @@ export default function DonorsContributions() {
                 ) : (
                   <>
                     <div className="bg-surface-container-low rounded-xl border border-outline-variant/20 overflow-x-auto">
-                      <table className="w-full text-sm min-w-[640px]">
+                      <table className="w-full text-sm min-w-[860px]">
                         <thead>
                           <tr className="border-b border-outline-variant/20">
-                            {['Type', 'Date', 'Amount', 'Est. Value', 'Campaign', 'Recurring', 'Allocations'].map(h => (
+                            {['Type', 'Date', 'Amount', 'Est. Value', 'Campaign', 'Details', 'Recurring', 'Alloc.', 'Reviewed'].map(h => (
                               <th key={h} className="text-left px-4 py-2.5 text-[10px] font-bold text-on-surface-variant uppercase tracking-widest whitespace-nowrap">
                                 {h}
                               </th>
@@ -765,8 +842,10 @@ export default function DonorsContributions() {
                           </tr>
                         </thead>
                         <tbody>
-                          {suppDonPageRows.map(d => (
-                            <tr key={d.donationId} className="border-b border-outline-variant/10 hover:bg-surface-container transition-colors">
+                          {suppDonPageRows.map(d => {
+                            const needsReview = (d.donationType === 'InKind' || d.donationType === 'Time') && !d.isReviewed;
+                            return (
+                            <tr key={d.donationId} className={`border-b border-outline-variant/10 hover:bg-surface-container transition-colors ${needsReview ? 'bg-tertiary-fixed/20' : ''}`}>
                               <td className="px-4 py-2.5">
                                 <span className={`inline-block px-2 py-0.5 rounded-full text-[10px] font-bold ${DONATION_TYPE_BADGE[d.donationType] ?? 'bg-surface-container text-on-surface-variant'}`}>
                                   {DONATION_TYPE_LABEL[d.donationType] ?? d.donationType}
@@ -774,23 +853,53 @@ export default function DonorsContributions() {
                               </td>
                               <td className="px-4 py-2.5 text-xs text-on-surface-variant whitespace-nowrap">{d.donationDate ?? '—'}</td>
                               <td className="px-4 py-2.5 text-xs whitespace-nowrap">
-                                {d.amount != null ? `${d.currencyCode ?? ''} ${fmt(d.amount)}` : '—'}
+                                {d.amount != null ? toUSD(d.amount, d.currencyCode) : '—'}
                               </td>
-                              <td className="px-4 py-2.5 text-xs whitespace-nowrap">₱{fmt(d.estimatedValue)}</td>
+                              <td className="px-4 py-2.5 text-xs whitespace-nowrap">{toUSD(d.estimatedValue, d.currencyCode ?? 'USD')}</td>
                               <td className="px-4 py-2.5 text-xs text-on-surface-variant whitespace-nowrap">{d.campaignName || '—'}</td>
+                              <td className="px-4 py-2.5 text-xs text-on-surface-variant max-w-[260px]">
+                                {d.notes ? (
+                                  <div>
+                                    <span className={expandedDetails.has(d.donationId) ? 'whitespace-pre-wrap break-words' : 'block truncate'}>{d.notes}</span>
+                                    <button onClick={() => toggleDetail(d.donationId)} className="text-primary text-[10px] font-bold mt-0.5 hover:underline">
+                                      {expandedDetails.has(d.donationId) ? 'Show less' : 'Show more'}
+                                    </button>
+                                  </div>
+                                ) : '—'}
+                              </td>
                               <td className="px-4 py-2.5 text-xs whitespace-nowrap">
                                 <span className={`inline-block px-2 py-0.5 rounded-full text-[10px] font-bold ${d.isRecurring ? 'bg-secondary/10 text-secondary' : 'bg-surface-container text-on-surface-variant'}`}>
                                   {d.isRecurring ? 'Yes' : 'No'}
                                 </span>
                               </td>
                               <td className="px-4 py-2.5 text-xs text-center">{d.allocations.length}</td>
+                              <td className="px-4 py-2.5 text-center">
+                                {(d.donationType === 'InKind' || d.donationType === 'Time') ? (
+                                  <button
+                                    onClick={() => toggleReview(d.donationId, !d.isReviewed)}
+                                    className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[10px] font-bold transition-colors ${
+                                      d.isReviewed
+                                        ? 'bg-secondary/10 text-secondary'
+                                        : 'bg-error/10 text-error hover:bg-error/20'
+                                    }`}
+                                  >
+                                    <span className="material-symbols-outlined text-[14px]" style={d.isReviewed ? { fontVariationSettings: "'FILL' 1" } : undefined}>
+                                      {d.isReviewed ? 'check_circle' : 'pending'}
+                                    </span>
+                                    {d.isReviewed ? 'Reviewed' : 'Pending'}
+                                  </button>
+                                ) : (
+                                  <span className="text-[10px] text-on-surface-variant">—</span>
+                                )}
+                              </td>
                             </tr>
-                          ))}
+                            );
+                          })}
                         </tbody>
                       </table>
                     </div>
-                    {suppDonations.length > PAGE_SIZE && (
-                      <PaginationBar total={suppDonations.length} currentPage={suppDonPage} pageSize={PAGE_SIZE}
+                    {sortedSuppDonations.length > PAGE_SIZE && (
+                      <PaginationBar total={sortedSuppDonations.length} currentPage={suppDonPage} pageSize={PAGE_SIZE}
                         onPageChange={setSuppDonPage} noun="donations" />
                     )}
                   </>
@@ -826,6 +935,23 @@ export default function DonorsContributions() {
               </button>
             </div>
             <div className="flex-1 overflow-y-auto px-6 py-4 space-y-5">
+              {donShowSuppSelector && (
+                <div>
+                  <p className="text-[10px] font-bold text-on-surface-variant uppercase tracking-widest mb-3 border-b border-outline-variant/20 pb-1">Supporter</p>
+                  <Field label="Supporter *">
+                    <select
+                      className={selectCls}
+                      value={donTargetSuppId ?? ''}
+                      onChange={e => setDonTargetSuppId(e.target.value ? Number(e.target.value) : null)}
+                    >
+                      <option value="">Select supporter…</option>
+                      {supporters.map(s => (
+                        <option key={s.supporterId} value={s.supporterId}>{s.displayName}</option>
+                      ))}
+                    </select>
+                  </Field>
+                </div>
+              )}
               <div>
                 <p className="text-[10px] font-bold text-on-surface-variant uppercase tracking-widest mb-3 border-b border-outline-variant/20 pb-1">Contribution Details</p>
                 <div className="grid grid-cols-2 gap-4">
@@ -919,8 +1045,8 @@ export default function DonorsContributions() {
                     ['Supporter', selectedDonation.supporterName || '—'],
                     ['Type', DONATION_TYPE_LABEL[selectedDonation.donationType] ?? selectedDonation.donationType],
                     ['Date', selectedDonation.donationDate ?? '—'],
-                    ['Amount', selectedDonation.amount != null ? `${selectedDonation.currencyCode ?? ''} ${fmt(selectedDonation.amount)}` : '—'],
-                    ['Est. Value', `₱${fmt(selectedDonation.estimatedValue)}`],
+                    ['Amount', selectedDonation.amount != null ? toUSD(selectedDonation.amount, selectedDonation.currencyCode) : '—'],
+                    ['Est. Value', toUSD(selectedDonation.estimatedValue, selectedDonation.currencyCode ?? 'USD')],
                     ['Campaign', selectedDonation.campaignName || '—'],
                     ['Channel', selectedDonation.channelSource || '—'],
                     ['Recurring', selectedDonation.isRecurring ? 'Yes' : 'No'],
@@ -967,7 +1093,7 @@ export default function DonorsContributions() {
                           <tr key={a.allocationId} className="border-b border-outline-variant/10 hover:bg-surface-container-low transition-colors">
                             <td className="px-4 py-2.5 text-xs whitespace-nowrap">{a.safehouseName || '—'}</td>
                             <td className="px-4 py-2.5 text-xs whitespace-nowrap">{a.programArea}</td>
-                            <td className="px-4 py-2.5 text-xs whitespace-nowrap">₱{fmt(a.amountAllocated)}</td>
+                            <td className="px-4 py-2.5 text-xs whitespace-nowrap">${fmt(a.amountAllocated)}</td>
                             <td className="px-4 py-2.5 text-xs text-on-surface-variant whitespace-nowrap">{a.allocationDate}</td>
                             <td className="px-4 py-2.5 text-xs text-on-surface-variant">{a.allocationNotes || '—'}</td>
                           </tr>

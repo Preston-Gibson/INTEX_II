@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import AdminSidebar from '../../components/AdminSidebar';
+import UserAvatar from '../../components/UserAvatar';
 import { authHeaders } from '../../utils/auth';
 
 // ─── Config ───────────────────────────────────────────────────────────────────
@@ -20,12 +21,6 @@ interface CommandCenterStats {
   nextVisitLocation: string;
 }
 
-interface WeeklyActivity {
-  day: string;
-  shortDay: string;
-  value: number;
-}
-
 interface ScheduledVisit {
   visitationId: number;
   residentCaseNo: string;
@@ -41,6 +36,12 @@ interface ActivityItem {
   type: 'case' | 'donation' | 'visit' | 'alert';
   description: string;
   timeAgo: string;
+}
+
+interface ReintegrationRate {
+  total: number;
+  successful: number;
+  rate: number;
 }
 
 // ─── API helpers ──────────────────────────────────────────────────────────────
@@ -68,27 +69,34 @@ function Skeleton({ className = '', style }: { className?: string; style?: React
 
 // ─── Component ────────────────────────────────────────────────────────────────
 
+function getGreeting() {
+  const hour = new Date().getHours();
+  if (hour < 12) return 'Good morning';
+  if (hour < 18) return 'Good afternoon';
+  return 'Good evening';
+}
+
 export default function AdminCommandCenter() {
   const navigate = useNavigate();
 
-  const [stats, setStats]                 = useState<CommandCenterStats | null>(null);
-  const [weeklyData, setWeeklyData]       = useState<WeeklyActivity[]>([]);
-  const [visits, setVisits]               = useState<ScheduledVisit[]>([]);
-  const [activity, setActivity]           = useState<ActivityItem[]>([]);
-  const [loading, setLoading]             = useState(true);
-  const [error, setError]                 = useState<string | null>(null);
+  const [stats, setStats]                         = useState<CommandCenterStats | null>(null);
+  const [visits, setVisits]                       = useState<ScheduledVisit[]>([]);
+  const [activity, setActivity]                   = useState<ActivityItem[]>([]);
+  const [reintegrationRate, setReintegrationRate] = useState<ReintegrationRate | null>(null);
+  const [loading, setLoading]                     = useState(true);
+  const [error, setError]                         = useState<string | null>(null);
 
   useEffect(() => {
     let cancelled = false;
     async function load() {
       try {
-        const [s, w, v, a] = await Promise.all([
+        const [s, v, a, rr] = await Promise.all([
           apiFetch<CommandCenterStats>('/api/admin-dashboard/stats'),
-          apiFetch<WeeklyActivity[]>('/api/admin-dashboard/weekly-activity'),
           apiFetch<ScheduledVisit[]>('/api/admin-dashboard/upcoming-visits'),
           apiFetch<ActivityItem[]>('/api/admin-dashboard/recent-activity'),
+          apiFetch<ReintegrationRate>('/api/admin-dashboard/reintegration-rate'),
         ]);
-        if (!cancelled) { setStats(s); setWeeklyData(w); setVisits(v); setActivity(a); }
+        if (!cancelled) { setStats(s); setVisits(v); setActivity(a); setReintegrationRate(rr); }
       } catch {
         if (!cancelled) setError('Unable to load dashboard data.');
       } finally {
@@ -98,20 +106,6 @@ export default function AdminCommandCenter() {
     load();
     return () => { cancelled = true; };
   }, []);
-
-  // Bar chart – normalise to max value; fall back to placeholder proportions
-  const maxVal = Math.max(...weeklyData.map(d => d.value), 1);
-  const chartBars = weeklyData.length > 0
-    ? weeklyData.map(d => ({ label: d.shortDay, pct: Math.round((d.value / maxVal) * 100), peak: d.value === maxVal }))
-    : [
-        { label: 'Mon', pct: 40,  peak: false },
-        { label: 'Tue', pct: 65,  peak: false },
-        { label: 'Wed', pct: 45,  peak: false },
-        { label: 'Thu', pct: 90,  peak: true  },
-        { label: 'Fri', pct: 60,  peak: false },
-        { label: 'Sat', pct: 30,  peak: false },
-        { label: 'Sun', pct: 75,  peak: false },
-      ];
 
   function fmtDate(iso: string) {
     const d = new Date(iso);
@@ -128,35 +122,10 @@ export default function AdminCommandCenter() {
 
         {/* Slim top bar – search + page label + user (mirrors donor dashboard) */}
         <header className="flex items-center gap-4 px-6 py-3 bg-surface-container-lowest border-b border-outline-variant/20 flex-shrink-0">
-          <div className="flex items-center gap-2 bg-surface-container-low rounded-xl px-3 py-2 flex-1 max-w-xs">
-            <span className="material-symbols-outlined text-on-surface-variant text-[18px]">search</span>
-            <input
-              className="bg-transparent text-sm text-on-surface placeholder:text-on-surface-variant outline-none w-full"
-              placeholder="Search cases, visits…"
-            />
-          </div>
-
-          <p className="flex-1 text-center text-sm font-bold text-on-surface">Admin Dashboard — Operational Oversight</p>
-
-          <div className="flex items-center gap-3">
-            <button className="relative" aria-label="Notifications">
-              <span className="material-symbols-outlined text-on-surface-variant text-[22px]">notifications</span>
-            </button>
-            <button aria-label="Help">
-              <span className="material-symbols-outlined text-on-surface-variant text-[22px]">help</span>
-            </button>
-            <div className="flex items-center gap-2">
-              <div className="w-8 h-8 rounded-full bg-primary-container flex items-center justify-center text-xs font-bold text-white">
-                AS
-              </div>
-              <div className="text-right">
-                <p className="text-xs font-bold text-on-surface leading-tight">Admin Staff</p>
-                <p className="text-[10px] text-secondary font-semibold">Lucera Portal</p>
-              </div>
-            </div>
+          <div className="flex items-center gap-3 ml-auto">
+            <UserAvatar />
           </div>
         </header>
-
         {/* ── Scrollable content ── */}
         <main className="flex-1 overflow-y-auto p-6 space-y-6">
 
@@ -171,11 +140,11 @@ export default function AdminCommandCenter() {
           {/* Page greeting + action buttons */}
           <section className="flex flex-col md:flex-row items-end justify-between gap-4">
             <div>
-              <h2 className="text-3xl font-extrabold text-primary tracking-tight font-headline">
-                Good morning, Guardian
-              </h2>
-              <p className="text-on-surface-variant max-w-md mt-1 leading-relaxed text-sm">
-                Your overview for Santa Rosa de Copán is ready. Here are the core metrics for today's operations.
+              <h1 className="font-manrope text-4xl font-extrabold text-primary tracking-tight mb-2">
+                {getGreeting()}
+              </h1>
+              <p className="text-on-surface-variant text-sm leading-relaxed">
+                Here are the core metrics for today's operations across all locations.
               </p>
             </div>
             <div className="flex gap-3 flex-shrink-0">
@@ -277,49 +246,72 @@ export default function AdminCommandCenter() {
             </div>
           </section>
 
+          {/* OKR Spotlight — Reintegration Rate */}
+          <section className="bg-surface-container-lowest rounded-xl shadow-sm border-l-4 border-[#006a6a] p-5 flex flex-col md:flex-row md:items-center gap-5">
+            <div className="flex-shrink-0 flex items-center justify-center">
+              {loading ? (
+                <Skeleton className="w-24 h-24 rounded-full" />
+              ) : (
+                <div
+                  className="w-24 h-24 rounded-full flex items-center justify-center"
+                  style={{
+                    background: `conic-gradient(#006a6a ${(reintegrationRate?.rate ?? 0) * 3.6}deg, #e0f2f1 0deg)`,
+                  }}
+                >
+                  <div className="w-16 h-16 rounded-full bg-surface-container-lowest flex items-center justify-center">
+                    <span className="text-base font-extrabold text-[#006a6a] font-headline leading-none">
+                      {reintegrationRate?.rate ?? 0}%
+                    </span>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            <div className="flex-1 min-w-0">
+              <p className="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant mb-0.5">OKR Metric</p>
+              <h3 className="text-xl font-extrabold text-primary font-headline mb-1">Reintegration Rate</h3>
+              {loading ? (
+                <Skeleton className="h-4 w-64 mb-3" />
+              ) : (
+                <p className="text-sm text-on-surface-variant mb-3">
+                  <span className="font-bold text-on-surface">{reintegrationRate?.successful ?? 0}</span> of{' '}
+                  <span className="font-bold text-on-surface">{reintegrationRate?.total ?? 0}</span> residents successfully reintegrated
+                </p>
+              )}
+
+              <div className="w-full bg-surface-container-high rounded-full h-2.5 overflow-hidden">
+                {loading ? (
+                  <div className="animate-pulse bg-surface-container-high h-full w-full" />
+                ) : (
+                  <div
+                    className="h-full rounded-full transition-all duration-700"
+                    style={{ width: `${reintegrationRate?.rate ?? 0}%`, backgroundColor: '#006a6a' }}
+                  />
+                )}
+              </div>
+            </div>
+
+            <div className="flex-shrink-0 text-right hidden md:block">
+              {loading ? (
+                <Skeleton className="h-12 w-28" />
+              ) : (
+                <>
+                  <p className="text-5xl font-extrabold text-[#006a6a] font-headline leading-none">
+                    {reintegrationRate?.rate ?? 0}%
+                  </p>
+                  <p className="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant mt-1">
+                    Success Rate
+                  </p>
+                </>
+              )}
+            </div>
+          </section>
+
           {/* Bottom grid */}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
 
             {/* Left col: chart + visits */}
             <div className="lg:col-span-2 space-y-5">
-
-              {/* Operational velocity chart */}
-              <div className="bg-surface-container-low p-6 rounded-xl">
-                <div className="flex justify-between items-center mb-5">
-                  <h3 className="text-lg font-bold text-primary font-headline">Operational Velocity</h3>
-                  <span className="px-3 py-1 bg-surface-container-lowest text-[10px] font-bold rounded-full text-[#006a6a]">
-                    WEEKLY VIEW
-                  </span>
-                </div>
-                {loading ? (
-                  <div className="h-48 flex items-end gap-2 px-2">
-                    {Array.from({ length: 7 }).map((_, i) => (
-                      <Skeleton key={i} className="w-full rounded-t-lg" style={{ height: `${30 + i * 8}%` } as React.CSSProperties} />
-                    ))}
-                  </div>
-                ) : (
-                  <>
-                    <div className="h-48 flex items-end justify-between gap-2 px-2">
-                      {chartBars.map((bar, i) => (
-                        <div
-                          key={i}
-                          className={`w-full rounded-t-lg relative group/bar transition-all duration-500 ${bar.peak ? 'bg-primary-container' : 'bg-primary-container/20'}`}
-                          style={{ height: `${bar.pct}%` }}
-                        >
-                          {bar.peak && (
-                            <div className="absolute -top-9 left-1/2 -translate-x-1/2 bg-on-surface text-surface text-[10px] px-2 py-1 rounded hidden group-hover/bar:block whitespace-nowrap">
-                              Peak: {bar.pct}%
-                            </div>
-                          )}
-                        </div>
-                      ))}
-                    </div>
-                    <div className="flex justify-between mt-3 text-[10px] font-bold text-on-surface-variant uppercase tracking-tighter">
-                      {chartBars.map((b, i) => <span key={i}>{b.label}</span>)}
-                    </div>
-                  </>
-                )}
-              </div>
 
               {/* Scheduled visits */}
               <div className="bg-surface-container-lowest p-6 rounded-xl shadow-sm">
@@ -435,27 +427,6 @@ export default function AdminCommandCenter() {
                 >
                   View All Activity
                 </NavLink>
-              </div>
-
-              {/* Local Focus card – contains the Lucero mascot/creature */}
-              <div className="rounded-xl overflow-hidden relative h-48 group">
-                <img
-                  src="https://lh3.googleusercontent.com/aida-public/AB6AXuDhWQ0gFZC0R2VZPlGnMYQjFlvE67DEcUSFpycBGy0xR3FFTwUPR8v9bj5SlkoBOmBRdlVSZbypzPSm0r1NENqOJ1K5fJ_kLiO7OWJuRdClUdHZYsVnMU_L2uA3HaDgmX5Ti6JU-ZQgg-hpSlWREdPRs4yytDbImwG514-44p-_5GfeX6pAppSUOEqrTng-8QWos_a9G-1ZmnKBTNtwCx6ixV-LOPT6U2s4pjBmx9FFr90KAcUfyg99ro5aGjgdB0oj1ahfOnChVA"
-                  alt="Santa Rosa de Copán — Lucero community"
-                  className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                  onError={(e) => {
-                    // Fallback: hide broken image so the gradient shows through
-                    (e.target as HTMLImageElement).style.display = 'none';
-                  }}
-                />
-                <div className="absolute inset-0 aurora-gradient opacity-80" />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent p-5 flex flex-col justify-end">
-                  <span className="text-[10px] text-white/70 uppercase font-bold tracking-widest mb-1">
-                    Local Focus
-                  </span>
-                  <h4 className="text-white font-bold text-lg font-headline">Santa Rosa de Copán</h4>
-                  <p className="text-white/80 text-xs">Current conditions: Sunny, 24°C</p>
-                </div>
               </div>
             </div>
           </div>

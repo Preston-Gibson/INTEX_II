@@ -20,6 +20,37 @@ export function isAuthenticated(): boolean {
   return !!getToken();
 }
 
+export interface UserInfo {
+  id: string;
+  email: string;
+  firstName: string;
+  lastName: string;
+  role: string | null;
+  initials: string;
+  fullName: string;
+}
+
+export function getUser(): UserInfo | null {
+  const token = getToken();
+  if (!token) return null;
+  try {
+    const payload = JSON.parse(atob(token.split('.')[1]));
+    const firstName: string = payload['given_name'] ?? payload['firstName'] ?? '';
+    const lastName: string  = payload['family_name'] ?? payload['lastName'] ?? '';
+    const email: string     = payload['email'] ?? payload['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress'] ?? payload['sub'] ?? '';
+    const role: string | null =
+      payload['http://schemas.microsoft.com/ws/2008/06/identity/claims/role'] ?? null;
+    const nameParts = [firstName, lastName].filter(Boolean);
+    const fullName  = nameParts.length > 0 ? nameParts.join(' ') : email.split('@')[0];
+    const initials  = nameParts.length > 0
+      ? nameParts.map(p => p.charAt(0)).join('').toUpperCase()
+      : fullName.charAt(0).toUpperCase();
+    return { id: payload['sub'] ?? '', email, firstName, lastName, role, initials, fullName };
+  } catch {
+    return null;
+  }
+}
+
 export function getRole(): string | null {
   const token = getToken();
   if (!token) return null;

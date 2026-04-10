@@ -1,4 +1,10 @@
+import { useNavigate } from 'react-router-dom'
+import { useLanguage } from '../context/LanguageContext'
+
 export default function Hero() {
+  const navigate = useNavigate()
+  const { t } = useLanguage()
+
   return (
     <section className="relative overflow-hidden min-h-[calc(100svh-7.25rem)] flex items-center">
       {/* Background image layer */}
@@ -18,40 +24,39 @@ export default function Hero() {
       </div>
 
       {/* Content */}
-      <div className="relative z-10 w-full max-w-7xl mx-auto px-6 grid grid-cols-2 gap-14 items-center py-12">
+      <div className="relative z-10 w-full max-w-7xl mx-auto px-6 grid grid-cols-1 lg:grid-cols-2 gap-14 items-center py-12">
         {/* Left — text */}
         <div>
           <span className="inline-flex items-center gap-2 px-4 py-1.5 bg-tertiary-fixed text-on-tertiary-fixed font-manrope text-[0.7rem] font-extrabold tracking-[0.1em] uppercase rounded-[9999px] mb-7">
             <span className="material-symbols-outlined" style={{ fontSize: '0.9rem' }}>
               location_on
             </span>
-            Santa Rosa de Copán, Honduras
+            {t('hero.badge')}
           </span>
 
           <h1 className="font-manrope text-[clamp(2.8rem,5vw,3.75rem)] font-extrabold text-primary tracking-tight mb-6">
-            A Radiant Shield for the <span className="text-secondary">Vulnerable.</span>
+            {t('hero.title')} <span className="text-secondary">{t('hero.title.accent')}</span>
           </h1>
 
           <p className="text-[1.15rem] leading-[1.75] text-on-surface-variant max-w-[520px] mb-10">
-            Lucera is a dedicated sanctuary providing recovery, advocacy, and a hopeful
-            future for children surviving exploitation in Central America.
+            {t('hero.subtitle')}
           </p>
 
           <div className="flex gap-4 flex-wrap">
-            <button className="aurora-gradient inline-flex items-center gap-2 px-8 py-3.5 text-white font-manrope font-bold text-base rounded-[0.75rem] shadow-[0_4px_16px_rgba(0,63,135,0.35)] hover:opacity-90 active:scale-[0.97] transition-all">
-              Donate Now
+            <button onClick={() => navigate('/donor-dashboard', { state: { tab: 'Giving' } })} className="aurora-gradient inline-flex items-center gap-2 px-8 py-3.5 text-white font-manrope font-bold text-base rounded-[0.75rem] shadow-[0_4px_16px_rgba(0,63,135,0.35)] hover:opacity-90 active:scale-[0.97] transition-all">
+              {t('hero.donate')}
               <span className="material-symbols-outlined" style={{ fontSize: '1.2rem' }}>
                 volunteer_activism
               </span>
             </button>
-            <button className="inline-flex items-center gap-2 px-8 py-3.5 bg-surface-container-lowest text-on-surface font-manrope font-bold text-base rounded-[0.75rem] border border-outline-variant/20 hover:bg-surface-container-low transition-colors">
-              Our Story
+            <button onClick={() => navigate('/impact')} className="inline-flex items-center gap-2 px-8 py-3.5 font-manrope font-bold text-base rounded-[0.75rem] transition-colors" style={{ background: '#ffffff', color: '#003f87', border: '2px solid #003f87' }} onMouseEnter={e => (e.currentTarget.style.background = '#edeeef')} onMouseLeave={e => (e.currentTarget.style.background = '#ffffff')}>
+              {t('hero.impact')}
             </button>
           </div>
         </div>
 
         {/* Right — image + floating quote */}
-        <div className="relative flex justify-end">
+        <div className="relative hidden lg:flex justify-end">
           <div className="relative w-[90%]">
             <img
               className="w-full aspect-[4/5] object-cover rounded-[2rem] rotate-2 shadow-[0_16px_48px_rgba(0,0,0,0.14)] block"
@@ -60,7 +65,7 @@ export default function Hero() {
             />
             <div className="absolute -bottom-6 -left-12 bg-surface-container-lowest px-7 py-6 rounded-[1.25rem] max-w-[260px] shadow-[0_16px_48px_rgba(0,0,0,0.14)] -rotate-2 z-10">
               <p className="font-manrope text-[1.1rem] font-bold italic text-secondary leading-[1.45]">
-                "Hope is the first step toward healing."
+                {t('hero.quote')}
               </p>
             </div>
           </div>

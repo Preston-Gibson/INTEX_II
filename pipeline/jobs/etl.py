@@ -390,6 +390,9 @@ def build_social_warehouse():
 
 
 # ---------------------------------------------------------------------------
+    print(f"Built fact_social_media_ml: {len(df_model)} rows")
+
+
 # Phase C — Build donor warehouse modeling table
 # ---------------------------------------------------------------------------
 

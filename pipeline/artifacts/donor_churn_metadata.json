@@ -1,7 +1,7 @@
 {
   "model_name": "donor_churn_classifier",
   "model_version": "1.0.0",
-  "trained_at_utc": "2026-04-08T17:39:23.436807+00:00",
+  "trained_at_utc": "2026-04-09T21:18:25.196872+00:00",
   "warehouse_table": "fact_donors_ml",
   "num_training_rows": 45,
   "num_test_rows": 15,

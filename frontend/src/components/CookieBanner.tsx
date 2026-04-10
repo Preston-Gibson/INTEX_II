@@ -1,17 +1,28 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import { useLanguage, onCookieConsent, onCookieDecline } from '../context/LanguageContext';
+
+const CONSENT_KEY = 'cookie-notice-acknowledged';
 
 export default function CookieBanner() {
   const [visible, setVisible] = useState(false);
+  const { t, language } = useLanguage();
 
   useEffect(() => {
-    if (!localStorage.getItem('cookie-notice-acknowledged')) {
+    if (!localStorage.getItem(CONSENT_KEY)) {
       setVisible(true);
     }
   }, []);
 
-  const acknowledge = () => {
-    localStorage.setItem('cookie-notice-acknowledged', 'true');
+  const accept = () => {
+    localStorage.setItem(CONSENT_KEY, 'accepted');
+    onCookieConsent(language);
+    setVisible(false);
+  };
+
+  const decline = () => {
+    localStorage.setItem(CONSENT_KEY, 'declined');
+    onCookieDecline();
     setVisible(false);
   };
 
@@ -24,17 +35,25 @@ export default function CookieBanner() {
           cookie
         </span>
         <p className="text-sm text-on-surface leading-relaxed flex-1">
-          We use only strictly necessary cookies to keep you securely logged in. No tracking or analytics.{' '}
+          {t('cookie.message')}{' '}
           <Link to="/privacy-policy" className="text-primary font-bold hover:underline">
-            Learn more
+            {t('cookie.learn')}
           </Link>
         </p>
-        <button
-          onClick={acknowledge}
-          className="aurora-gradient text-white text-sm font-bold px-5 py-2.5 rounded-xl hover:opacity-90 transition-opacity flex-shrink-0"
-        >
-          Got it
-        </button>
+        <div className="flex gap-2 flex-shrink-0">
+          <button
+            onClick={decline}
+            className="text-sm font-bold px-5 py-2.5 rounded-xl border border-current hover:opacity-70 transition-opacity"
+          >
+            {t('cookie.decline')}
+          </button>
+          <button
+            onClick={accept}
+            className="aurora-gradient text-white text-sm font-bold px-5 py-2.5 rounded-xl hover:opacity-90 transition-opacity"
+          >
+            {t('cookie.accept')}
+          </button>
+        </div>
       </div>
     </div>
   );

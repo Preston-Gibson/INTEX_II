@@ -1,5 +1,6 @@
 using INTEX_II.Data;
 using INTEX_II.Models;
+using INTEX_II.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -12,10 +13,14 @@ namespace INTEX_II.Controllers;
 public class ResidentController : ControllerBase
 {
     private readonly AppDbContext _db;
+    private readonly ILogger<ResidentController> _logger;
+    private readonly SecurityLogService _secLog;
 
-    public ResidentController(AppDbContext db)
+    public ResidentController(AppDbContext db, ILogger<ResidentController> logger, SecurityLogService secLog)
     {
         _db = db;
+        _logger = logger;
+        _secLog = secLog;
     }
 
     // GET /api/residents/safehouses — must be before {id} route to avoid ambiguity
@@ -48,10 +53,13 @@ public class ResidentController : ControllerBase
         var query = _db.Residents.Include(r => r.Safehouse).AsQueryable();
 
         if (!string.IsNullOrWhiteSpace(search))
+        {
+            var pattern = $"%{search}%";
             query = query.Where(r =>
-                r.CaseControlNo.Contains(search) ||
-                r.InternalCode.Contains(search) ||
-                r.AssignedSocialWorker.Contains(search));
+                EF.Functions.ILike(r.CaseControlNo, pattern) ||
+                EF.Functions.ILike(r.InternalCode, pattern) ||
+                EF.Functions.ILike(r.AssignedSocialWorker, pattern));
+        }
 
         if (!string.IsNullOrWhiteSpace(caseStatus))
             query = query.Where(r => r.CaseStatus == caseStatus);
@@ -243,6 +251,9 @@ public class ResidentController : ControllerBase
         _db.Residents.Add(entity);
         await _db.SaveChangesAsync();
 
+        var admin = User.FindFirst(System.Security.Claims.ClaimTypes.Email)?.Value ?? "unknown";
+        _logger.LogInformation("Admin {Admin} created resident {ResidentId} ({CaseControlNo})", admin, entity.ResidentId, entity.CaseControlNo);
+        await _secLog.InfoAsync("RESIDENT_CREATED", admin, details: $"ResidentId={entity.ResidentId} Case={entity.CaseControlNo}");
         return CreatedAtAction(nameof(GetById), new { id = entity.ResidentId }, new { entity.ResidentId });
     }
 
@@ -302,6 +313,24 @@ public class ResidentController : ControllerBase
         entity.NotesRestricted = dto.NotesRestricted;
 
         await _db.SaveChangesAsync();
+        var admin = User.FindFirst(System.Security.Claims.ClaimTypes.Email)?.Value ?? "unknown";
+        _logger.LogInformation("Admin {Admin} updated resident {ResidentId}", admin, id);
+        await _secLog.InfoAsync("RESIDENT_UPDATED", admin, details: $"ResidentId={id}");
+        return NoContent();
+    }
+
+    // DELETE /api/residents/{id}
+    [HttpDelete("{id}")]
+    public async Task<IActionResult> Delete(int id)
+    {
+        var entity = await _db.Residents.FindAsync(id);
+        if (entity == null) return NotFound();
+
+        _db.Residents.Remove(entity);
+        await _db.SaveChangesAsync();
+        var admin = User.FindFirst(System.Security.Claims.ClaimTypes.Email)?.Value ?? "unknown";
+        _logger.LogInformation("Admin {Admin} deleted resident {ResidentId}", admin, id);
+        await _secLog.WarnAsync("RESIDENT_DELETED", admin, details: $"ResidentId={id}");
         return NoContent();
     }
 }

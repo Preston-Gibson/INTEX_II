@@ -17,6 +17,7 @@ builder.Services.AddHttpClient("Meta", client =>
 {
     client.Timeout = TimeSpan.FromSeconds(30);
 });
+builder.Services.AddScoped<SecurityLogService>();
 
 builder.Services.AddCors(options =>
 {
@@ -73,30 +74,68 @@ builder.Services.AddAuthentication(options =>
 })
 
 // Google OAuth
-.AddGoogle(options =>
-{
-    options.SignInScheme = "Identity.External";
-    options.ClientId = builder.Configuration["Authentication:Google:ClientId"]!;
-    options.ClientSecret = builder.Configuration["Authentication:Google:ClientSecret"]!;
-    options.CorrelationCookie.SameSite = SameSiteMode.Lax;
-    options.CorrelationCookie.SecurePolicy = CookieSecurePolicy.SameAsRequest;
-    options.CorrelationCookie.HttpOnly = true;
-})
+;
 
-// Microsoft OAuth
-.AddMicrosoftAccount(options =>
+var googleClientId = builder.Configuration["Authentication:Google:ClientId"];
+var googleClientSecret = builder.Configuration["Authentication:Google:ClientSecret"];
+if (!string.IsNullOrWhiteSpace(googleClientId) && !string.IsNullOrWhiteSpace(googleClientSecret))
 {
-    options.SignInScheme = "Identity.External";
-    options.ClientId = builder.Configuration["Authentication:Microsoft:ClientId"]!;
-    options.ClientSecret = builder.Configuration["Authentication:Microsoft:ClientSecret"]!;
-    options.CorrelationCookie.SameSite = SameSiteMode.Lax;
-    options.CorrelationCookie.SecurePolicy = CookieSecurePolicy.SameAsRequest;
-    options.CorrelationCookie.HttpOnly = true;
-});
+    builder.Services.AddAuthentication()
+        .AddGoogle(options =>
+        {
+            options.SignInScheme = "Identity.External";
+            options.ClientId = googleClientId;
+            options.ClientSecret = googleClientSecret;
+            options.CorrelationCookie.SameSite = SameSiteMode.Lax;
+            options.CorrelationCookie.SecurePolicy = CookieSecurePolicy.SameAsRequest;
+            options.CorrelationCookie.HttpOnly = true;
+        });
+}
+
+var msClientId = builder.Configuration["Authentication:Microsoft:ClientId"];
+var msClientSecret = builder.Configuration["Authentication:Microsoft:ClientSecret"];
+if (!string.IsNullOrWhiteSpace(msClientId) && !string.IsNullOrWhiteSpace(msClientSecret))
+{
+    builder.Services.AddAuthentication()
+        .AddMicrosoftAccount(options =>
+        {
+            options.SignInScheme = "Identity.External";
+            options.ClientId = msClientId;
+            options.ClientSecret = msClientSecret;
+            options.CorrelationCookie.SameSite = SameSiteMode.Lax;
+            options.CorrelationCookie.SecurePolicy = CookieSecurePolicy.SameAsRequest;
+            options.CorrelationCookie.HttpOnly = true;
+        });
+}
 
 var app = builder.Build();
 
-// Seed roles and default admin account
+// TO DO: Once everyone runs this, delete it. Just to populate profile picture. 
+using (var scope = app.Services.CreateScope())
+{
+    var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+    await db.Database.ExecuteSqlRawAsync(@"
+        ALTER TABLE ""AspNetUsers""
+        ADD COLUMN IF NOT EXISTS profile_picture_url text NULL;
+    ");
+    await db.Database.ExecuteSqlRawAsync(@"
+        ALTER TABLE donations
+        ADD COLUMN IF NOT EXISTS is_reviewed boolean NOT NULL DEFAULT false;
+    ");
+    await db.Database.ExecuteSqlRawAsync(@"
+        CREATE TABLE IF NOT EXISTS security_logs (
+            id            SERIAL PRIMARY KEY,
+            timestamp     TIMESTAMP NOT NULL DEFAULT NOW(),
+            level         TEXT NOT NULL,
+            event_type    TEXT NOT NULL,
+            user_email    TEXT,
+            ip_address    TEXT,
+            details       TEXT
+        );
+    ");
+}
+
+// Seed roles
 using (var scope = app.Services.CreateScope())
 {
     var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
@@ -104,22 +143,6 @@ using (var scope = app.Services.CreateScope())
     {
         if (!await roleManager.RoleExistsAsync(role))
             await roleManager.CreateAsync(new IdentityRole(role));
-    }
-
-    var userManager = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
-    const string adminEmail = "admin@lucera.org";
-    if (await userManager.FindByEmailAsync(adminEmail) == null)
-    {
-        var admin = new ApplicationUser
-        {
-            UserName = adminEmail,
-            Email = adminEmail,
-            FirstName = "Admin",
-            LastName = "User"
-        };
-        var result = await userManager.CreateAsync(admin, "adminadminadmin");
-        if (result.Succeeded)
-            await userManager.AddToRoleAsync(admin, "Admin");
     }
 }
 
@@ -130,6 +153,15 @@ if (builder.Configuration.GetValue<bool>("DataSeeding:SeedOnStartup"))
     var csvPath = builder.Configuration["DataSeeding:CsvDataPath"]!;
     var forceReseed = builder.Configuration.GetValue<bool>("DataSeeding:ForcedReseed");
     await DbSeeder.SeedAsync(db, csvPath, forceReseed);
+
+    // Test user seeding removed — accounts are created through the app
+}
+
+// Always reset sequences on startup to keep them in sync with seeded data.
+using (var scope = app.Services.CreateScope())
+{
+    var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+    await DbSeeder.ResetSequencesAsync(db);
 }
 
 if (app.Environment.IsDevelopment())
@@ -158,6 +190,29 @@ app.UseCookiePolicy(new CookiePolicyOptions
 });
 app.UseAuthentication();
 app.UseAuthorization();
+
+// Security event logging — capture 401/403 responses after auth pipeline runs
+app.Use(async (context, next) =>
+{
+    await next();
+    var ip   = context.Connection.RemoteIpAddress?.ToString() ?? "unknown";
+    var path = context.Request.Path.Value ?? "";
+    if (context.Response.StatusCode == 401)
+    {
+        var logger = context.RequestServices.GetRequiredService<ILogger<Program>>();
+        logger.LogWarning("Unauthorized (401): {Path} from {IP}", path, ip);
+        var secLog = context.RequestServices.GetRequiredService<SecurityLogService>();
+        await secLog.WarnAsync("UNAUTHORIZED_401", ip: ip, details: path);
+    }
+    else if (context.Response.StatusCode == 403)
+    {
+        var logger = context.RequestServices.GetRequiredService<ILogger<Program>>();
+        logger.LogWarning("Forbidden (403): {Path} from {IP}", path, ip);
+        var secLog = context.RequestServices.GetRequiredService<SecurityLogService>();
+        await secLog.WarnAsync("FORBIDDEN_403", ip: ip, details: path);
+    }
+});
+
 app.MapControllers();
 
 app.Run();

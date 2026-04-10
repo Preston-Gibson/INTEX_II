@@ -8,6 +8,7 @@
 
     <ItemGroup>
         <PackageReference Include="ClosedXML" Version="0.104.1" />
+        <PackageReference Include="System.IO.Packaging" Version="9.0.4" />
         <PackageReference Include="Microsoft.AspNetCore.Authentication.MicrosoftAccount" Version="9.0.4" />
         <PackageReference Include="Microsoft.AspNetCore.Authentication.Google" Version="10.0.5" />
         <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="9.0.4" />
