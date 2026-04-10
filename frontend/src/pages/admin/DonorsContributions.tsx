@@ -521,7 +521,7 @@ export default function DonorsContributions() {
               className={`text-xs font-semibold px-3 py-1.5 rounded-lg transition-colors ${
                 activeTab === 'supporters' ? 'aurora-gradient text-white' : 'text-on-surface-variant hover:bg-surface-container'
               }`}>
-              Supporters
+              Donors
             </button>
             <button onClick={() => setActiveTab('donations')}
               className={`text-xs font-semibold px-3 py-1.5 rounded-lg transition-colors ${
