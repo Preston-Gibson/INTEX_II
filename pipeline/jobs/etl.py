@@ -6,6 +6,8 @@ Phase B: Aggregate child tables and join onto residents → fact_residents_ml
          in the 'warehouse' schema.
 """
 
+import re
+
 import pandas as pd
 
 from config import (
@@ -284,6 +286,34 @@ SENTIMENT_TONE_MAP = {
 }
 
 
+_EMOJI_RE = re.compile(
+    "[\U0001F600-\U0001F64F"
+    "\U0001F300-\U0001F5FF"
+    "\U0001F680-\U0001F6FF"
+    "\U0001F1E0-\U0001F1FF"
+    "\U00002700-\U000027BF"
+    "\U0001F900-\U0001F9FF]+",
+    flags=re.UNICODE,
+)
+
+
+def _extract_text_features(df: pd.DataFrame) -> pd.DataFrame:
+    """Derive simple NLP signal columns from the caption column."""
+    cap = df["caption"].fillna("")
+    df["word_count"]        = cap.str.split().str.len().fillna(0).astype(int)
+    df["sentence_count"]    = cap.apply(
+        lambda t: len([s for s in re.split(r"[.!?]+", t.strip()) if s.strip()]) or 1
+    )
+    df["question_count"]    = cap.str.count(r"\?").astype(int)
+    df["exclamation_count"] = cap.str.count(r"!").astype(int)
+    df["has_url"]           = cap.str.contains(r"https?://", na=False).astype(int)
+    df["emoji_count"]       = cap.apply(lambda t: len(_EMOJI_RE.findall(t)))
+    df["starts_strong"]     = (
+        cap.str[:125].str.len() / cap.str.len().replace(0, 1)
+    ).ge(0.5).astype(int)
+    return df
+
+
 def build_social_warehouse():
     op_engine = get_engine(OPERATIONAL_SCHEMA)
     posts = pd.read_sql("SELECT * FROM social_media_posts", op_engine)
@@ -297,13 +327,16 @@ def build_social_warehouse():
         posts[col] = posts[col].astype(int)
 
     # ---- Categorical encoding ----------------------------------------------
-    posts["platform_encoded"]          = posts["platform"].map(PLATFORM_MAP).fillna(-1).astype(int)
-    posts["post_type_encoded"]         = posts["post_type"].map(POST_TYPE_MAP).fillna(-1).astype(int)
-    posts["media_type_encoded"]        = posts["media_type"].map(MEDIA_TYPE_MAP).fillna(-1).astype(int)
-    posts["day_of_week_encoded"]       = posts["day_of_week"].map(DAY_OF_WEEK_MAP).fillna(-1).astype(int)
+    posts["platform_encoded"]            = posts["platform"].map(PLATFORM_MAP).fillna(-1).astype(int)
+    posts["post_type_encoded"]           = posts["post_type"].map(POST_TYPE_MAP).fillna(-1).astype(int)
+    posts["media_type_encoded"]          = posts["media_type"].map(MEDIA_TYPE_MAP).fillna(-1).astype(int)
+    posts["day_of_week_encoded"]         = posts["day_of_week"].map(DAY_OF_WEEK_MAP).fillna(-1).astype(int)
     posts["call_to_action_type_encoded"] = posts["call_to_action_type"].map(CTA_TYPE_MAP).fillna(-1).astype(int)
-    posts["content_topic_encoded"]     = posts["content_topic"].map(CONTENT_TOPIC_MAP).fillna(-1).astype(int)
-    posts["sentiment_tone_encoded"]    = posts["sentiment_tone"].map(SENTIMENT_TONE_MAP).fillna(-1).astype(int)
+    posts["content_topic_encoded"]       = posts["content_topic"].map(CONTENT_TOPIC_MAP).fillna(-1).astype(int)
+    posts["sentiment_tone_encoded"]      = posts["sentiment_tone"].map(SENTIMENT_TONE_MAP).fillna(-1).astype(int)
+
+    # ---- Text-derived features ---------------------------------------------
+    posts = _extract_text_features(posts)
 
     # ---- Target labels -----------------------------------------------------
     q33 = posts["engagement_rate"].quantile(1 / 3)
@@ -331,6 +364,9 @@ def build_social_warehouse():
         # numeric features
         "post_hour", "num_hashtags", "mentions_count", "caption_length",
         "boost_budget_php", "follower_count_at_post",
+        # text-derived features
+        "word_count", "sentence_count", "question_count", "exclamation_count",
+        "has_url", "emoji_count", "starts_strong",
         # targets
         "engagement_tier", "has_donations",
     ]
@@ -339,6 +375,21 @@ def build_social_warehouse():
     wh_engine = get_engine(WAREHOUSE_SCHEMA)
     df_model.to_sql(
         "fact_social_media_ml",
+        wh_engine,
+        schema=WAREHOUSE_SCHEMA,
+        if_exists="replace",
+        index=False,
+    )
+
+    print(f"fact_social_media_ml written to schema '{WAREHOUSE_SCHEMA}'")
+    print(f"  {len(df_model)} rows, {len(df_model.columns)} columns")
+    print(f"  Engagement tier distribution:\n{df_model['engagement_tier'].value_counts().to_string()}")
+    print(f"  Has donations distribution:\n{df_model['has_donations'].value_counts().to_string()}")
+    print(f"  Tertile thresholds — q33: {q33:.6f}, q67: {q67:.6f}")
+    return len(df_model), q33, q67
+
+
+# ---------------------------------------------------------------------------
 # Phase C — Build donor warehouse modeling table
 # ---------------------------------------------------------------------------
 
@@ -581,12 +632,6 @@ def build_resident_outcome_warehouse():
         index=False,
     )
 
-    print(f"fact_social_media_ml written to schema '{WAREHOUSE_SCHEMA}'")
-    print(f"  {len(df_model)} rows, {len(df_model.columns)} columns")
-    print(f"  Engagement tier distribution:\n{df_model['engagement_tier'].value_counts().to_string()}")
-    print(f"  Has donations distribution:\n{df_model['has_donations'].value_counts().to_string()}")
-    print(f"  Tertile thresholds — q33: {q33:.6f}, q67: {q67:.6f}")
-    return len(df_model), q33, q67
     print(f"fact_resident_outcomes_ml written to schema '{WAREHOUSE_SCHEMA}'")
     print(f"  {len(df)} rows, {len(df.columns)} columns")
     print(f"  Reintegration outcome:\n{df['reintegration_outcome_label'].value_counts().to_string()}")

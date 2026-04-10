@@ -4,6 +4,7 @@ using System.Text;
 using System.Text.Json;
 using INTEX_II.Data;
 using INTEX_II.Models;
+using INTEX_II.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -18,12 +19,35 @@ public class SocialMediaController : ControllerBase
     private readonly AppDbContext _db;
     private readonly IHttpClientFactory _httpFactory;
     private readonly IConfiguration _config;
+    private readonly SocialScoreService _scorer;
 
-    public SocialMediaController(AppDbContext db, IHttpClientFactory httpFactory, IConfiguration config)
+    public SocialMediaController(AppDbContext db, IHttpClientFactory httpFactory,
+        IConfiguration config, SocialScoreService scorer)
     {
         _db = db;
         _httpFactory = httpFactory;
         _config = config;
+        _scorer = scorer;
+    }
+
+    // GET /api/social-media/predictions/{postId}
+    [HttpGet("predictions/{postId:int}")]
+    public async Task<IActionResult> GetPrediction(int postId)
+    {
+        var p = await _db.SocialMediaPredictions.AsNoTracking()
+            .FirstOrDefaultAsync(x => x.PostId == postId);
+        if (p is null) return NotFound();
+        return Ok(new
+        {
+            postId              = p.PostId,
+            probHasDonations    = p.ProbHasDonations,
+            donationTier        = p.DonationTier,
+            probEngagementLow   = p.ProbEngagementLow,
+            probEngagementMedium = p.ProbEngagementMedium,
+            probEngagementHigh  = p.ProbEngagementHigh,
+            predictedEngagementTier = p.PredictedEngagementTier,
+            scoredAt            = p.ScoredAt,
+        });
     }
 
     // GET /api/social-media/insights
@@ -546,6 +570,9 @@ public class SocialMediaController : ControllerBase
         };
         _db.SocialMediaPosts.Add(post);
         await _db.SaveChangesAsync();
+
+        // Score the new post in the background — non-blocking
+        _scorer.EnqueueScore(post.PostId);
     }
 }
 

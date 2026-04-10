@@ -495,15 +495,17 @@ function FacebookPreview({ caption, hashtags, media }: { caption: string; hashta
           </div>
 
           {/* Caption text */}
-          <div style={{ flex: 1, padding: '4px 14px 8px', overflowY: 'auto' }}>
-            <p style={{ color: text ? '#050505' : '#bcc0c4', fontSize: 18, lineHeight: 1.4, margin: 0, whiteSpace: 'pre-wrap' }}>
+          <div style={{ padding: '4px 14px 8px', flexShrink: 0 }}>
+            <p style={{ color: text ? '#050505' : '#bcc0c4', fontSize: 16, lineHeight: 1.4, margin: 0, whiteSpace: 'pre-wrap', display: '-webkit-box', WebkitLineClamp: 3, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
               {text || "What's on your mind, Lucera Offical?"}
             </p>
-            {/* Media preview */}
-            {media && (
-              <img src={media} alt="Post" style={{ width: '100%', borderRadius: 8, objectFit: 'cover', maxHeight: 140, display: 'block', marginTop: 10 }} />
-            )}
           </div>
+          {/* Media preview — full width, outside caption scroll */}
+          {media && (
+            <div style={{ flexShrink: 0 }}>
+              <img src={media} alt="Post" style={{ width: '100%', objectFit: 'cover', maxHeight: 180, display: 'block' }} />
+            </div>
+          )}
 
           {/* Background color + emoji row */}
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '6px 14px', flexShrink: 0 }}>
@@ -899,7 +901,8 @@ export default function SocialMediaComposer() {
   });
   const [activeTab, setActiveTab] = useState<Platform>('Facebook');
   const [hashtagInput, setHashtagInput] = useState('');
-  const [media, setMedia] = useState<string | null>(null);
+  const [media, setMedia] = useState<string | null>(null);           // blob URL — display only
+  const [mediaPublicUrl, setMediaPublicUrl] = useState<string | null>(null); // Supabase URL — publish only
   const [copied, setCopied] = useState<Platform | null>(null);
   const [toast, setToast] = useState<string | null>(null);
   const [insights, setInsights] = useState<Insights | null>(null);
@@ -954,8 +957,9 @@ export default function SocialMediaComposer() {
     const f = e.target.files?.[0];
     if (!f) return;
 
-    // Show local preview immediately
-    setMedia(URL.createObjectURL(f));
+    const blobUrl = URL.createObjectURL(f);
+    setMedia(blobUrl);
+    setMediaPublicUrl(null);
     setMediaUploading(true);
 
     try {
@@ -971,8 +975,8 @@ export default function SocialMediaComposer() {
         .from('Social Media Uploads')
         .getPublicUrl(path);
 
-      setMedia(data.publicUrl);
-      showToast('Image uploaded successfully');
+      setMediaPublicUrl(data.publicUrl);  // only used for publish API call
+      showToast('Photo ready to publish');
     } catch {
       showToast('Upload failed — check Supabase storage permissions');
     } finally {
@@ -992,8 +996,8 @@ export default function SocialMediaComposer() {
   const handlePublish = async () => {
     if (!draft.caption.trim()) { showToast('Caption is required'); return; }
     if (!draft.platforms.includes('Facebook')) { showToast('Select Facebook to publish'); return; }
-    if (draft.mediaType !== 'Text' && media?.startsWith('blob:')) { showToast('Image still uploading — please wait'); return; }
-    if (draft.mediaType !== 'Text' && !media) { showToast('Please upload an image first'); return; }
+    if (draft.mediaType !== 'Text' && !media) { showToast('Please upload a photo first'); return; }
+    if (draft.mediaType !== 'Text' && !mediaPublicUrl) { showToast('Photo still uploading — please wait'); return; }
 
     setPublishing(true);
     setPublishResults([]);
@@ -1002,7 +1006,7 @@ export default function SocialMediaComposer() {
         platforms: ['Facebook'],
         caption: draft.caption,
         mediaType: draft.mediaType,
-        mediaUrl: media ?? undefined,
+        mediaUrl: mediaPublicUrl ?? undefined,
         hashtags: draft.hashtags,
         postType: draft.postType,
         sentimentTone: draft.sentimentTone,
@@ -1236,18 +1240,28 @@ export default function SocialMediaComposer() {
               {draft.mediaType === 'Photo' && (
               <div>
                 <label className="text-[10px] font-bold text-on-surface-variant uppercase tracking-widest mb-1.5 block">Photo</label>
-                <button onClick={() => fileRef.current?.click()} disabled={mediaUploading}
-                  className="w-full border-2 border-dashed border-outline-variant rounded-xl py-3 flex flex-col items-center gap-1.5 hover:border-primary/40 hover:bg-primary/5 transition-colors disabled:opacity-60">
-                  {mediaUploading
-                    ? <span className="material-symbols-outlined text-[28px] text-primary animate-spin">refresh</span>
-                    : media
-                      ? <img src={media} alt="Preview" className="w-16 h-16 object-cover rounded-lg" />
-                      : <span className="material-symbols-outlined text-[28px] text-on-surface-variant/50">upload</span>
-                  }
-                  <p className="text-xs font-semibold text-on-surface-variant">
-                    {mediaUploading ? 'Uploading…' : media ? 'Change photo' : 'Upload a photo'}
-                  </p>
-                </button>
+                {media ? (
+                  <div className="relative rounded-xl overflow-hidden border border-outline-variant/30 cursor-pointer group"
+                    onClick={() => !mediaUploading && fileRef.current?.click()}>
+                    <img src={media} alt="Preview" className="w-full max-h-40 object-cover block" />
+                    {mediaUploading && (
+                      <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
+                        <span className="material-symbols-outlined text-[28px] text-white animate-spin">refresh</span>
+                      </div>
+                    )}
+                    {!mediaUploading && (
+                      <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors flex items-center justify-center opacity-0 group-hover:opacity-100">
+                        <span className="text-white text-[11px] font-bold bg-black/50 px-3 py-1 rounded-full">Change photo</span>
+                      </div>
+                    )}
+                  </div>
+                ) : (
+                  <button onClick={() => fileRef.current?.click()} disabled={mediaUploading}
+                    className="w-full border-2 border-dashed border-outline-variant rounded-xl py-6 flex flex-col items-center gap-1.5 hover:border-primary/40 hover:bg-primary/5 transition-colors">
+                    <span className="material-symbols-outlined text-[28px] text-on-surface-variant/50">upload</span>
+                    <p className="text-xs font-semibold text-on-surface-variant">Upload a photo</p>
+                  </button>
+                )}
                 <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={handleMedia} />
               </div>
               )}

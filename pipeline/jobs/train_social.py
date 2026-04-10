@@ -60,6 +60,14 @@ NUM_COLS = [
     "caption_length",
     "boost_budget_php",
     "follower_count_at_post",
+    # text-derived features
+    "word_count",
+    "sentence_count",
+    "question_count",
+    "exclamation_count",
+    "has_url",
+    "emoji_count",
+    "starts_strong",
 ]
 
 FEATURE_COLS = CAT_COLS + NUM_COLS   # 16 total

@@ -9,10 +9,37 @@ The app queries that table; it never loads the models itself.
 """
 
 import json
+import re
 from datetime import datetime, timezone
 
 import joblib
 import pandas as pd
+
+_EMOJI_RE = re.compile(
+    "[\U0001F600-\U0001F64F"
+    "\U0001F300-\U0001F5FF"
+    "\U0001F680-\U0001F6FF"
+    "\U0001F1E0-\U0001F1FF"
+    "\U00002700-\U000027BF"
+    "\U0001F900-\U0001F9FF]+",
+    flags=re.UNICODE,
+)
+
+
+def _extract_text_features(df: pd.DataFrame) -> pd.DataFrame:
+    cap = df["caption"].fillna("")
+    df["word_count"]        = cap.str.split().str.len().fillna(0).astype(int)
+    df["sentence_count"]    = cap.apply(
+        lambda t: len([s for s in re.split(r"[.!?]+", t.strip()) if s.strip()]) or 1
+    )
+    df["question_count"]    = cap.str.count(r"\?").astype(int)
+    df["exclamation_count"] = cap.str.count(r"!").astype(int)
+    df["has_url"]           = cap.str.contains(r"https?://", na=False).astype(int)
+    df["emoji_count"]       = cap.apply(lambda t: len(_EMOJI_RE.findall(t)))
+    df["starts_strong"]     = (
+        cap.str[:125].str.len() / cap.str.len().replace(0, 1)
+    ).ge(0.5).astype(int)
+    return df
 
 from config import (
     DONATION_METADATA_PATH,
@@ -74,6 +101,9 @@ def _build_features(engine) -> pd.DataFrame:
     posts["content_topic_encoded"]       = posts["content_topic"].map(CONTENT_TOPIC_MAP).fillna(-1).astype(int)
     posts["sentiment_tone_encoded"]      = posts["sentiment_tone"].map(SENTIMENT_TONE_MAP).fillna(-1).astype(int)
 
+    # Text-derived features
+    posts = _extract_text_features(posts)
+
     feature_cols = [
         "platform_encoded", "post_type_encoded", "media_type_encoded",
         "day_of_week_encoded", "call_to_action_type_encoded",
@@ -81,6 +111,8 @@ def _build_features(engine) -> pd.DataFrame:
         "has_call_to_action", "features_resident_story", "is_boosted",
         "post_hour", "num_hashtags", "mentions_count", "caption_length",
         "boost_budget_php", "follower_count_at_post",
+        "word_count", "sentence_count", "question_count", "exclamation_count",
+        "has_url", "emoji_count", "starts_strong",
     ]
 
     return posts[["post_id"] + feature_cols].copy()

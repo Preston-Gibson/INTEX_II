@@ -1,4 +1,5 @@
 using INTEX_II.Data;
+using INTEX_II.Services;
 using Microsoft.EntityFrameworkCore;
 using System.Text;
 using INTEX_II.Models;
@@ -11,6 +12,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddOpenApi();
 builder.Services.AddControllers();
+builder.Services.AddSingleton<SocialScoreService>();
 builder.Services.AddHttpClient("Meta", client =>
 {
     client.Timeout = TimeSpan.FromSeconds(30);
