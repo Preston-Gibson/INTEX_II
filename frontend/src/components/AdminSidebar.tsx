@@ -1,3 +1,5 @@
+import { NavLink, Link, useNavigate, useLocation } from 'react-router-dom';
+import { clearToken } from '../utils/auth';
 import { useState } from 'react';
 import { NavLink, Link, useNavigate } from 'react-router-dom';
 
@@ -12,6 +14,8 @@ const NAV_ITEMS = [
 
 export default function AdminSidebar() {
   const navigate = useNavigate();
+  const { pathname } = useLocation();
+  const isSocialMedia = pathname.includes('social-media');
   const [open, setOpen] = useState(false);
 
   const sidebarContent = (
@@ -42,6 +46,28 @@ export default function AdminSidebar() {
         ))}
       </nav>
 
+      {!isSocialMedia && (
+        <button
+          onClick={() => navigate('/admin-caseload-inventory')}
+          className="w-full py-3 rounded-xl font-bold text-sm flex items-center justify-center gap-2 hover:opacity-90 transition-opacity mb-2 shadow-sm"
+          style={{ backgroundColor: '#ffba38', color: '#281900' }}
+        >
+          <span
+            className="material-symbols-outlined text-[18px]"
+            style={{ fontVariationSettings: "'FILL' 1" }}
+          >
+            add_circle
+          </span>
+          New Case
+        </button>
+      )}
+
+      <button
+        onClick={() => { clearToken(); navigate('/login'); }}
+        className="flex items-center justify-center gap-2 text-on-surface-variant text-xs font-semibold py-2 rounded-xl hover:bg-surface-container-low transition-colors w-full mb-1"
+      >
+        <span className="material-symbols-outlined text-[16px]">logout</span>
+        Sign out
       <button
         onClick={() => { navigate('/admin-caseload-inventory'); setOpen(false); }}
         className="w-full py-3 rounded-xl font-bold text-sm flex items-center justify-center gap-2 hover:opacity-90 transition-opacity mb-2 shadow-sm"

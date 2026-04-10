@@ -12,6 +12,11 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddOpenApi();
 builder.Services.AddControllers();
+builder.Services.AddSingleton<SocialScoreService>();
+builder.Services.AddHttpClient("Meta", client =>
+{
+    client.Timeout = TimeSpan.FromSeconds(30);
+});
 builder.Services.AddScoped<SecurityLogService>();
 
 builder.Services.AddCors(options =>
