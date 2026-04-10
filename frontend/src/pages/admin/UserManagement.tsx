@@ -2,7 +2,8 @@ import { useState, useEffect, useCallback } from 'react';
 import AdminSidebar from '../../components/AdminSidebar';
 import { authHeaders } from '../../utils/auth';
 
-const API = `${import.meta.env.VITE_API_URL ?? 'http://localhost:5229'}/api/users`;
+const API     = `${import.meta.env.VITE_API_URL ?? 'http://localhost:5229'}/api/users`;
+const LOG_API = `${import.meta.env.VITE_API_URL ?? 'http://localhost:5229'}/api/security-logs`;
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -16,6 +17,17 @@ interface UserRow {
 }
 
 type ModalMode = 'add' | 'edit' | 'role' | 'password' | 'delete' | 'add-role' | 'delete-role' | null;
+type ActiveTab = 'users' | 'logs';
+
+interface SecurityLogRow {
+  id: number;
+  timestamp: string;
+  level: string;
+  eventType: string;
+  userEmail: string | null;
+  ipAddress: string | null;
+  details: string | null;
+}
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
@@ -50,10 +62,22 @@ function RoleBadge({ role }: { role: string }) {
 // ── Main component ─────────────────────────────────────────────────────────────
 
 export default function UserManagement() {
+  const [activeTab, setActiveTab] = useState<ActiveTab>('users');
+
+  // ── Users tab state ───────────────────────────────────────────────────────────
   const [users, setUsers] = useState<UserRow[]>([]);
   const [roles, setRoles] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
+
+  // ── Security logs tab state ───────────────────────────────────────────────────
+  const [logs, setLogs] = useState<SecurityLogRow[]>([]);
+  const [logTotal, setLogTotal] = useState(0);
+  const [logPage, setLogPage] = useState(1);
+  const [logLevel, setLogLevel] = useState('');
+  const [logSearch, setLogSearch] = useState('');
+  const [logsLoading, setLogsLoading] = useState(false);
+  const LOG_PAGE_SIZE = 50;
 
   const [modalMode, setModalMode] = useState<ModalMode>(null);
   const [selectedUser, setSelectedUser] = useState<UserRow | null>(null);
@@ -93,6 +117,28 @@ export default function UserManagement() {
   }, []);
 
   useEffect(() => { fetchData(); }, [fetchData]);
+
+  const fetchLogs = useCallback(async () => {
+    setLogsLoading(true);
+    const params = new URLSearchParams({
+      page: String(logPage),
+      pageSize: String(LOG_PAGE_SIZE),
+    });
+    if (logLevel)  params.set('level', logLevel);
+    if (logSearch) params.set('search', logSearch);
+    try {
+      const res = await fetch(`${LOG_API}?${params}`, { headers: authHeaders() });
+      const data = await res.json();
+      setLogs(data.logs);
+      setLogTotal(data.total);
+    } catch { /* ignore */ } finally {
+      setLogsLoading(false);
+    }
+  }, [logPage, logLevel, logSearch]);
+
+  useEffect(() => {
+    if (activeTab === 'logs') fetchLogs();
+  }, [activeTab, fetchLogs]);
 
   const closeModal = () => {
     setModalMode(null);
@@ -295,24 +341,153 @@ export default function UserManagement() {
             <h1 className="font-manrope text-4xl font-extrabold text-primary tracking-tight mb-2">User Management</h1>
             <p className="text-on-surface-variant text-sm leading-relaxed">Manage accounts, assign roles, and control access across the platform.</p>
           </div>
-          <div className="flex gap-2">
-            <button
-              onClick={() => setModalMode('add-role')}
-              className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold border border-outline-variant text-on-surface-variant hover:bg-surface-container-low transition-colors"
-            >
-              <span className="material-symbols-outlined text-[18px]">manage_accounts</span>
-              Manage Roles
-            </button>
-            <button
-              onClick={() => setModalMode('add')}
-              className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold text-white transition-opacity hover:opacity-90"
-              style={{ backgroundColor: '#00696b' }}
-            >
-              <span className="material-symbols-outlined text-[18px]">person_add</span>
-              Add User
-            </button>
-          </div>
+          {activeTab === 'users' && (
+            <div className="flex gap-2">
+              <button
+                onClick={() => setModalMode('add-role')}
+                className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold border border-outline-variant text-on-surface-variant hover:bg-surface-container-low transition-colors"
+              >
+                <span className="material-symbols-outlined text-[18px]">manage_accounts</span>
+                Manage Roles
+              </button>
+              <button
+                onClick={() => setModalMode('add')}
+                className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold text-white transition-opacity hover:opacity-90"
+                style={{ backgroundColor: '#00696b' }}
+              >
+                <span className="material-symbols-outlined text-[18px]">person_add</span>
+                Add User
+              </button>
+            </div>
+          )}
         </div>
+
+        {/* Tabs */}
+        <div className="flex gap-1 mb-6 border-b border-outline-variant/20">
+          {(['users', 'logs'] as ActiveTab[]).map(tab => (
+            <button
+              key={tab}
+              onClick={() => setActiveTab(tab)}
+              className={`px-4 py-2 text-sm font-semibold capitalize rounded-t-lg transition-colors ${
+                activeTab === tab
+                  ? 'text-primary border-b-2 border-primary'
+                  : 'text-on-surface-variant hover:text-on-surface'
+              }`}
+            >
+              {tab === 'logs' ? 'Security Logs' : 'Users'}
+            </button>
+          ))}
+        </div>
+
+        {/* ── Security Logs Tab ─────────────────────────────────────────────────── */}
+        {activeTab === 'logs' && (
+          <div>
+            {/* Filters */}
+            <div className="flex gap-3 mb-4 flex-wrap">
+              <select
+                value={logLevel}
+                onChange={e => { setLogLevel(e.target.value); setLogPage(1); }}
+                className="bg-surface-container-low rounded-xl px-3 py-2 text-sm text-on-surface outline-none"
+              >
+                <option value="">All Levels</option>
+                <option value="Info">Info</option>
+                <option value="Warning">Warning</option>
+              </select>
+              <div className="relative flex-1 max-w-sm">
+                <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant text-[18px]">search</span>
+                <input
+                  value={logSearch}
+                  onChange={e => { setLogSearch(e.target.value); setLogPage(1); }}
+                  placeholder="Search email, IP, event…"
+                  className="w-full pl-9 pr-3 py-2 bg-surface-container-low rounded-xl text-sm text-on-surface outline-none focus:ring-2 focus:ring-primary/20"
+                />
+              </div>
+              <button
+                onClick={fetchLogs}
+                className="flex items-center gap-1 px-4 py-2 rounded-xl text-sm font-semibold border border-outline-variant text-on-surface-variant hover:bg-surface-container-low transition-colors"
+              >
+                <span className="material-symbols-outlined text-[18px]">refresh</span>
+                Refresh
+              </button>
+            </div>
+
+            {/* Table */}
+            <div className="bg-surface-container-lowest border border-outline-variant/20 rounded-2xl overflow-hidden">
+              {logsLoading ? (
+                <div className="flex items-center justify-center h-40 text-on-surface-variant text-sm">Loading…</div>
+              ) : logs.length === 0 ? (
+                <div className="flex items-center justify-center h-40 text-on-surface-variant text-sm">No logs found.</div>
+              ) : (
+                <table className="w-full text-sm">
+                  <thead>
+                    <tr className="border-b border-outline-variant/20">
+                      <th className="px-4 py-3 text-left text-[10px] font-bold text-on-surface-variant uppercase tracking-widest">Time</th>
+                      <th className="px-4 py-3 text-left text-[10px] font-bold text-on-surface-variant uppercase tracking-widest">Level</th>
+                      <th className="px-4 py-3 text-left text-[10px] font-bold text-on-surface-variant uppercase tracking-widest">Event</th>
+                      <th className="px-4 py-3 text-left text-[10px] font-bold text-on-surface-variant uppercase tracking-widest">User</th>
+                      <th className="px-4 py-3 text-left text-[10px] font-bold text-on-surface-variant uppercase tracking-widest">IP</th>
+                      <th className="px-4 py-3 text-left text-[10px] font-bold text-on-surface-variant uppercase tracking-widest">Details</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {logs.map((log, i) => (
+                      <tr
+                        key={log.id}
+                        className={`border-b border-outline-variant/10 ${i % 2 === 0 ? '' : 'bg-surface-container-lowest/40'}`}
+                      >
+                        <td className="px-4 py-2.5 text-on-surface-variant whitespace-nowrap text-xs">
+                          {new Date(log.timestamp).toLocaleString()}
+                        </td>
+                        <td className="px-4 py-2.5">
+                          <span className={`px-2 py-0.5 rounded-full text-[11px] font-semibold ${
+                            log.level === 'Warning'
+                              ? 'bg-error/10 text-error'
+                              : 'bg-primary/10 text-primary'
+                          }`}>
+                            {log.level}
+                          </span>
+                        </td>
+                        <td className="px-4 py-2.5 font-mono text-xs text-on-surface">{log.eventType}</td>
+                        <td className="px-4 py-2.5 text-on-surface-variant text-xs">{log.userEmail ?? '—'}</td>
+                        <td className="px-4 py-2.5 text-on-surface-variant text-xs font-mono">{log.ipAddress ?? '—'}</td>
+                        <td className="px-4 py-2.5 text-on-surface-variant text-xs max-w-[200px] truncate">{log.details ?? '—'}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              )}
+            </div>
+
+            {/* Pagination */}
+            <div className="flex items-center justify-between mt-4">
+              <p className="text-[11px] text-on-surface-variant">
+                {logTotal} total events
+              </p>
+              <div className="flex gap-2">
+                <button
+                  disabled={logPage <= 1}
+                  onClick={() => setLogPage(p => p - 1)}
+                  className="px-3 py-1.5 rounded-lg text-xs font-semibold border border-outline-variant disabled:opacity-40 hover:bg-surface-container-low transition-colors"
+                >
+                  Previous
+                </button>
+                <span className="px-3 py-1.5 text-xs text-on-surface-variant">
+                  Page {logPage} of {Math.max(1, Math.ceil(logTotal / LOG_PAGE_SIZE))}
+                </span>
+                <button
+                  disabled={logPage >= Math.ceil(logTotal / LOG_PAGE_SIZE)}
+                  onClick={() => setLogPage(p => p + 1)}
+                  className="px-3 py-1.5 rounded-lg text-xs font-semibold border border-outline-variant disabled:opacity-40 hover:bg-surface-container-low transition-colors"
+                >
+                  Next
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* ── Users Tab ─────────────────────────────────────────────────────────── */}
+        {activeTab === 'users' && <>
 
         {/* Roles overview strip */}
         <div className="flex items-center gap-3 mb-6 bg-surface-container-lowest border border-outline-variant/20 rounded-2xl px-4 py-3">
@@ -386,6 +561,7 @@ export default function UserManagement() {
         <p className="text-[11px] text-on-surface-variant mt-4 text-right">
           {filteredUsers.length} of {users.length} users
         </p>
+        </>}
       </main>
 
       {/* ── Modals ─────────────────────────────────────────────────────────────── */}

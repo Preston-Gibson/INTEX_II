@@ -4,6 +4,7 @@ using System.Security.Claims;
 using System.Text;
 using INTEX_II.Data;
 using INTEX_II.Models;
+using INTEX_II.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -20,14 +21,19 @@ public class AuthController : ControllerBase
     private readonly SignInManager<ApplicationUser> _signInManager;
     private readonly IConfiguration _config;
     private readonly AppDbContext _db;
+    private readonly ILogger<AuthController> _logger;
+    private readonly SecurityLogService _secLog;
 
     public AuthController(UserManager<ApplicationUser> userManager,
-        SignInManager<ApplicationUser> signInManager, IConfiguration config, AppDbContext db)
+        SignInManager<ApplicationUser> signInManager, IConfiguration config, AppDbContext db,
+        ILogger<AuthController> logger, SecurityLogService secLog)
     {
         _userManager = userManager;
         _signInManager = signInManager;
         _config = config;
         _db = db;
+        _logger = logger;
+        _secLog = secLog;
     }
 
     // Public registration — always creates a Donor + Supporter record
@@ -37,10 +43,17 @@ public class AuthController : ControllerBase
         var user = new ApplicationUser { UserName = dto.Email, Email = dto.Email, FirstName = dto.FirstName, LastName = dto.LastName };
         var result = await _userManager.CreateAsync(user, dto.Password);
         if (!result.Succeeded)
+        {
+            var errors = string.Join(", ", result.Errors.Select(e => e.Description));
+            _logger.LogWarning("Registration failed for {Email}: {Errors}", dto.Email, errors);
+            await _secLog.WarnAsync("REGISTER_FAILED", dto.Email, details: errors);
             return BadRequest(result.Errors);
+        }
 
         await _userManager.AddToRoleAsync(user, "Donor");
         await EnsureSupporterExists(dto.Email, dto.FirstName, dto.LastName);
+        _logger.LogInformation("New donor registered: {Email}", dto.Email);
+        await _secLog.InfoAsync("REGISTER_SUCCESS", dto.Email);
         return Ok(new { message = "User registered successfully" });
     }
 
@@ -49,25 +62,46 @@ public class AuthController : ControllerBase
     [HttpPost("register-admin")]
     public async Task<IActionResult> RegisterAdmin([FromBody] RegisterDto dto)
     {
+        var requestingAdmin = User.FindFirst(System.Security.Claims.ClaimTypes.Email)?.Value ?? "unknown";
         var user = new ApplicationUser { UserName = dto.Email, Email = dto.Email, FirstName = dto.FirstName, LastName = dto.LastName };
         var result = await _userManager.CreateAsync(user, dto.Password);
         if (!result.Succeeded)
+        {
+            var errors = string.Join(", ", result.Errors.Select(e => e.Description));
+            _logger.LogWarning("Admin registration failed for {Email} (requested by {Admin}): {Errors}", dto.Email, requestingAdmin, errors);
+            await _secLog.WarnAsync("ADMIN_REGISTER_FAILED", requestingAdmin, details: $"Target: {dto.Email} — {errors}");
             return BadRequest(result.Errors);
+        }
 
         await _userManager.AddToRoleAsync(user, "Admin");
+        _logger.LogInformation("New admin account created: {Email} (created by {Admin})", dto.Email, requestingAdmin);
+        await _secLog.InfoAsync("ADMIN_REGISTER_SUCCESS", requestingAdmin, details: $"Created admin: {dto.Email}");
         return Ok(new { message = "Admin user registered successfully" });
     }
 
     [HttpPost("login")]
     public async Task<IActionResult> Login([FromBody] LoginDto dto)
     {
+        var ip = HttpContext.Connection.RemoteIpAddress?.ToString() ?? "unknown";
         var user = await _userManager.FindByEmailAsync(dto.Email);
-        if (user == null) return Unauthorized("Invalid credentials");
+        if (user == null)
+        {
+            _logger.LogWarning("Failed login attempt for unknown email {Email} from {IP}", dto.Email, ip);
+            await _secLog.WarnAsync("LOGIN_FAILED", dto.Email, ip, "Unknown user");
+            return Unauthorized("Invalid credentials");
+        }
 
         var result = await _signInManager.CheckPasswordSignInAsync(user, dto.Password, false);
-        if (!result.Succeeded) return Unauthorized("Invalid credentials");
+        if (!result.Succeeded)
+        {
+            _logger.LogWarning("Failed login attempt for {Email} from {IP}", dto.Email, ip);
+            await _secLog.WarnAsync("LOGIN_FAILED", dto.Email, ip, "Invalid password");
+            return Unauthorized("Invalid credentials");
+        }
 
         var token = await GenerateJwtToken(user);
+        _logger.LogInformation("Successful login: {Email} from {IP}", dto.Email, ip);
+        await _secLog.InfoAsync("LOGIN_SUCCESS", dto.Email, ip);
         return Ok(new { token });
     }
 
@@ -158,8 +192,15 @@ public class AuthController : ControllerBase
         if (user == null) return NotFound();
 
         var result = await _userManager.ChangePasswordAsync(user, dto.CurrentPassword, dto.NewPassword);
-        if (!result.Succeeded) return BadRequest(result.Errors);
+        if (!result.Succeeded)
+        {
+            _logger.LogWarning("Password change failed for {Email}", user.Email);
+            await _secLog.WarnAsync("PASSWORD_CHANGE_FAILED", user.Email);
+            return BadRequest(result.Errors);
+        }
 
+        _logger.LogInformation("Password changed for {Email}", user.Email);
+        await _secLog.InfoAsync("PASSWORD_CHANGED", user.Email);
         return Ok(new { message = "Password changed successfully." });
     }
 
@@ -176,10 +217,20 @@ public async Task<IActionResult> ExternalCallback()
 {
     var info = await _signInManager.GetExternalLoginInfoAsync();
     var frontendUrl = _config["Frontend:Url"]!;
-    if (info == null) return Redirect($"{frontendUrl}/login?error=oauth_failed");
+    if (info == null)
+    {
+        _logger.LogWarning("OAuth callback failed: no external login info");
+        await _secLog.WarnAsync("OAUTH_FAILED", details: "No external login info");
+        return Redirect($"{frontendUrl}/login?error=oauth_failed");
+    }
 
     var email = info.Principal.FindFirstValue(ClaimTypes.Email);
-    if (email == null) return Redirect($"{frontendUrl}/login?error=no_email");
+    if (email == null)
+    {
+        _logger.LogWarning("OAuth callback failed: no email returned from provider {Provider}", info.LoginProvider);
+        await _secLog.WarnAsync("OAUTH_FAILED", details: $"No email from {info.LoginProvider}");
+        return Redirect($"{frontendUrl}/login?error=no_email");
+    }
 
     // Find or create the user
     var user = await _userManager.FindByEmailAsync(email);
@@ -194,6 +245,13 @@ public async Task<IActionResult> ExternalCallback()
         };
         await _userManager.CreateAsync(user);
         await _userManager.AddToRoleAsync(user, "Donor");
+        _logger.LogInformation("New donor account created via {Provider} OAuth: {Email}", info.LoginProvider, email);
+        await _secLog.InfoAsync("OAUTH_REGISTER", email, details: info.LoginProvider);
+    }
+    else
+    {
+        _logger.LogInformation("Existing user logged in via {Provider} OAuth: {Email}", info.LoginProvider, email);
+        await _secLog.InfoAsync("OAUTH_LOGIN", email, details: info.LoginProvider);
     }
 
     // Link the provider login to the user (idempotent)
